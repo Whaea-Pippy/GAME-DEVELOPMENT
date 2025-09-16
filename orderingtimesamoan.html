@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Te Reo Ordering Game: Days, Months, Seasons</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 820px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  h1 { font-size: 24px; margin-bottom: 16px; }
+
+  .category-buttons { margin-bottom: 16px; }
+  .category-button {
+    padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer;
+    background-color: #6f42c1; color: white; border: none; border-radius: 6px;
+  }
+  .category-button:hover { background-color: #5a32a3; }
+  /* Category active: keep green but add thicker yellow outline */
+  .category-button.active {
+    background-color: #28a745;
+    outline: 6px solid yellow; /* thicker highlight */
+    color: white;
+  }
+
+  .order-options { margin-bottom: 16px; display: none; }
+  .order-option {
+    padding: 8px 16px; margin: 5px; font-size: 14px; cursor: pointer;
+    border: none; border-radius: 6px;
+  }
+  /* Matariki button default color */
+  .order-option[data-order="matariki"] {
+    background-color: #6c757d; /* Grey */
+    color: white;
+  }
+  /* Pākehā button default color */
+  .order-option[data-order="pakeha"] {
+    background-color: #007bff; /* Blue */
+    color: white;
+  }
+  
+  .order-option:hover { background-color: #0056b3; }
+  /* Order active: thicker yellow outline for BOTH pakeha and matariki */
+  .order-option.active {
+    outline: 6px solid yellow; /* double thickness from before */
+    color: white;
+  }
+  /* Make the Matariki order button orange when active so it matches cards */
+  .order-option[data-order="matariki"].active {
+    background-color: #ffb84d; /* warm orange */
+    color: #000; /* black text reads better on this orange */
+  }
+
+  #item-list {
+    list-style: none; padding: 0; margin: 0 auto; max-width: 640px;
+  }
+
+  /* Two-column layout for months */
+  #item-list.months {
+    display: flex; justify-content: space-between; gap: 16px;
+  }
+  #item-list.months .column { width: 48%; }
+
+  .item {
+    padding: 10px; margin: 6px 0; background-color: #f8f9fa; border: 1px solid #ddd;
+    cursor: move; font-size: 18px; user-select: none; touch-action: none; border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+  .item.dragging { opacity: 0.5; background-color: #e9ecef; }
+
+  /* Colour the cards by order */
+  .item.pakeha   { background-color: #cce5ff; }  /* pale blue */
+  .item.matariki { background-color: #ffe5b4; }  /* pale orange */
+
+  /* Correct order feedback */
+  #item-list.correct {
+    background-color: #d4edda; transition: background-color 0.5s;
+    padding: 10px; border-radius: 8px;
+  }
+
+  .action-buttons { margin-top: 16px; }
+  .cheat-button {
+    padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer;
+    background-color: #6f42c1; color: white; border: none; border-radius: 6px;
+  }
+  .cheat-button:hover { background-color: #5a32a3; }
+  .cheat-button:disabled { background-color: #a89fc7; cursor: not-allowed; }
+</style>
+</head>
+<body>
+  <h1>Samoan Ordering Game: Days, Months, Seasons</h1>
+
+  <div class="category-buttons">
+    <button class="category-button" data-category="days">Days of the Week</button>
+    <button class="category-button" data-category="months">Months</button>
+    <button class="category-button" data-category="seasons">Seasons</button>
+  </div>
+
+  <div class="order-options" id="order-options">
+    <button class="order-option" data-order="matariki">Matariki Order</button>
+    <button class="order-option" data-order="pakeha">Pākehā Order</button>
+  </div>
+
+  <ul id="item-list"></ul>
+
+  <div class="action-buttons">
+    <button class="cheat-button" onclick="showTranslations()">Cheat</button>
+  </div>
+
+<script>
+/* ----- DATA ----- */
+const data = {
+  days: [
+    { word: "ASO GAFUA", translation: "Monday" },
+    { word: "ASO LUA", translation: "Tuesday" },
+    { word: "ASO LULU", translation: "Wednesday" },
+    { word: "ASO TOFI", translation: "Thursday" },
+    { word: "ASO FARAILE", translation: "Friday" },
+    { word: "ASO TOʻONAʻI", translation: "Saturday" },
+    { word: "ASO SA", translation: "Sunday" }
+  ],
+  months: [
+    { word: "IANUARI", translation: "January" },
+    { word: "FEPUARI", translation: "February" },
+    { word: "MATI", translation: "March" },
+    { word: "APELILA", translation: "April" },
+    { word: "ME", translation: "May" },
+    { word: "IUNI", translation: "June" },
+    { word: "IULAI", translation: "July" },
+    { word: "AUKUSO", translation: "August" },
+    { word: "SETEMA", translation: "September" },
+    { word: "OKETOPA", translation: "October" },
+    { word: "NOVEMA", translation: "November" },
+    { word: "TESEMA", translation: "December" }
+  ],
+  seasons: [
+    { word: "VAITAU O LE VEVELA", translation: "Summer" },
+    { word: "VAITAU O LE LULU", translation: "Autumn" },
+    { word: "VAITAU O LE MALULU", translation: "Winter" },
+    { word: "VAITAU O LE FAʻAFOUINA", translation: "Spring" }
+  ]
+};
+
+const correctOrders = {
+  days: {
+    pakeha: ["ASO GAFUA","ASO LUA","ASO LULU","ASO TOFI","ASO FARAILE","ASO TOʻONAʻI","ASO SA"]
+  },
+  months: {
+    pakeha: ["IANUARI","FEPUARI","MATI","APELILA","ME","IUNI",
+             "IULAI","AUKUSO","SETEMA","OKETOPA","NOVEMA","TESEMA"],
+    matalii: ["IUNI","IULAI","AUKUSO","SETEMA","OKETOPA","NOVEMA",
+              "TESEMA","IANUARI","FEPUARI","MATI","APELILA","ME"]
+  },
+  seasons: {
+    pakeha:   ["VAITAU O LE VEVELA","VAITAU O LE LULU","VAITAU O LE MALULU","VAITAU O LE FAʻAFOUINA"],
+    matalii: ["VAITAU O LE MALULU","VAITAU O LE FAʻAFOUINA","VAITAU O LE VEVELA","VAITAU O LE LULU"]
+  }
+};
+/* ----- STATE ----- */
+let currentCategory = null;
+let currentOrder = "matariki"; // default for months/seasons
+let translationsVisible = false;
+let cheatTimeout = null;
+
+const itemList = document.getElementById("item-list");
+const orderOptions = document.getElementById("order-options");
+const cheatButton = document.querySelector(".cheat-button");
+
+/* ----- UTILS ----- */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+function setOrderButtonHighlights() {
+  document.querySelectorAll(".order-option").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.order === currentOrder);
+  });
+}
+function setCardColours() {
+  document.querySelectorAll(".item").forEach(li => {
+    li.classList.remove("pakeha","matariki");
+    li.classList.add(currentOrder);
+  });
+}
+
+/* ----- RENDERERS ----- */
+function renderList(category) {
+  currentCategory = category;
+  itemList.classList.remove("correct");
+  itemList.innerHTML = "";
+
+  const showOrderOptions = (category === "months" || category === "seasons");
+  orderOptions.style.display = showOrderOptions ? "block" : "none";
+  if (category === "days") currentOrder = "pakeha"; // days use Pākehā order naming
+
+  // category button active state
+  document.querySelectorAll(".category-button").forEach(btn => btn.classList.remove("active"));
+  document.querySelector(`.category-button[data-category="${category}"]`)?.classList.add("active");
+
+  if (category === "months") {
+    renderMonths();
+  } else {
+    renderLinear(category);
+  }
+
+  setOrderButtonHighlights();
+  setCardColours();
+  setupDragAndDrop();
+  checkCorrectOrder();
+}
+
+function renderLinear(category) {
+  itemList.classList.remove("months");
+  const items = shuffle([...data[category]]);
+  items.forEach(item => {
+    const li = document.createElement("li");
+    li.className = `item ${currentOrder}`;
+    li.dataset.word = item.word;
+    li.innerText = item.word;
+    li.draggable = true;
+    itemList.appendChild(li);
+  });
+}
+
+function renderMonths() {
+  itemList.innerHTML = "";
+  itemList.classList.add("months");
+
+  const canonical = correctOrders.months[currentOrder];
+  // two 6-month blocks based on selected order
+  const block1 = canonical.slice(0, 6);
+  const block2 = canonical.slice(6, 12);
+
+  // Shuffle within each block only
+  shuffle(block1);
+  shuffle(block2);
+
+  const leftCol = document.createElement("div");
+  leftCol.className = "column";
+  const rightCol = document.createElement("div");
+  rightCol.className = "column";
+
+  block1.forEach(word => leftCol.appendChild(buildMonthLI(word)));
+  block2.forEach(word => rightCol.appendChild(buildMonthLI(word)));
+
+  itemList.appendChild(leftCol);
+  itemList.appendChild(rightCol);
+}
+
+function buildMonthLI(word) {
+  const li = document.createElement("li");
+  li.className = `item ${currentOrder}`;
+  li.dataset.word = word;
+  li.innerText = word;
+  li.draggable = true;
+  return li;
+}
+
+/* ----- BEHAVIOUR ----- */
+function showTranslations() {
+  if (cheatTimeout || translationsVisible) return;
+  cheatButton.disabled = true;
+
+  const items = itemList.querySelectorAll(".item");
+  items.forEach(item => {
+    const kupu = item.dataset.word;
+    const d = data.days.concat(data.months, data.seasons).find(x => x.word === kupu);
+    item.innerText = d ? `${d.word} (${d.translation})` : kupu;
+  });
+
+  cheatTimeout = setTimeout(() => {
+    if (!translationsVisible) {
+      items.forEach(item => { item.innerText = item.dataset.word; });
+    }
+    cheatButton.disabled = false;
+    cheatTimeout = null;
+  }, 3000);
+}
+
+function checkCorrectOrder() {
+  const items = Array.from(itemList.querySelectorAll(".item"));
+  const currentWords = items.map(el => el.dataset.word);
+  const correctMap = correctOrders[currentCategory];
+  if (!correctMap) { itemList.classList.remove("correct"); return; }
+  const correct = correctMap[currentOrder];
+  const isCorrect = Array.isArray(correct) && currentWords.length === correct.length &&
+                    currentWords.every((w,i) => w === correct[i]);
+  itemList.classList.toggle("correct", !!isCorrect);
+}
+
+function setupDragAndDrop() {
+  const items = itemList.querySelectorAll(".item");
+  items.forEach(item => {
+    item.addEventListener("dragstart", e => {
+      item.classList.add("dragging");
+      e.dataTransfer?.setData("text/plain", "");
+    });
+    item.addEventListener("dragend", () => {
+      item.classList.remove("dragging");
+      checkCorrectOrder();
+    });
+    item.addEventListener("dragover", e => e.preventDefault());
+    item.addEventListener("drop", e => {
+      e.preventDefault();
+      const dragging = document.querySelector(".dragging");
+      if (!dragging || dragging === item) return;
+
+      // Restrict months to stay within their column
+      if (currentCategory === "months") {
+        if (dragging.parentElement !== item.parentElement) return;
+      }
+
+      const allItems = Array.from(itemList.querySelectorAll(".item"));
+      const fromIndex = allItems.indexOf(dragging);
+      const toIndex = allItems.indexOf(item);
+      if (fromIndex < toIndex) item.parentElement.insertBefore(dragging, item.nextSibling);
+      else item.parentElement.insertBefore(dragging, item);
+      checkCorrectOrder();
+    });
+
+    // Touch support
+    item.addEventListener("touchstart", () => item.classList.add("dragging"), {passive:true});
+    item.addEventListener("touchend", () => {
+      item.classList.remove("dragging");
+      checkCorrectOrder();
+    });
+    item.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target) return;
+      if (target.classList.contains("item") && target !== item) {
+        if (currentCategory === "months" && item.parentElement !== target.parentElement) return;
+        const parent = target.parentElement;
+        if (Array.from(parent.children).indexOf(item) < Array.from(parent.children).indexOf(target)) {
+          parent.insertBefore(item, target.nextSibling);
+        } else {
+          parent.insertBefore(item, target);
+        }
+        checkCorrectOrder();
+      }
+    }, {passive:false});
+  });
+}
+
+/* ----- EVENTS ----- */
+document.querySelectorAll(".category-button").forEach(button => {
+  button.addEventListener("click", () => {
+    const cat = button.dataset.category;
+    currentOrder = (cat === "days") ? "pakeha" : "matariki";
+    renderList(cat);
+  });
+});
+
+document.querySelectorAll(".order-option").forEach(button => {
+  button.addEventListener("click", () => {
+    currentOrder = button.dataset.order;
+    renderList(currentCategory);
+  });
+});
+
+/* ----- AUTO-INIT ----- */
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector('.category-button[data-category="days"]').click();
+});
+</script>
+</body>
+</html>
