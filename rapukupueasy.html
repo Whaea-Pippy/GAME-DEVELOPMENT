@@ -616,6 +616,19 @@ const messageBox = document.getElementById('message-box');
 
           // easy
           const LEVELS = [
+          {
+    name: 'Kia pai tō rā',
+    bg: 'linear-gradient(135deg, #a0e9ff 0%, #ffb3c6 100%)',
+    wordColors: ['#e5e7eb', '#d1d5db', '#9ca3af', '#6b7280', '#4b5563'],
+    words: [
+        { w: 'kuri', t: 'dog', c: 'bg-[#6b7280] text-white' },
+        { w: 'pipi', t: 'shellfish', c: 'bg-[#d1d5db] text-black' },
+        { w: 'rere', t: 'to fly', c: 'bg-[#EACBF9] text-black' },
+        { w: 'wai', t: 'water', c: 'bg-[#4b5563] text-white' },
+        { w: 'rangi', t: 'sky', c: 'bg-[#e5e7eb] text-black' }
+    ]
+},
+
     {
         name: 'Greetings',
         bg: 'linear-gradient(135deg, #fcf879 0%, #e61cd1 100%)',
@@ -720,7 +733,7 @@ const messageBox = document.getElementById('message-box');
             { w: 'hari', t: 'happy', c: 'bg-[#fce7f3] text-black' },
             { w: 'ngenge', t: 'tired', c: 'bg-[#f9a8d4] text-black' },
             { w: 'hiakai', t: 'hungry', c: 'bg-[#ec4899] text-white' },
-            { w: 'hiahia inu', t: 'thirsty', c: 'bg-[#db2777] text-white' },
+            { w: 'hiainu', t: 'thirsty', c: 'bg-[#db2777] text-white' },
             { w: 'pōuri', t: 'sad', c: 'bg-[#be185d] text-white' }
         ]
     },
@@ -753,11 +766,11 @@ const messageBox = document.getElementById('message-box');
         bg: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
         wordColors: ['#ffedd5', '#fed7aa', '#fb923c', '#ea580c', '#c2410c'],
         words: [
-            { w: 'Rāhina', t: 'Monday', c: 'bg-[#ffedd5] text-black' },
-            { w: 'Rātū', t: 'Tuesday', c: 'bg-[#fed7aa] text-black' },
-            { w: 'Rāapa', t: 'Wednesday', c: 'bg-[#fb923c] text-black' },
-            { w: 'Rāpare', t: 'Thursday', c: 'bg-[#ea580c] text-white' },
-            { w: 'Rāmere', t: 'Friday', c: 'bg-[#c2410c] text-white' }
+            { w: 'rāhina', t: 'Monday', c: 'bg-[#ffedd5] text-black' },
+            { w: 'rātū', t: 'Tuesday', c: 'bg-[#fed7aa] text-black' },
+            { w: 'rāapa', t: 'Wednesday', c: 'bg-[#fb923c] text-black' },
+            { w: 'rāpare', t: 'Thursday', c: 'bg-[#ea580c] text-white' },
+            { w: 'rāmere', t: 'Friday', c: 'bg-[#c2410c] text-white' }
         ]
     },
     {
@@ -817,7 +830,7 @@ const messageBox = document.getElementById('message-box');
             { w: 'ngeru', t: 'cat', c: 'bg-[#facc15] text-black' },
             { w: 'hoiho', t: 'horse', c: 'bg-[#1e40af] text-white' },
             { w: 'manu', t: 'bird', c: 'bg-[#3b82f6] text-white' },
-            { w: 'ihe', t: 'fish', c: 'bg-[#1e3a8a] text-white' }
+            { w: 'ika', t: 'fish', c: 'bg-[#1e3a8a] text-white' }
         ]
     },
     {
@@ -839,9 +852,9 @@ const messageBox = document.getElementById('message-box');
         words: [
             { w: 'kei te pai', t: 'I am good', c: 'bg-[#fef9c3] text-black' },
             { w: 'kei te ngenge', t: 'I am tired', c: 'bg-[#fef08a] text-black' },
-            { w: 'kei te hiakai', t: 'I am hungry', c: 'bg-[#facc15] text-black' },
-            { w: 'kei te oma ia', t: 'He/She is running', c: 'bg-[#eab308] text-black' },
-            { w: 'kei te kura au', t: 'I am at school', c: 'bg-[#ca8a04] text-white' }
+            { w: 'e hiakai ana', t: 'I am hungry', c: 'bg-[#facc15] text-black' },
+            { w: 'oma', t: 'run', c: 'bg-[#eab308] text-black' },
+            { w: 'kura', t: 'school', c: 'bg-[#ca8a04] text-white' }
         ]
     }
 ];
@@ -992,7 +1005,8 @@ const messageBox = document.getElementById('message-box');
 
         function placeWord(wordObj, board) {
             const word = wordObj.w;
-            const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+            //const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+            const directions = [[0,1],[0,-1],[1,0],[-1,0]];
             let placed = false;
             let attempts = 0;
             const maxAttempts = 100;

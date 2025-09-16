@@ -559,7 +559,7 @@ margin-bottom: 8px;
     <div class="container">
         <div class="header">
             <button class="instructions-btn" id="instructions-btn">Instructions</button>
-            <h1 class="title">Rapu Kupu UAUA</h1>
+            <h1 class="title">History Vocab</h1>
             <div class="score" id="score-display">Score: 0</div>
         </div>
         <div class="progress-bar" id="progress-bar"></div>
@@ -1166,8 +1166,8 @@ const LEVELS = [
 
         function placeWord(wordObj, board) {
             const word = wordObj.w;
-           const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
-        //    const directions = [[0,1],[0,-1],[1,0],[-1,0]];
+         //  const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+           const directions = [[0,1],[0,-1],[1,0],[-1,0]];
             let placed = false;
             let attempts = 0;
             const maxAttempts = 100;

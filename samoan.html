@@ -1,12 +1,14 @@
 <!DOCTYPE html>
+<!--13th September 2025 - added auto reset when stuck & fixed issue of words not getting on the board-->
+<!--10th September 2025 WebApp by Gemini on Firebase-->
 <!--Created by Priscilla Allan with help from Grok, ChatGPT, and a little Gemini-->
 <!--I am learning HTML, Java script & how to harness FREE ai-coding help-->
-<!--12th September 2025 Tongan Version-->
+<!--I know almost NOTHING about the Samoan Language, so please take and fix-->
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Kumi Kupu - Te Reo Tongan Word Game</title>
+    <title>Sailiga Upu - Samoan Word Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
@@ -23,7 +25,7 @@
             flex-direction: column;
             color: #fff;
             padding: 20px;
-            touch-action: none;
+            touch-action: pan-y;
             overflow-y: auto;
             transition: background 600ms ease;
         }
@@ -47,12 +49,23 @@
             width: 100%;
             margin-bottom: 1rem;
         }
-        .title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35);
-        }
+        .tile {
+    position: relative;
+    background-color: var(--tile-bg);
+    color: black;
+    font-size: clamp(0.9rem, 3.5vw, 1.6rem);
+    font-weight: 700;
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.25s, top 0.35s ease-out;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
         .score {
             font-size: 1.25rem;
             font-weight: 700;
@@ -175,18 +188,19 @@
             text-transform: uppercase;
         }
         .built-letter {
-            width: 34px;
-            height: 34px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #fff;
-            color: #000;
-            font-weight: 700;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-            animation: popIn 0.18s ease;
-        }
+    width: 34px;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    animation: popIn 0.18s ease;
+}
+
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0 }
             100% { transform: scale(1); opacity: 1 }
@@ -201,22 +215,7 @@
             margin-bottom: 12px;
             position: relative;
         }
-        .tile {
-            position: relative;
-            background-color: var(--tile-bg);
-            color: black;
-            font-size: clamp(0.9rem, 3.5vw, 1.6rem);
-            font-weight: 700;
-            border-radius: 12px;
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.18s, box-shadow 0.18s, opacity 0.25s, top 0.35s ease-out;
-            text-transform: uppercase;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-        }
+ // .TILE WAS REPEATED HERE - WAS OVERWRITTEN THEN REMOVED
         .tile.hidden-tile {
             opacity: 0;
         }
@@ -406,13 +405,158 @@ margin-bottom: 8px;
         .bg-level-18 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 50%, #ffff00 100%); }
         .bg-level-19 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 33%, #ffff00 66%, #00ff00 100%); }
         .bg-level-20 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 20%, #ffff00 40%, #00ff00 60%, #0000ff 80%, #4b0082 100%); }
+        /* --- Desktop Interaction Fix --- */
+/* Prevents the browser from trying to text-select or drag the game grid */
+#grid-container {
+  user-select: none; /* Standard property to disable text selection */
+  -webkit-user-drag: none; /* Specific property for Safari/Chrome to disable dragging */
+}
+        @media (max-width: 767px) {
+    /* ----- Header Redesign ----- */
+    .header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+    .title {
+        width: 100%;
+        text-align: center;
+        order: -1; /* Hoist title to the top */
+        font-size: 1.8rem; /* ~20% smaller */
+        margin-bottom: 0;
+    }
+    .instructions-btn, .score {
+        font-size: 1rem; /* ~20% smaller */
+        padding: 6px 12px;
+    }
+
+    /* ----- Scrolling Fix ----- */
+    /* Prevent page from scrolling when user drags on the game grid */
+    #grid-container {
+        touch-action: none;
+    }
+
+    /* ----- Word List & Stars Layout ----- */
+    .word-list-section {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    .word-list-heading {
+        text-align: center;
+        margin-bottom: 0;
+    }
+    #word-list {
+        width: 100%;
+    }
+    #star-container {
+        max-width: 240px;
+        gap: 8px;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    /* ----- Learning Log ----- */
+    /* Hide the list of copied words on mobile to save space */
+    #learning-log-list {
+        display: none;
+    }
+    /* Add some space at the very bottom of the page on mobile */
+    .audit-trail-section {
+        margin-bottom: 20px;
+    }
+
+    /* ----- Existing Mobile Styles (from previous step) ----- */
+    .progress-bar {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    .progress-square {
+        width: calc(10% - 4px); /* Fit 10 per row */
+        font-size: 0.75rem;
+    }
+    .grid { /* This is the JS-driven grid, not the layout grid */
+        aspect-ratio: 1 / 1;
+        max-width: 100%;
+        gap: 6px;
+    }
+    .star {
+      width: 24px;
+      height: 24px;
+    }
+    .word-item-text {
+      font-size: 0.95rem;
+    }
+}
+/* 11th september adding the meaning of bonus words for Kristen-->
+/* Bonus Word Overlay Styling */
+.bonus-word-overlay {
+    display: none; /* Hidden by default */
+    position: fixed; /* Covers the entire screen, regardless of scroll */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(238, 155, 213, 0.75);
+    z-index: 2000; /* Ensures it is on top of everything */
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+}
+
+.bonus-word-overlay.visible {
+    display: flex; /* Makes it visible and centers the content */
+}
+
+.bonus-word-content {
+    /* This is the rainbow circle */
+    background: linear-gradient(135deg, #eaa4a4 0%, #f5a04c 20%, #f1f1a4 40%, #c6f0c6 60%, #bbbbdb 80%, #c8a7e0 100%);
+    border-radius: 50%;
+    color: black; /* Text color is now black */
+    width: 90vw;
+    height: 90vw;
+    max-width: 500px;
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.bonus-word-tereo {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    /* No text-shadow for better readability on a colourful background */
+}
+
+.bonus-word-translation {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.bonus-word-continue {
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    font-weight: 400;
+    margin-top: 20px;
+    opacity: 0.8;
+}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <button class="instructions-btn" id="instructions-btn">Instructions</button>
-            <h1 class="title">Kumi Kupu</h1>
+            <h1 class="title">Sailiga Upu - Samoan Word Game</h1>
             <div class="score" id="score-display">Score: 0</div>
         </div>
         <div class="progress-bar" id="progress-bar"></div>
@@ -424,12 +568,24 @@ margin-bottom: 8px;
             </div>
         </div>
         <div class="main-content">
-            <div id="game-container" class="game-section">
-                <div id="word-builder" class="word-builder"></div>
-                <div id="grid-container" class="grid"></div>
-                <div id="message-box" class="message-box opacity-0 transition-opacity duration-300"></div>
-                <div id="win-screen" class="hidden"></div>
-            </div>
+<!-- This is lines 599-613 after the fix -->
+<div id="game-container" class="game-section">
+    <div id="word-builder" class="word-builder"></div>
+    <div id="grid-container" class="grid"></div>
+    <div id="message-box" class="message-box opacity-0 transition-opacity duration-300"></div>
+    <div id="win-screen" class="hidden"></div>
+</div>
+
+            <!-- kristen start -->
+<!-- Bonus Word Overlay -->
+<div class="bonus-word-overlay" id="bonus-word-overlay">
+    <div class="bonus-word-content">
+        <div id="bonus-word-tereo" class="bonus-word-tereo"></div>
+        <div id="bonus-word-translation" class="bonus-word-translation"></div>
+        <div class="bonus-word-continue">(click anywhere to continue)</div>
+    </div>
+</div>
+<!-- kristen end -->
             <div class="word-list-section">
                 <div class="word-list-heading">Words to find</div>
                 <div id="word-list" class="word-list"></div>
@@ -440,7 +596,7 @@ margin-bottom: 8px;
     <div class="modal" id="instructions-modal">
         <div class="modal-content">
             <button class="modal-close" id="modal-close">Close</button>
-            <h2>How to Play Rapu Kupu</h2>
+            <h2>How to Play Sailiga Upu - Samoan Word Game</h2>
             <p>Find and connect letters to form the hidden words.</p>
             <p>Words SNAKE up, down, left, right, or diagonally.</p>
             <p> SELECT letters in order to form words.</p>
@@ -454,6 +610,7 @@ margin-bottom: 8px;
             <p>The progress bar at the top shows your progress through the levels.</p>
             <h3>Tips</h3>
             <p>Look carefully — bonus words can sneak through the purple filler letters!</p>
+            <p>If there is too many bonus words on the board it resets automatically</p>
             <p>The later levels get more colourful and challenging.</p>
             <h2>Copy the learning log</h2>
             <h3>Copy then paste as an EMBED into your google site</h3>
@@ -462,11 +619,10 @@ margin-bottom: 8px;
 </div>
 <div class="audit-trail-section">
     <button id="copy-trail" class="win-button" onclick="copyToClipboard()">
-        Kumi Kupu: Learning Log 2025         [CC BY-NC]        Click to COPY
+        Sailiga Upu - Samoan Word Game: Learning Log 2025         [CC BY-NC]        Click to COPY
     </button>
     <div id="learning-log-list" class="word-list"></div>
 </div>
-
     <script>
 const messageBox = document.getElementById('message-box');
     document.addEventListener('DOMContentLoaded', () => {
@@ -487,11 +643,14 @@ const messageBox = document.getElementById('message-box');
         const modalClose = document.getElementById('modal-close');
         const learningLogList = document.getElementById('learning-log-list');
         const copyTrailBtn = document.getElementById('copy-trail');
-
+        const bonusWordOverlay = document.getElementById('bonus-word-overlay');
+        const bonusWordTereo = document.getElementById('bonus-word-tereo');
+        const bonusWordTranslation = document.getElementById('bonus-word-translation');
         const GRID_SIZE = 6;
         const FIND_COUNT_PER_WORD = 1;
         const TOTAL_STARS = 15;
 
+        let purpleResetTimeout = null; // 13th September
         let gameBoard = [];
         let selectedTiles = [];
         let foundWordCounts = {};
@@ -503,314 +662,386 @@ const messageBox = document.getElementById('message-box');
         let stars = [];
         let starsUsedCount = 0;
         let completedLevels = new Set();
-        let score = 0;
+        // let score = 0; 14th September Score Saving
+        let score = parseInt(localStorage.getItem('gameScore')) || 0;
         let foundWordsTrail = [];
         let normalizedTranslations = {};
         let selectionStartTime = null; // To track time taken for word selection
 
         const letters = ['a', 'e', 'h', 'i', 'k', 'm', 'n', 'o', 'p', 'r', 't', 'u', 'w'];
 
-const BONUS_WORDS = [
-    { w: 'faifekau', t: 'school' },
-    { w: 'tusi', t: 'book' },
-    { w: 'pena', t: 'pen' },
-    { w: 'papa moana', t: 'whiteboard' },
-    { w: 'faifekau', t: 'teacher' },
-    { w: 'ako', t: 'student' },
-    { w: 'fānau', t: 'children' },
-    { w: 'kaungā', t: 'friend' },
+        const BONUS_WORDS = [
+{ w: 'aoga', t: 'school' },
+{ w: 'tusi', t: 'book' },
+{ w: 'pene', t: 'pen' },
+{ w: 'papa-lisi', t: 'whiteboard' },
+{ w: 'faiaoga', t: 'teacher' },
+{ w: 'tagata aoga', t: 'student' },
+{ w: 'tamaiti', t: 'children' },
+{ w: 'uō', t: 'friend' },
 
-    { w: 'fale', t: 'house' },
-    { w: 'nofo', t: 'chair' },
-    { w: 'fakahua', t: 'picture/photo' },
-    { w: 'fakaʻeleʻele', t: 'window' },
-    { w: 'tātā', t: 'door' },
-    { w: 'moenga', t: 'bed' },
-    { w: 'māhina', t: 'mat' },
-    { w: 'harakeke', t: 'flax' },
+{ w: 'fale', t: 'house' },
+{ w: 'nofoa', t: 'chair' },
+{ w: 'ata', t: 'picture/photo' },
+{ w: 'faamalama', t: 'window' },
+{ w: 'faitotoa', t: 'door' },
+{ w: 'moega', t: 'bed' },
+{ w: 'fala', t: 'mat' },
+{ w: 'lau fala', t: 'pandanus/flax' },
 
-    { w: 'kai', t: 'food' },
-    { w: 'vai', t: 'water' },
-    { w: 'inu', t: 'drink' },
-    { w: 'miraka', t: 'milk' },
-    { w: 'pisi', t: 'peach' },
-    { w: 'ʻālani', t: 'orange' },
-    { w: 'piniti', t: 'peanut' },
-    { w: 'kānga', t: 'corn' },
-    { w: 'kumala', t: 'sweet potato' },
-    { w: 'ika', t: 'fish' },
-    { w: 'hēki', t: 'egg' },
+{ w: 'meaai', t: 'food' },
+{ w: 'vai', t: 'water' },
+{ w: 'inu', t: 'drink' },
+{ w: 'susu', t: 'milk' },
+{ w: 'pītiti', t: 'peach' },
+{ w: 'molī', t: 'orange' },
+{ w: 'pinati', t: 'peanut' },
+{ w: 'saina', t: 'corn' },
+{ w: 'ufi', t: 'yam/sweet potato' },
+{ w: 'iʻa', t: 'fish' },
+{ w: 'fuamoa', t: 'egg' },
 
-    { w: 'ngaue', t: 'work' },
-    { w: 'taluaki', t: 'listen' },
-    { w: 'sivi', t: 'read/announcement' },
-    { w: 'tusi', t: 'write' },
-    { w: 'fakaʻohi', t: 'wash/clean' },
-    { w: 'kamata', t: 'laugh' },
-    { w: 'hiki', t: 'go' },
-    { w: 'nofo', t: 'sit/stay' },
-    { w: 'lau', t: 'run' },
-    { w: 'talanoa', t: 'speak' },
+{ w: 'galuega', t: 'work' },
+{ w: 'faalogo', t: 'listen' },
+{ w: 'faitau', t: 'read' },
+{ w: 'tusi', t: 'write' },
+{ w: 'fufulu', t: 'wash/clean' },
+{ w: 'ataata', t: 'laugh' },
+{ w: 'alu', t: 'go' },
+{ w: 'nofo', t: 'sit/stay' },
+{ w: 'tamoe', t: 'run' },
+{ w: 'talanoa', t: 'speak' },
 
-    { w: 'fānau', t: 'family' },
-    { w: 'māmā', t: 'mum' },
-    { w: 'pāpā', t: 'dad' },
-    { w: 'tuahine', t: 'sister (of a male)' },
-    { w: 'tungāne', t: 'brother (of a female)' },
-    { w: 'tuakana', t: 'older sibling' },
-    { w: 'teina', t: 'younger sibling' },
-    { w: 'matua', t: 'grandfather/elderly man' },
-    { w: 'kuia', t: 'grandmother/elderly woman' },
-    { w: 'tamāhine/tama', t: 'niece/nephew' },
+{ w: 'āiga', t: 'family' },
+{ w: 'tinā', t: 'mum' },
+{ w: 'tamā', t: 'dad' },
+{ w: 'uso fafine', t: 'sister (of a male)' },
+{ w: 'uso tane', t: 'brother (of a female)' },
+{ w: 'uso matutua', t: 'older sibling' },
+{ w: 'uso laititi', t: 'younger sibling' },
+{ w: 'tama matua', t: 'grandfather/elderly man' },
+{ w: 'tina matua', t: 'grandmother/elderly woman' },
+{ w: 'atalii o le uso', t: 'niece/nephew' },
 
-    { w: 'langi', t: 'god' },
-    { w: 'mahuika', t: 'Goddess of fire' },
-    { w: 'hine-moana', t: 'Goddess of the ocean' },
-    { w: 'tāwhirimātea', t: 'God of wind' },
-    { w: 'hine-te-iwaiwa', t: 'Goddess of weaving/childbirth' },
-    { w: 'rehua', t: 'Star god of kindness' },
-    { w: 'papatuanuku', t: 'Earth mother' },
-    { w: 'tangaloa', t: 'Sky father' },
-    { w: 'māui', t: 'legendary hero' },
+{ w: 'atua', t: 'god' },
+{ w: 'nafanua', t: 'Goddess of war/protection' },
+{ w: 'salamasina', t: 'Goddess/queen figure' },
+{ w: 'sāsaʻe', t: 'wind (as element)' },
+{ w: 'tinā fanau', t: 'Goddess of childbirth' },
+{ w: 'tagaloa', t: 'creator god' },
+{ w: 'papatuanuku (fanua)', t: 'Earth mother' },
+{ w: 'lagi', t: 'Sky father/heaven' },
+{ w: 'maui', t: 'legendary hero' },
 
-    { w: 'kula', t: 'colour' },
-    { w: 'ʻula', t: 'red' },
-    { w: 'kākāriki', t: 'green' },
-    { w: 'kāfurinī', t: 'blue' },
-    { w: 'mā', t: 'white' },
-    { w: 'pango', t: 'black' },
-    { w: 'sio', t: 'yellow' },
-    { w: 'paraone', t: 'brown' },
-    { w: 'hina', t: 'grey' },
-    { w: 'kōura', t: 'gold' },
-    { w: 'hiriwa', t: 'silver' },
+{ w: 'lanu', t: 'colour' },
+{ w: 'mūmū', t: 'red' },
+{ w: 'lanumeamata', t: 'green' },
+{ w: 'lanumoana', t: 'blue' },
+{ w: 'paʻepaʻe', t: 'white' },
+{ w: 'uliuli', t: 'black' },
+{ w: 'samasa', t: 'yellow' },
+{ w: 'enaena', t: 'brown' },
+{ w: 'samasama-uliuli', t: 'grey' },
+{ w: 'auro', t: 'gold' },
+{ w: 'siliva', t: 'silver' },
 
-    { w: 'ngahere', t: 'forest' },
-    { w: 'moana', t: 'sea' },
-    { w: 'maunga', t: 'mountain' },
-    { w: 'awa', t: 'river' },
-    { w: 'loto', t: 'lake' },
-    { w: 'oneone', t: 'sand' },
-    { w: 'ngalu', t: 'wave' },
-    { w: 'fonua', t: 'land' },
-    { w: 'kakai', t: 'tree' },
-    { w: 'manu', t: 'bird' },
-    { w: 'ngārara', t: 'insect/reptile' },
-    { w: 'tohora', t: 'whale' },
-    { w: 'kōura', t: 'crayfish' },
+{ w: 'vao', t: 'forest' },
+{ w: 'sami', t: 'sea' },
+{ w: 'mauga', t: 'mountain' },
+{ w: 'vaitafe', t: 'river' },
+{ w: 'vaituloto', t: 'lake' },
+{ w: 'oneone', t: 'sand' },
+{ w: 'galu', t: 'wave' },
+{ w: 'fanua', t: 'land' },
+{ w: 'laau', t: 'tree' },
+{ w: 'manu', t: 'bird' },
+{ w: 'gata', t: 'insect/reptile' },
+{ w: 'toʻloa', t: 'whale' },
+{ w: 'ula', t: 'crayfish' },
 
-    { w: 'taimi', t: 'time' },
-    { w: 'aho', t: 'day/sun' },
-    { w: 'po', t: 'night' },
-    { w: 'uike', t: 'week' },
-    { w: 'mahina', t: 'month/moon' },
-    { w: 'taʻu', t: 'year' },
-    { w: 'mōnite', t: 'monday' },
-    { w: 'tūsite', t: 'tuesday' },
-    { w: 'pulelulu', t: 'wednesday' },
-    { w: 'tāite', t: 'thursday' },
-    { w: 'felite', t: 'friday' },
-    { w: 'hākisā', t: 'saturday' },
-    { w: 'sāpate', t: 'sunday' },
-    { w: 'haka', t: 'haka' },
+{ w: 'taimi', t: 'time' },
+{ w: 'aso', t: 'day/sun' },
+{ w: 'po', t: 'night' },
+{ w: 'vaiaso', t: 'week' },
+{ w: 'masina', t: 'month/moon' },
+{ w: 'tausaga', t: 'year' },
+{ w: 'aso gafua', t: 'monday' },
+{ w: 'aso lua', t: 'tuesday' },
+{ w: 'aso lulu', t: 'wednesday' },
+{ w: 'aso tofi', t: 'thursday' },
+{ w: 'aso faraile', t: 'friday' },
+{ w: 'aso toʻonaʻi', t: 'saturday' },
+{ w: 'aso sa', t: 'sunday' },
+{ w: 'siva', t: 'dance' },
 ];
 
-
-  const LEVELS = [
+const LEVELS = [
     {
         name: 'Classroom',
-        bg: 'linear-gradient(135deg, #f0512e 0%, #9ca3af 100%)',
+        bg: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)',
         wordColors: ['#e5e7eb', '#d1d5db', '#9ca3af', '#6b7280', '#4b5563'],
         words: [
-            { w: 'faleako', t: 'classroom', c: 'bg-[#d1d5db] text-black' },
-            { w: 'faiako', t: 'teacher', c: 'bg-[#EACBF9] text-black' },
-            { w: 'lea', t: 'speak', c: 'bg-[#4b5563] text-white' },
-            { w: 'ako', t: 'student', c: 'bg-[#e5e7eb] text-black' }
+            { w: 'tamaiti', t: 'children', c: 'bg-[#6b7280] text-white' },
+            { w: 'potu a', t: 'classroom', c: 'bg-[#d1d5db] text-black' },
+            { w: 'faiaoga', t: 'teacher', c: 'bg-[#EACBF9] text-black' },
+            { w: 'talanoa', t: 'speak', c: 'bg-[#4b5563] text-white' },
+            { w: 'tagata', t: 'person', c: 'bg-[#e5e7eb] text-black' }
         ]
     },
     {
-        name: 'Fānau',
+        name: 'Aiga',
         bg: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
         wordColors: ['#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1e40af'],
         words: [
-            { w: 'fānau', t: 'family', c: 'bg-[#93c5fd] text-black' },
+            { w: 'aiga', t: 'family', c: 'bg-[#93c5fd] text-black' },
             { w: 'tupuna', t: 'ancestors', c: 'bg-[#60a5fa] text-white' },
-            { w: 'māmā', t: 'mother', c: 'bg-[#3b82f6] text-white' },
-            { w: 'tamai', t: 'father', c: 'bg-[#2563eb] text-white' },
-            { w: 'fefine mātuʻa', t: 'elderly woman', c: 'bg-[#1e40af] text-white' }
+            { w: 'tina', t: 'mother', c: 'bg-[#3b82f6] text-white' },
+            { w: 'tama', t: 'father', c: 'bg-[#2563eb] text-white' },
+            { w: 'tausi', t: 'elderly woman', c: 'bg-[#1e40af] text-white' }
         ]
     },
     {
-        name: 'Vao & Tai',
+        name: 'Vao & Sami',
         bg: 'linear-gradient(135deg, #06b6d4 0%, #7dd3fc 100%)',
         wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
         words: [
             { w: 'vao', t: 'forest', c: 'bg-[#1e40af] text-white' },
             { w: 'laau', t: 'tree', c: 'bg-[#3b82f6] text-white' },
-            { w: 'tahi', t: 'sea', c: 'bg-[#facc15] text-black' },
+            { w: 'sami', t: 'sea', c: 'bg-[#facc15] text-black' },
             { w: 'manu', t: 'bird', c: 'bg-[#1e3a8a] text-white' },
-            { w: 'muipipi', t: 'shellfish', c: 'bg-[#fef08a] text-black' }
+            { w: 'pipi', t: 'shellfish', c: 'bg-[#fef08a] text-black' }
         ]
     },
     {
-        name: 'Kofi',
+        name: 'Ofu',
         bg: 'linear-gradient(135deg, #22c55e 0%, #86efac 100%)',
         wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
         words: [
-            { w: 'siketi', t: 'skirt', c: 'bg-[#1e40af] text-white' },
-            { w: 'talau', t: 'trousers', c: 'bg-[#3b82f6] text-white' },
-            { w: 'saketi', t: 'jumper', c: 'bg-[#facc15] text-black' },
-            { w: 'vala', t: 'clothes', c: 'bg-[#1e3a8a] text-white' },
-            { w: 'tatā', t: 'hat', c: 'bg-[#fef08a] text-black' }
+            { w: 'lavalava', t: 'skirt', c: 'bg-[#1e40af] text-white' },
+            { w: 'ofuvae', t: 'trousers', c: 'bg-[#3b82f6] text-white' },
+            { w: 'suti', t: 'jumper', c: 'bg-[#facc15] text-black' },
+            { w: 'ofu', t: 'clothes', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'pulou', t: 'hat', c: 'bg-[#fef08a] text-black' }
         ]
     },
     {
-        name: 'Otua',
+        name: 'Atua',
         bg: 'linear-gradient(135deg, #16a34a 0%, #4ade80 100%)',
         wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
         words: [
-            { w: 'mamani', t: 'Earth Mother', c: 'bg-[#1e3a8a] text-white' },
-            { w: 'tangaloa', t: 'Sea God', c: 'bg-[#fef08a] text-black' },
-            { w: 'langi', t: 'Sky Father', c: 'bg-[#1e40af] text-white' },
+            { w: 'fafine o le fanua', t: 'Earth Mother', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'tagaloa', t: 'Sea God', c: 'bg-[#fef08a] text-black' },
+            { w: 'lagi', t: 'Sky Father', c: 'bg-[#1e40af] text-white' },
             { w: 'rongo', t: 'God of Peace', c: 'bg-[#facc15] text-black' },
-            { w: 'otua', t: 'God', c: 'bg-[#3b82f6] text-white' }
+            { w: 'tane', t: 'Forest God', c: 'bg-[#3b82f6] text-white' }
         ]
     },
     {
-        name: 'Kula Lanu',
-        bg: 'linear-gradient(135deg, #eb582f 0%, #f0512e 100%)',
+        name: 'Colours',
+        bg: 'linear-gradient(135deg, #facc15 0%, #fef08a 100%)',
         wordColors: ['#fef08a', '#8b4513', '#f97316', '#16a34a', '#111827'],
         words: [
-            { w: 'lanumasi', t: 'green', c: 'bg-[#16a34a] text-white' },
-            { w: 'māfela', t: 'brown', c: 'bg-[#8b4513] text-white' },
-            { w: 'ʻalani', t: 'orange', c: 'bg-[#f97316] text-black' },
-            { w: 'melomelo', t: 'yellow', c: 'bg-[#fef08a] text-black' },
-            { w: 'kulokula', t: 'red', c: 'bg-[#111827] text-white' }
+            { w: 'lanumeamata', t: 'green', c: 'bg-[#16a34a] text-white' },
+            { w: 'enaena', t: 'brown', c: 'bg-[#8b4513] text-white' },
+            { w: 'karaka', t: 'orange', c: 'bg-[#f97316] text-black' },
+            { w: 'samasama', t: 'yellow', c: 'bg-[#fef08a] text-black' },
+            { w: 'uliuli', t: 'black', c: 'bg-[#111827] text-white' }
         ]
     },
     {
-        name: 'Nime & Fetū',
+        name: 'Numbers',
         bg: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
         wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
         words: [
-            { w: 'nima', t: 'five', c: 'bg-[#facc15] text-black' },
-            { w: 'nui', t: 'many', c: 'bg-[#1e3a8a] text-white' },
-            { w: 'tahaʻulu', t: 'first', c: 'bg-[#1e40af] text-white' },
-            { w: 'tahaʻelua', t: 'second', c: 'bg-[#3b82f6] text-white' },
-            { w: 'tahaʻefā', t: 'fourth', c: 'bg-[#fef08a] text-black' }
+            { w: 'lima', t: 'five', c: 'bg-[#facc15] text-black' },
+            { w: 'tele', t: 'many', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'muamua', t: 'first', c: 'bg-[#1e40af] text-white' },
+            { w: 'lua', t: 'second', c: 'bg-[#3b82f6] text-white' },
+            { w: 'lona fa', t: 'fourth', c: 'bg-[#fef08a] text-black' }
         ]
     },
     {
-        name: 'Taonga & Pounamu',
+        name: 'Meaalofa & Maa',
         bg: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
         wordColors: ['#fed7aa', '#fdba74', '#fb923c', '#f97316', '#ea580c'],
         words: [
-            { w: 'talanoa', t: 'story', c: 'bg-[#ea580c] text-white' },
-            { w: 'pounamu', t: 'greenstone', c: 'bg-[#fdba74] text-black' },
-            { w: 'taonga', t: 'treasure', c: 'bg-[#fed7aa] text-black' },
+            { w: 'tala', t: 'story', c: 'bg-[#ea580c] text-white' },
+            { w: 'maa lanumeamata', t: 'greenstone', c: 'bg-[#fdba74] text-black' },
+            { w: 'meaalofa', t: 'treasure', c: 'bg-[#fed7aa] text-black' },
             { w: 'malamalama', t: 'clarity', c: 'bg-[#f97316] text-black' },
             { w: 'loto', t: 'heart', c: 'bg-[#fb923c] text-black' }
         ]
     },
     {
-        name: 'Mataliki',
+        name: 'Mataalii',
         bg: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
         wordColors: ['#ffedd5', '#fed7aa', '#fb923c', '#ea580c', '#c2410c'],
         words: [
-            { w: 'pohutukava', t: 'star 5', c: 'bg-[#c2410c] text-white' },
-            { w: 'tupuārangi', t: 'star 2', c: 'bg-[#fed7aa] text-black' },
-            { w: 'tupuānuku', t: 'star 1', c: 'bg-[#ffedd5] text-black' },
-            { w: 'waiti', t: 'star 3', c: 'bg-[#fb923c] text-black' },
-            { w: 'waita', t: 'star 4', c: 'bg-[#ea580c] text-white' }
+            { w: 'fetu lima', t: 'star 5', c: 'bg-[#c2410c] text-white' },
+            { w: 'fetu lua', t: 'star 2', c: 'bg-[#fed7aa] text-black' },
+            { w: 'fetu tasi', t: 'star 1', c: 'bg-[#ffedd5] text-black' },
+            { w: 'fetu tolu', t: 'star 3', c: 'bg-[#fb923c] text-black' },
+            { w: 'fetu fa', t: 'star 4', c: 'bg-[#ea580c] text-white' }
         ]
     },
     {
-        name: 'Kula (School life)',
+        name: 'Aoga',
         bg: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)',
         wordColors: ['#fee2e2', '#fecaca', '#f87171', '#ef4444', '#dc2626'],
         words: [
-            { w: 'nofoa', t: 'home', c: 'bg-[#fecaca] text-black' },
-            { w: 'whakapapa', t: 'genealogy', c: 'bg-[#f87171] text-white' },
-            { w: 'talavou', t: 'beautiful', c: 'bg-[#fee2e2] text-black' },
-            { w: 'ako', t: 'learning', c: 'bg-[#dc2626] text-white' },
-            { w: 'puka', t: 'book', c: 'bg-[#ef4444] text-white' }
+            { w: 'nofoaga', t: 'home', c: 'bg-[#fecaca] text-black' },
+            { w: 'gafa', t: 'genealogy', c: 'bg-[#f87171] text-white' },
+            { w: 'talavou', t: 'youth', c: 'bg-[#fee2e2] text-black' },
+            { w: 'aoga', t: 'learning', c: 'bg-[#dc2626] text-white' },
+            { w: 'tagata aoga', t: 'apprentice', c: 'bg-[#ef4444] text-white' }
         ]
     },
     {
-        name: 'Taha ʻAtamai (Spiritual)',
+        name: 'Vaega Agaga',
         bg: 'linear-gradient(135deg, #b91c1c 0%, #ef4444 100%)',
         wordColors: ['#fef2f2', '#fee2e2', '#f87171', '#ef4444', '#b91c1c'],
         words: [
-            { w: 'mafaufau', t: 'knowledge', c: 'bg-[#f87171] text-white' },
-            { w: 'lotu', t: 'prayer', c: 'bg-[#fee2e2] text-black' },
-            { w: 'lotu ngāue', t: 'pray for work', c: 'bg-[#b91c1c] text-white' },
-            { w: 'rongoa', t: 'medicine', c: 'bg-[#ef4444] text-white' },
-            { w: 'mokomoko', t: 'spirit', c: 'bg-[#fef2f2] text-black' }
+            { w: 'malamalama', t: 'knowledge', c: 'bg-[#f87171] text-white' },
+            { w: 'tatalo', t: 'prayer', c: 'bg-[#fee2e2] text-black' },
+            { w: 'faasamoa', t: 'customs', c: 'bg-[#b91c1c] text-white' },
+            { w: 'vailaau', t: 'medicine', c: 'bg-[#ef4444] text-white' },
+            { w: 'agaga', t: 'spirit', c: 'bg-[#fef2f2] text-black' }
         ]
     },
     {
-        name: 'Langa fakafou (Everyday)',
+        name: 'Everyday Life',
         bg: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)',
         wordColors: ['#fce7f3', '#f9a8d4', '#ec4899', '#db2777', '#be185d'],
         words: [
-            { w: 'hiva', t: 'song', c: 'bg-[#be185d] text-white' },
+            { w: 'pese', t: 'song', c: 'bg-[#be185d] text-white' },
             { w: 'fale', t: 'house', c: 'bg-[#ec4899] text-white' },
-            { w: 'lue', t: 'walk', c: 'bg-[#f9a8d4] text-black' },
-            { w: 'ofa', t: 'love', c: 'bg-[#fce7f3] text-black' },
-            { w: 'ngaue', t: 'work', c: 'bg-[#db2777] text-white' }
+            { w: 'savali', t: 'walk', c: 'bg-[#f9a8d4] text-black' },
+            { w: 'alofa', t: 'love', c: 'bg-[#fce7f3] text-black' },
+            { w: 'galuega', t: 'work', c: 'bg-[#db2777] text-white' }
         ]
     },
     {
-        name: 'Kolo mo Nofoʻanga (Community & Place)',
+        name: 'Community & Place',
         bg: 'linear-gradient(135deg, #db2777 0%, #ec4899 100%)',
         wordColors: ['#f9a8d4', '#ec4899', '#db2777', '#be185d', '#9d174d'],
         words: [
-            { w: 'fonua', t: 'land', c: 'bg-[#ec4899] text-white' },
-            { w: 'malae', t: 'Marae', c: 'bg-[#db2777] text-white' },
-            { w: 'manupuna', t: 'pet', c: 'bg-[#be185d] text-white' },
-            { w: 'rohe', t: 'region', c: 'bg-[#f9a8d4] text-black' },
-            { w: 'vilisi', t: 'village', c: 'bg-[#9d174d] text-white' }
+            { w: 'fanua', t: 'land', c: 'bg-[#ec4899] text-white' },
+            { w: 'malae', t: 'Māori community centre', c: 'bg-[#db2777] text-white' },
+            { w: 'tausi manu', t: 'pet', c: 'bg-[#be185d] text-white' },
+            { w: 'itumalo', t: 'region', c: 'bg-[#f9a8d4] text-black' },
+            { w: 'nuu', t: 'tribe', c: 'bg-[#9d174d] text-white' }
         ]
     },
     {
-        name: 'Emosi (Feelings)',
+        name: 'Feelings',
         bg: 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
         wordColors: ['#e9d5ff', '#d8b4fe', '#c084fc', '#a855f7', '#9333ea'],
         words: [
-            { w: 'fiefia', t: 'excited', c: 'bg-[#9333ea] text-white' },
-            { w: 'fiekaia', t: 'hungry', c: 'bg-[#e9d5ff] text-black' },
-            { w: 'fieinua', t: 'thirsty', c: 'bg-[#d8b4fe] text-black' },
-            { w: 'helaʻia', t: 'tired', c: 'bg-[#c084fc] text-black' },
-            { w: 'ita', t: 'angry', c: 'bg-[#a855f7] text-white' }
+            { w: 'fiafia', t: 'excited', c: 'bg-[#9333ea] text-white' },
+            { w: 'fiaai', t: 'hungry', c: 'bg-[#e9d5ff] text-black' },
+            { w: 'fia inu', t: 'thirsty', c: 'bg-[#d8b4fe] text-black' },
+            { w: 'fia moe', t: 'tired', c: 'bg-[#c084fc] text-black' },
+            { w: 'manuia', t: 'happy', c: 'bg-[#a855f7] text-white' }
+        ]
+    },
+    {
+        name: 'Actions',
+        bg: 'linear-gradient(135deg, #7e22ce 0%, #a78bfa 100%)',
+        wordColors: ['#ddd6fe', '#c4b5fd', '#a78bfa', '#7e22ce', '#6b21a8'],
+        words: [
+            { w: 'siva', t: 'dance', c: 'bg-[#a78bfa] text-black' },
+            { w: 'aau', t: 'swim', c: 'bg-[#7e22ce] text-white' },
+            { w: 'oso', t: 'jump', c: 'bg-[#c4b5fd] text-black' },
+            { w: 'tietie', t: 'ride', c: 'bg-[#6b21a8] text-white' },
+            { w: 'tamoe', t: 'run', c: 'bg-[#ddd6fe] text-black' }
+        ]
+    },
+    {
+        name: 'Transport',
+        bg: 'linear-gradient(135deg, #ff0000 0%, #ff7f00 100%)',
+        wordColors: ['#fed7aa', '#fdba74', '#fb923c', '#f97316', '#ea580c'],
+        words: [
+            { w: 'uila', t: 'bike', c: 'bg-[#fed7aa] text-black' },
+            { w: 'nofoaafi', t: 'train', c: 'bg-[#fb923c] text-black' },
+            { w: 'taavale', t: 'car', c: 'bg-[#fdba74] text-black' },
+            { w: 'taksi', t: 'taxi', c: 'bg-[#f97316] text-black' },
+            { w: 'pasi', t: 'bus', c: 'bg-[#ea580c] text-white' }
+        ]
+    },
+    {
+        name: 'Aitu & Tala',
+        bg: 'linear-gradient(135deg, #ff7f00 0%, #ffff00 100%)',
+        wordColors: ['#fef9c3', '#fef08a', '#facc15', '#eab308', '#ca8a04'],
+        words: [
+            { w: 'aitu', t: 'fairy', c: 'bg-[#fef08a] text-black' },
+            { w: 'kaitiaki', t: 'guardian', c: 'bg-[#ca8a04] text-white' },
+            { w: 'tupua', t: 'guardian spirit', c: 'bg-[#fef9c3] text-black' },
+            { w: 'tamaitiiti', t: 'youngest child', c: 'bg-[#facc15] text-black' },
+            { w: 'tagata tupua', t: 'supernatural being', c: 'bg-[#eab308] text-black' }
+        ]
+    },
+    {
+        name: 'Meaai',
+        bg: 'linear-gradient(135deg, #ff0000 0%, #ff7f00 50%, #ffff00 100%)',
+        wordColors: ['#fef9c3', '#fef08a', '#facc15', '#eab308', '#ca8a04'],
+        words: [
+            { w: 'fua', t: 'fruit', c: 'bg-[#eab308] text-black' },
+            { w: 'falaoa', t: 'bread', c: 'bg-[#facc15] text-black' },
+            { w: 'susu', t: 'milk', c: 'bg-[#fef08a] text-black' },
+            { w: 'manu', t: 'meat', c: 'bg-[#ca8a04] text-white' },
+            { w: 'meaai', t: 'food', c: 'bg-[#fef9c3] text-black' }
+        ]
+    },
+    {
+        name: 'O le Lagi',
+        bg: 'linear-gradient(135deg, #ff0000 0%, #ff7f00 33%, #ffff00 66%, #00ff00 100%)',
+        wordColors: ['#fef9c3', '#fef08a', '#facc15', '#eab308', '#ca8a04'],
+        words: [
+            { w: 'masina', t: 'moon', c: 'bg-[#fef08a] text-black' },
+            { w: 'fetu', t: 'star', c: 'bg-[#facc15] text-black' },
+            { w: 'ao', t: 'cloud', c: 'bg-[#ca8a04] text-white' },
+            { w: 'la', t: 'sun', c: 'bg-[#fef9c3] text-black' },
+            { w: 'timuga', t: 'rain', c: 'bg-[#eab308] text-black' }
+        ]
+    },
+    {
+        name: 'Sports & Games',
+        bg: 'linear-gradient(135deg, #ff0000 0%, #ff7f00 20%, #ffff00 40%, #00ff00 60%, #0000ff 80%, #4b0082 100%)',
+        wordColors: ['#fef9c3', '#fef08a', '#facc15', '#eab308', '#ca8a04'],
+        words: [
+            { w: 'netipolo', t: 'netball', c: 'bg-[#fef08a] text-black' },
+            { w: 'lakapi', t: 'rugby', c: 'bg-[#fef9c3] text-black' },
+            { w: 'faafiafiaga', t: 'performer', c: 'bg-[#eab308] text-black' },
+            { w: 'soka', t: 'soccer', c: 'bg-[#facc15] text-black' },
+            { w: 'taaloga', t: 'game/play', c: 'bg-[#ca8a04] text-white' }
         ]
     }
 ];
 
-let currentLevel = 0;
+        let currentLevel = 0;
 
-const LEVEL_COMPLETION_MESSAGES = [
-    "Mālō! – Good job!",
-    "Mālō ʻaupito! – Very good!",
-    "Fakamālō! – Awesome!",
-    "Fakaʻapaʻapa! – Excellent!",
-    "Mālō hoʻo ngāue! – Good work!",
-    "Fakaʻapaʻapa lahi! – Really excellent!",
-    "Tāutuʻaki! – Amazing!",
-    "Fakamālo ʻa e ngāue! – Your work is fantastic!",
-    "Kau mālō! – You are a champion!",
-    "ʻOku ke leaʻi! – You are a hero!",
-    "Kia kaha! – Stay strong!",
-    "Kia manawanui! – Be steadfast!",
-    "Fakamālō! – Fantastic!",
-    "ʻOku ke lava! – You did it!",
-    "Ngā mālo! – Congratulations!",
-    "Ngā mālo lahi! – Big congratulations!",
-    "Fakaʻapaʻapa lahi! – Absolutely awesome!",
-    "Ngaue mālo! – Your work is very strong!",
-    "Fakamālo lahi! – Truly amazing!",
-    "Ngā fakamālo! – Highest praise!"
+        const LEVEL_COMPLETION_MESSAGES = [
+    "Manuia! – Good job!",
+    "Sili lelei! – Very good!",
+    "Mālō tele! – Awesome!",
+    "Lelei tele! – Excellent!",
+    "Manuia lou galuega! – Good work!",
+    "Sili ona lelei! – Really excellent!",
+    "Ofoofogia! – Amazing!",
+    "E ofoofogia lau galuega! – Your work is fantastic!",
+    "Toa! – You are a champion!",
+    "O oe o se toa! – You are a hero!",
+    "Ia malosi! – Stay strong!",
+    "Ia onosaʻi! – Be steadfast!",
+    "E matagofie! – Fantastic!",
+    "Ua e mafai! – You did it!",
+    "Fa'afetai! – Congratulations!",
+    "Fa'afetai tele! – Big congratulations!",
+    "Mālō sili! – Absolutely awesome!",
+    "E matua malosi lou galuega! – Your work is very strong!",
+    "E matua ofoofogia! – Truly amazing!",
+    "Fa'amanuia! – Highest praise!"
 ];
-
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -868,9 +1099,14 @@ const LEVEL_COMPLETION_MESSAGES = [
             }
         }
 
-        function updateScoreDisplay() {
-            scoreDisplay.textContent = `Score: ${score}`;
-        }
+    // function updateScoreDisplay() {
+    //   scoreDisplay.textContent = `Score: ${score}`;
+    //    }
+    function updateScoreDisplay() {
+    scoreDisplay.textContent = `Score: ${score}`;
+    localStorage.setItem('gameScore', score);
+}
+// modified to save score
 
         function displayWordList() {
             wordListEl.innerHTML = '';
@@ -930,8 +1166,8 @@ const LEVEL_COMPLETION_MESSAGES = [
 
         function placeWord(wordObj, board) {
             const word = wordObj.w;
-            const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
-      //      const directions = [[0,1],[0,-1],[1,0],[-1,0]];
+        //   const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+           const directions = [[0,1],[0,-1],[1,0],[-1,0]];
             let placed = false;
             let attempts = 0;
             const maxAttempts = 100;
@@ -985,8 +1221,7 @@ const LEVEL_COMPLETION_MESSAGES = [
 
         function validateBoard(board) {
             const wordsOnGrid = new Set();
-       //     const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
-const directions = [[0,1],[0,-1],[1,0],[-1,0]];
+            const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
             function checkPath(r, c, word, wordIndex, path, visited, depth=0) {
                 if (wordIndex === word.length) return true;
                 if (depth > word.length * 2) return false;
@@ -1049,108 +1284,78 @@ const directions = [[0,1],[0,-1],[1,0],[-1,0]];
         }
 
         function refreshBoard() {
-            const MAX_OVERALL_ATTEMPTS = 50;
-            const startTime = performance.now();
-            let overallAttempt = 0;
-            let success = false;
-            let words = wordsToFind.map(w => wordInfo[w].obj);
-            words.sort((a, b) => b.w.length - a.length);
+    const MAX_ATTEMPTS = 50;
+    let attempts = 0;
+    let boardIsValid = false;
+    let mainWords = wordsToFind.map(w => wordInfo[w].obj);
+    mainWords.sort((a, b) => b.w.length - a.length); // Start with the longest words
 
-            while (!success && overallAttempt < MAX_OVERALL_ATTEMPTS && performance.now() - startTime < 2000) {
-                const localBoard = Array.from({length:GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
-                let allPlaced = true;
-                for (const wobj of words) {
-                    const placed = placeWord(wobj, localBoard);
-                    if (!placed) { allPlaced = false; break; }
-                }
-                if (allPlaced && validateBoard(localBoard)) {
-                    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
-                    otherWords.sort((a, b) => b.length - a.length);
-                    const purpleShades = [
-                        'bg-[#c084fc] text-black',
-                        'bg-[#a855f7] text-white',
-                        'bg-[#9333ea] text-white',
-                        'bg-[#7e22ce] text-white',
-                        'bg-[#6b21a8] text-white'
-                    ];
-                    for (let i = 0; i < otherWords.length; i++) {
-                        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
-                        placeWord(wordObj, localBoard);
-                    }
-                    let remainingWords = shuffle(getAllWords().filter(w => w.length === 5 || w.length === 4));
-                    let remainingWordIndex = 0;
-                    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
-                    let vowelIndex = 0;
-                    for (let r = 0; r < GRID_SIZE; r++) {
-                        for (let c = 0; c < GRID_SIZE; c++) {
-                            if (localBoard[r][c] === null) {
-                                if (remainingWordIndex < remainingWords.length) {
-                                    let wordObj = { w: remainingWords[remainingWordIndex], c: 'bg-[#d8b4fe] text-black' };
-                                    if (placeWord(wordObj, localBoard)) {
-                                        remainingWordIndex++;
-                                    } else {
-                                        localBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                        vowelIndex = (vowelIndex + 1) % vowels.length;
-                                    }
-                                } else {
-                                    localBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                    vowelIndex = (vowelIndex + 1) % vowels.length;
-                                }
-                            }
-                        }
-                    }
-                    gameBoard = localBoard;
-                    success = true;
-                }
-                overallAttempt++;
+    let finalBoard = null; // Will hold the board only if it's a 100% success
+    let lastAttemptBoard = null; // Will hold the board from the most recent attempt
+
+    // --- Start of change ---
+    // Phase 1: Tirelessly attempt to place ONLY the required words for the level.
+    while (!boardIsValid && attempts < MAX_ATTEMPTS) {
+        const localBoard = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+        let allPlaced = true;
+
+        for (const wobj of mainWords) {
+            if (!placeWord(wobj, localBoard)) {
+                allPlaced = false;
+                break; // If any word fails, scrap this attempt and start over.
             }
-
-            if (!success) {
-                gameBoard = Array.from({length:GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
-                for (const w of words) placeWord(w, gameBoard);
-                let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
-                otherWords.sort((a, b) => b.length - a.length);
-                const purpleShades = [
-                    'bg-[#c084fc] text-black',
-                    'bg-[#a855f7] text-white',
-                    'bg-[#9333ea] text-white',
-                    'bg-[#7e22ce] text-white',
-                    'bg-[#6b21a8] text-white'
-                ];
-                for (let i = 0; i < otherWords.length; i++) {
-                    let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
-                    placeWord(wordObj, gameBoard);
-                }
-                let remainingWords = shuffle(getAllWords().filter(w => w.length === 5 || w.length === 4));
-                let remainingWordIndex = 0;
-                const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
-                let vowelIndex = 0;
-                for (let r = 0; r < GRID_SIZE; r++) {
-                    for (let c = 0; c < GRID_SIZE; c++) {
-                        if (gameBoard[r][c] === null) {
-                            if (remainingWordIndex < remainingWords.length) {
-                                let wordObj = { w: remainingWords[remainingWordIndex], c: 'bg-[#d8b4fe] text-black' };
-                                if (placeWord(wordObj, gameBoard)) {
-                                    remainingWordIndex++;
-                                } else {
-                                    gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                    vowelIndex = (vowelIndex + 1) % vowels.length;
-                                }
-                            } else {
-                                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                vowelIndex = (vowelIndex + 1) % vowels.length;
-                            }
-                        }
-                    }
-                }
-                if (!validateBoard(gameBoard)) {
-                    showMessage('Board may be incomplete. Use a star to refresh.');
-                }
-            }
-
-            renderBoard();
-            displayWordList();
         }
+        
+        lastAttemptBoard = localBoard; // We save every attempt, even failures.
+
+        // If all words were placed perfectly, we have our final board.
+        if (allPlaced && validateBoard(localBoard)) {
+            boardIsValid = true;
+            finalBoard = localBoard; // Success! A perfect board.
+        }
+        attempts++;
+    }
+
+    // Phase 2: Decide which board to use.
+    if (boardIsValid) {
+        // If we found a perfect board, use it.
+        gameBoard = finalBoard;
+    } else {
+        // If not, use the very last attempt we saved instead of a blank one.
+        gameBoard = lastAttemptBoard;
+        showMessage('Could not place all words. Using last attempt.', 3000);
+    }
+    // --- End of change ---
+
+    // Phase 3: Now that main words are secured, fill the empty spaces.
+    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 10);
+    otherWords.sort((a, b) => b.length - a.length);
+    const purpleShades = [
+        'bg-[#c084fc] text-black', 'bg-[#a855f7] text-white',
+        'bg-[#9333ea] text-white', 'bg-[#7e22ce] text-white',
+        'bg-[#6b21a8] text-white'
+    ];
+    for (let i = 0; i < otherWords.length; i++) {
+        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
+        placeWord(wordObj, gameBoard); // placeWord already respects existing letters.
+    }
+
+    // Finally, fill any remaining empty spots with random purple vowels.
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+    let vowelIndex = 0;
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (gameBoard[r][c] === null) {
+                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
+                vowelIndex = (vowelIndex + 1) % vowels.length;
+            }
+        }
+    }
+
+    // Phase 4: Render the final board.
+    renderBoard();
+    displayWordList();
+}
 
         function initBoard() {
             foundWordCounts = {};
@@ -1208,7 +1413,52 @@ const directions = [[0,1],[0,-1],[1,0],[-1,0]];
             messageBox.style.opacity = '1';
             setTimeout(() => { messageBox.style.opacity = '0'; }, duration);
         }
+// counting purple tiles so the board will reset when stuck        
+function countPurpleTilesOnBoard() {
+    let purpleCount = 0;
+    const purpleClasses = [
+        'bg-[#c084fc]', 'bg-[#a855f7]', 'bg-[#9333ea]', 
+        'bg-[#7e22ce]', 'bg-[#6b21a8]', 'bg-[#d8b4fe]'
+    ];
 
+    if (!gameBoard) return 0;
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            const cell = gameBoard[r] && gameBoard[r][c];
+
+            // Check if the tile's background color is one of the purple shades
+            const isPurple = cell && cell.color && purpleClasses.some(pClass => cell.color.includes(pClass));
+
+            if (isPurple) {
+                // Check if the tile is part of a word in the current level's main word list
+                const isMainWordTile = cell.word && wordsToFind.includes(cell.word);
+
+                // Only increment the counter if it's a purple tile that is NOT a main word
+                if (!isMainWordTile) {
+                    purpleCount++;
+                }
+            }
+        }
+    }
+    return purpleCount;
+}
+
+function showBonusWord(word, translation) {
+    return new Promise(resolve => {
+        bonusWordTereo.textContent = word.toUpperCase();
+        bonusWordTranslation.textContent = `(${translation})`;
+        bonusWordOverlay.classList.add('visible');
+
+        const continueGame = () => {
+            bonusWordOverlay.classList.remove('visible');
+            bonusWordOverlay.removeEventListener('click', continueGame);
+            resolve();
+        };
+
+        bonusWordOverlay.addEventListener('click', continueGame);
+    });
+}
         function clearHighlights() {
             document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
             selectedTiles = [];
@@ -1261,10 +1511,14 @@ const directions = [[0,1],[0,-1],[1,0],[-1,0]];
         }
 
         function handleStart(e) {
-            isDragging = true;
-            selectionStartTime = Date.now(); // Start timing
-            handleMove(e);
-        }
+    // This new line prevents the browser's default dragging action
+    if (e.preventDefault) e.preventDefault();
+
+    isDragging = true;
+    selectionStartTime = Date.now(); // Start timing
+    handleMove(e);
+}
+
 
         function handleMove(e) {
             if (!isDragging) return;
@@ -1288,154 +1542,134 @@ const directions = [[0,1],[0,-1],[1,0],[-1,0]];
                 }
             }
         }
+async function handleEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    lastTile = null;
+    const timeTaken = Math.round((Date.now() - selectionStartTime) / 1000); // Calculate time taken in seconds
+    const word = getSelectedWord().toLowerCase();
+    const foundWord = wordsToFind.find(w => w === word);
+    const allWords = [...getAllWords(), ...getBonusWords().map(w => w.w)];
+    const isBonusWord = !foundWord && allWords.includes(word);
+    const levelName = `Level ${currentLevel + 1} - ${LEVELS[currentLevel].name}`;
 
-        function handleEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            lastTile = null;
-            const timeTaken = Math.round((Date.now() - selectionStartTime) / 1000); // Calculate time taken in seconds
-            const word = getSelectedWord().toLowerCase();
-            const foundWord = wordsToFind.find(w => w === word);
-            const allWords = [...getAllWords(), ...getBonusWords().map(w => w.w)];
-            const isBonusWord = !foundWord && allWords.includes(word);
-            const levelName = `Level ${currentLevel + 1} - ${LEVELS[currentLevel].name}`;
+    if (foundWord && word.length >= 2) {
+        foundWordCounts[foundWord] = (foundWordCounts[foundWord] || 0) + 1;
+        const pointsGained = word.length;
+        score += pointsGained;
+        showMessage('Mīharo - you got it!');
+        dropLettersAndRefill(selectedTiles);
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const translation = wordInfo[foundWord].translation;
+        foundWordsTrail.push({
+            time,
+            level: levelName,
+            type: 'List Word',
+            word: word.toUpperCase(),
+            translation,
+            timeTaken,
+            pointsGained,
+            pointsTotal: score
+        });
+        displayWordList();
+        displayLearningLog();
+        updateScoreDisplay();
+    } else if (isBonusWord && word.length >= 2) {
+        const pointsGained = word.length * 5;
+        score += pointsGained;
+        const type = getAllWords().includes(word) ? 'Bonus Word (list)' : 'Bonus Word (hidden)';
+        const translation = getTranslation(word);
 
-            if (foundWord && word.length >= 2) {
-                foundWordCounts[foundWord] = (foundWordCounts[foundWord] || 0) + 1;
-                const pointsGained = word.length;
-                score += pointsGained;
-                showMessage('Mīharo - you got it!');
-                dropLettersAndRefill(selectedTiles);
-                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const translation = wordInfo[foundWord].translation;
-                foundWordsTrail.push({
-                    time,
-                    level: levelName,
-                    type: 'List Word',
-                    word: word.toUpperCase(),
-                    translation,
-                    timeTaken,
-                    pointsGained,
-                    pointsTotal: score
-                });
-                displayWordList();
-                displayLearningLog();
-                updateScoreDisplay();
-            } else if (isBonusWord && word.length >= 2) {
-                const pointsGained = word.length * 5;
-                score += pointsGained;
-                const type = getAllWords().includes(word) ? 'Bonus Word (list)' : 'Bonus Word (hidden)';
-                showMessage('Ka rawe! Bonus word found!');
-                dropLettersAndRefill(selectedTiles);
-                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const translation = getTranslation(word);
-                foundWordsTrail.push({
-                    time,
-                    level: levelName,
-                    type,
-                    word: word.toUpperCase(),
-                    translation,
-                    timeTaken,
-                    pointsGained,
-                    pointsTotal: score
-                });
-                displayLearningLog();
-                updateScoreDisplay();
-            } else if (word.length > 1) {
-                showMessage('That is not a valid word.');
+        await showBonusWord(word, translation); 
+
+        dropLettersAndRefill(selectedTiles);
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        foundWordsTrail.push({
+            time,
+            level: levelName,
+            type,
+            word: word.toUpperCase(),
+            translation,
+            timeTaken,
+            pointsGained,
+            pointsTotal: score
+        });
+        displayLearningLog();
+        updateScoreDisplay();
+    } else if (word.length > 1) {
+        showMessage('That is not a valid word.');
+    }
+    clearHighlights();
+    checkWinCondition();
+}
+// refreshboard and droplettersandrefill both changed 13sep25
+function dropLettersAndRefill(tilesToRemove) {
+    // Phase 1: Remove the found word and let letters fall.
+    const newGameBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
+    const removeSet = new Set(tilesToRemove.map(t => `${t.row},${t.col}`));
+
+    for (let c = 0; c < GRID_SIZE; c++) {
+        const columnStack = [];
+        for (let r = GRID_SIZE - 1; r >= 0; r--) {
+            if (!removeSet.has(`${r},${c}`) && gameBoard[r][c]) {
+                columnStack.push(gameBoard[r][c]);
             }
-            clearHighlights();
-            checkWinCondition();
         }
-
-        function dropLettersAndRefill(tilesToRemove) {
-            const newGameBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
-            const removeSet = new Set(tilesToRemove.map(t => `${t.row},${t.col}`));
-            for (let c = 0; c < GRID_SIZE; c++) {
-                const columnStack = [];
-                for (let r = GRID_SIZE - 1; r >= 0; r--) {
-                    const coord = `${r},${c}`;
-                    if (!removeSet.has(coord) && gameBoard[r][c]) columnStack.push(gameBoard[r][c]);
-                }
-                let fillRow = GRID_SIZE - 1;
-                for (let i = 0; i < columnStack.length; i++) {
-                    newGameBoard[fillRow][c] = columnStack[i];
-                    fillRow--;
-                }
-            }
-            gameBoard = newGameBoard;
-
-            const wordsToFindStillRemaining = wordsToFind.filter(w => foundWordCounts[w] < FIND_COUNT_PER_WORD);
-            const wordsOnGrid = new Set();
-            for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (gameBoard[r][c] && gameBoard[r][c].word) wordsOnGrid.add(gameBoard[r][c].word);
-            let attempts = 0;
-            const maxAttempts = 100;
-            const startTime = performance.now();
-            while (wordsOnGrid.size < wordsToFindStillRemaining.length && attempts < maxAttempts && performance.now() - startTime < 1000) {
-                let wordsNotOnGrid = wordsToFindStillRemaining.filter(w => !wordsOnGrid.has(w));
-                wordsNotOnGrid.sort((a, b) => b.length - a.length);
-                for (const w of wordsNotOnGrid) {
-                    if (placeWord(wordInfo[w].obj, gameBoard)) {
-                        wordsOnGrid.add(w);
-                    }
-                }
-                if (wordsOnGrid.size < wordsToFindStillRemaining.length) {
-                    const nonWordTiles = [];
-                    for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!gameBoard[r][c] || !gameBoard[r][c].word) nonWordTiles.push({r, c});
-                    shuffle(nonWordTiles);
-                    const tilesToReplace = nonWordTiles.slice(0, Math.min(20, nonWordTiles.length));
-                    tilesToReplace.forEach(({r, c}) => gameBoard[r][c] = null);
-                    for (const w of wordsNotOnGrid) {
-                        if (placeWord(wordInfo[w].obj, gameBoard)) {
-                            wordsOnGrid.add(w);
-                        }
-                    }
-                }
-                attempts++;
-            }
-            if (wordsOnGrid.size < wordsToFindStillRemaining.length) {
-                showMessage('Some main words could not be placed. Use a star to refresh if needed.');
-            }
-
-            let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
-            otherWords.sort((a, b) => b.length - a.length);
-            const purpleShades = [
-                'bg-[#c084fc] text-black',
-                'bg-[#a855f7] text-white',
-                'bg-[#9333ea] text-white',
-                'bg-[#7e22ce] text-white',
-                'bg-[#6b21a8] text-white'
-            ];
-            for (let i = 0; i < otherWords.length; i++) {
-                let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
-                placeWord(wordObj, gameBoard);
-            }
-
-            let remainingWords = shuffle(getAllWords().filter(w => w.length === 5 || w.length === 4));
-            let remainingWordIndex = 0;
-            const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
-            let vowelIndex = 0;
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    if (gameBoard[r][c] === null) {
-                        if (remainingWordIndex < remainingWords.length) {
-                            let wordObj = { w: remainingWords[remainingWordIndex], c: 'bg-[#d8b4fe] text-black' };
-                            if (placeWord(wordObj, gameBoard)) {
-                                remainingWordIndex++;
-                            } else {
-                                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                vowelIndex = (vowelIndex + 1) % vowels.length;
-                            }
-                        } else {
-                            gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                            vowelIndex = (vowelIndex + 1) % vowels.length;
-                        }
-                    }
-                }
-            }
-
-            renderBoard();
+        let fillRow = GRID_SIZE - 1;
+        for (let i = 0; i < columnStack.length; i++) {
+            newGameBoard[fillRow][c] = columnStack[i];
+            fillRow--;
         }
+    }
+    gameBoard = newGameBoard;
+
+    // Phase 2: Check which main words are still needed and prioritize placing them.
+    const wordsToFindStillRemaining = wordsToFind.filter(w => foundWordCounts[w] < FIND_COUNT_PER_WORD);
+    const wordsOnGrid = new Set(
+        gameBoard.flat().filter(c => c && c.word).map(c => c.word)
+    );
+
+    let wordsNotOnGrid = wordsToFindStillRemaining.filter(w => !wordsOnGrid.has(w));
+    if (wordsNotOnGrid.length > 0) {
+        wordsNotOnGrid.sort((a,b) => b.length - a.length);
+        for (const wordStr of wordsNotOnGrid) {
+            // Attempt to place the missing required word into the new gaps.
+            placeWord(wordInfo[wordStr].obj, gameBoard);
+        }
+    }
+
+    // Phase 3: Now fill the rest of the gaps with bonus/filler letters.
+    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
+    otherWords.sort((a, b) => b.length - a.length);
+    const purpleShades = [
+        'bg-[#c084fc] text-black', 'bg-[#a855f7] text-white', 'bg-[#9333ea] text-white'
+    ];
+    for (let i = 0; i < otherWords.length; i++) {
+        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
+        placeWord(wordObj, gameBoard);
+    }
+
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+    let vowelIndex = 0;
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (gameBoard[r][c] === null) {
+                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
+                vowelIndex = (vowelIndex + 1) % vowels.length;
+            }
+        }
+    }
+
+    // Phase 4: Render and perform the purple-overload check.
+    renderBoard();
+
+    const purpleCount = countPurpleTilesOnBoard();
+    if (purpleCount >= 33) {
+        showMessage('Purple overload! Free board refresh!', 2500);
+        purpleResetTimeout = setTimeout(refreshBoard, 2500);
+    }
+}
 
         function checkWinCondition() {
             const allFound = wordsToFind.every(word => foundWordCounts[word] >= FIND_COUNT_PER_WORD);
@@ -1475,6 +1709,7 @@ const directions = [[0,1],[0,-1],[1,0],[-1,0]];
         }
 
         function resetGame() {
+            clearTimeout(purpleResetTimeout); // 13th September
             winScreen.classList.add('hidden');
             winScreen.innerHTML = '';
             initBoard();
@@ -1494,13 +1729,23 @@ const directions = [[0,1],[0,-1],[1,0],[-1,0]];
             }
         }
 
-function attachEventListeners() {
+        function attachEventListeners() {
     gridContainer.addEventListener('mousedown', handleStart);
     gridContainer.addEventListener('mousemove', handleMove);
     gridContainer.addEventListener('mouseup', handleEnd);
     gridContainer.addEventListener('mouseleave', handleEnd);
-    gridContainer.addEventListener('touchstart', (e) => handleStart(e.touches[0]));
-    gridContainer.addEventListener('touchmove', (e) => handleMove(e.touches[0]));
+
+    // These touch listeners are updated to prevent default scrolling on mobile
+    gridContainer.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleStart(e.touches[0]);
+    }, { passive: false });
+
+    gridContainer.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // Also prevent scrolling while dragging on touch devices
+        handleMove(e.touches[0]);
+    }, { passive: false });
+    
     gridContainer.addEventListener('touchend', handleEnd);
 
     prevLevelBtn.addEventListener('click', () => { prevLevel(); });
@@ -1512,7 +1757,6 @@ function attachEventListeners() {
         instructionsModal.style.display = 'none';
     });
     copyTrailBtn.addEventListener('click', copyToClipboard);
-
 function copyToClipboard() {
     try {
         const now = new Date().toLocaleString('en-NZ', {
@@ -1522,15 +1766,31 @@ function copyToClipboard() {
             year: 'numeric'
         });
 
-        const maoriDays = {
-            'Monday': 'Mane','Tuesday': 'Tūrei','Wednesday': 'Wenerei','Thursday': 'Tāite',
-            'Friday': 'Paraire','Saturday': 'Rāhoroi','Sunday': 'Rātapu'
-        };
-        const maoriMonths = {
-            'January': 'Kohitātea','February': 'Hui-tanguru','March': 'Poutū-te-rangi','April': 'Paenga-whāwhā',
-            'May': 'Haratua','June': 'Pipiri','July': 'Hōngongoi','August': 'Hereturikōkā',
-            'September': 'Mahuru','October': 'Whiringa-ā-nuku','November': 'Whiringa-ā-rangi','December': 'Hakihea'
-        };
+        const samoanDays = {
+    'Monday': 'Aso Gafua',
+    'Tuesday': 'Aso Lua',
+    'Wednesday': 'Aso Lulu',
+    'Thursday': 'Aso Tofi',
+    'Friday': 'Aso Faraile',
+    'Saturday': 'Aso Toʻonaʻi',
+    'Sunday': 'Aso Sa'
+};
+
+const samoanMonths = {
+    'January': 'Ianuari',
+    'February': 'Fepuari',
+    'March': 'Mati',
+    'April': 'Aperila',
+    'May': 'Me',
+    'June': 'Iuni',
+    'July': 'Iulai',
+    'August': 'Aokuso',
+    'September': 'Setema',
+    'October': 'Oketopa',
+    'November': 'Novema',
+    'December': 'Tesema'
+};
+
 
         const parts = now.split(/[, ]+/);
         const weekday = parts[0];
@@ -1543,7 +1803,7 @@ function copyToClipboard() {
             'Time',
             'Level',
             'Type',
-            'Kupu',
+            'Te Reo Kupu',
             'Translation',
             'Time Taken',
             'Points Gained',
@@ -1631,7 +1891,7 @@ function copyToClipboard() {
             }
         }).join('\n');
 
-        const text = `<pre>Kumi Kupu Learning Log for ${maoriDate}\n\n${headerRow}\n${underlineRow}\n${bodyRows}</pre>`;
+        const text = `<pre>Rapu Kupu Learning Log for ${maoriDate}\n\n${headerRow}\n${underlineRow}\n${bodyRows}</pre>`;
 
         const tempTextArea = document.createElement('textarea');
         tempTextArea.value = text;
