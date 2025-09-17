@@ -110,6 +110,18 @@
     .field-centre-button a {
         color: #007bff;
     }
+    .side-by-side-container {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      width: 80%;
+      max-width: 800px;
+      margin: 1rem auto 0;
+    }
+    .side-by-side-container .button-box {
+      width: 100%;
+      margin-top: 0;
+    }
   </style>
 </head>
 <body>
@@ -185,12 +197,13 @@
     <a href="about.html">ABOUT</a>
   </div>
 
-  <div class="button-box field-centre-button">
-    <a href="fieldcentre1.html">Field Centre 1</a>
-  </div>
-
-  <div class="button-box field-centre-button">
-    <a href="fieldcentre2.html">Field Centre 2</a>
+  <div class="side-by-side-container">
+    <div class="button-box field-centre-button">
+      <a href="fieldcentre1.html">Field Centre 1</a>
+    </div>
+    <div class="button-box field-centre-button">
+      <a href="fieldcentre2.html">Field Centre 2</a>
+    </div>
   </div>
 
 </body>
