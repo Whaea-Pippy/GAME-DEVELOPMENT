@@ -48,6 +48,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
     .logo svg { width: 40px; height: 40px; fill: #ffffff; }
     h1 {
@@ -104,6 +105,32 @@
       border-radius: 12px;
       background: #fff1f8;
     }
+
+    /* Pop star pastel room backgrounds */
+    #room1 {
+      background: linear-gradient(135deg, #fef7ff 0%, #f3e8ff 50%, #fce7f3 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    #room2 {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    #room3 {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    #room4 {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
     label {
       display: block;
       margin-bottom: 0.5rem;
@@ -131,6 +158,7 @@
       transition: background 0.2s;
     }
     button:hover { background: var(--accent-dark); }
+    button:active { transform: translateY(1px); }
     .muted { color: var(--muted); }
 
     .hint {
@@ -193,10 +221,24 @@
       justify-content: center;
       padding: var(--pad);
       background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 10;
     }
     .modal .card {
       max-width: 700px;
       text-align: center;
+    }
+
+    .debug {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid #ccc;
+      z-index: 100;
     }
 
     @media (max-width: 600px) {
@@ -214,10 +256,12 @@
   </style>
 </head>
 <body>
+  <div class="debug" id="debugInfo">JS Loading...</div>
+  
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo">
+        <div class="logo" id="logo">
           <svg viewBox="0 0 24 24">
             <path d="M12 2a1 1 0 0 1 .894.553L20 14h-4v8H8v-8H4L11.106 2.553A1 1 0 0 1 12 2zm0 2.236L6.618 12H10v8h4v-8h3.382L12 4.236z"/>
           </svg>
@@ -246,7 +290,6 @@
 
       <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
 
-      <!-- Stages -->
       <section id="room1" class="room active" aria-labelledby="r1">
         <h2 id="r1" class="clue">Stage 1 — Auckland Arena Pass</h2>
         <div class="quiz" style="margin-top: 1rem;">
@@ -350,9 +393,19 @@
   </template>
 
   <script>
-    console.log("JavaScript is running! Initializing Pop Star Tour Math Escape...");
+    // Debug info
+    const debugInfo = document.getElementById('debugInfo');
+    function updateDebug(msg) {
+      debugInfo.textContent = msg;
+      console.log('DEBUG:', msg);
+    }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    updateDebug('Script started');
+
+    // Initialize immediately instead of waiting for DOMContentLoaded
+    function initializeGame() {
+      updateDebug('Initializing game...');
+
       const rooms = [
         { id: 'room1', check: checkR1, hintText: 'Subtract 3 from both sides, then divide by 2.', points: 20 },
         { id: 'room2', check: checkR2, hintText: 'The least common denominator for 4 and 3 is 12.', points: 15 },
@@ -360,14 +413,31 @@
         { id: 'room4', check: checkR4, hintText: 'Each number increases by 3.', points: 25 },
       ];
 
-      let index = Number(localStorage.getItem('er_index') || 0);
-      let points = Number(localStorage.getItem('er_points') || 0);
-      let hints = Number(localStorage.getItem('er_hints') || 0);
-      let solved = JSON.parse(localStorage.getItem('er_solved') || '[]');
-      let totalTime = Number(localStorage.getItem('er_time') || 10 * 60);
+      const getCssVariable = (name) => {
+        try {
+          return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        } catch (e) {
+          console.warn('Failed to get CSS variable:', name);
+          return name === '--success' ? '#34d399' : '#f87171';
+        }
+      };
+      
+      const successColor = getCssVariable('--success');
+      const dangerColor = getCssVariable('--danger');
+
+      // Use memory storage instead of localStorage for better compatibility
+      let gameState = {
+        index: 0,
+        points: 0,
+        hints: 0,
+        solved: new Array(rooms.length).fill(false),
+        totalTime: 10 * 60
+      };
+
       let timerInterval = null;
       let isPaused = false;
 
+      // Get DOM elements
       const roomIndexEl = document.getElementById('roomIndex');
       const pointsEl = document.getElementById('points');
       const hintsEl = document.getElementById('hintsUsed');
@@ -375,19 +445,39 @@
       const progressFill = document.getElementById('progressFill');
       const pauseBtn = document.getElementById('pauseBtn');
 
-      try {
-        solved = Array.isArray(solved) && solved.length ? solved : new Array(rooms.length).fill(false);
-      } catch (e) {
-        console.error('Error parsing solved state:', e);
-        solved = new Array(rooms.length).fill(false);
+      // Check if all elements exist
+      const requiredElements = [roomIndexEl, pointsEl, hintsEl, timerEl, progressFill, pauseBtn];
+      const missingElements = requiredElements.filter(el => !el);
+      if (missingElements.length > 0) {
+        updateDebug(`Missing elements: ${missingElements.length}`);
+        return;
       }
-      if (index < 0 || index >= rooms.length || isNaN(index)) index = 0;
 
+      updateDebug('All elements found');
+
+      // Initialize UI
       updateUI();
       startTimer();
 
-      pauseBtn.addEventListener('click', () => {
-        console.log('Pause/Resume button clicked');
+      // Add event listeners with error handling
+      function safeAddListener(element, event, handler, name) {
+        if (element) {
+          element.addEventListener(event, (e) => {
+            try {
+              updateDebug(`${name} clicked`);
+              handler(e);
+            } catch (error) {
+              console.error(`Error in ${name} handler:`, error);
+              updateDebug(`Error in ${name}`);
+            }
+          });
+          updateDebug(`${name} listener added`);
+        } else {
+          updateDebug(`${name} element not found`);
+        }
+      }
+
+      safeAddListener(pauseBtn, 'click', () => {
         isPaused = !isPaused;
         pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
         if (isPaused) {
@@ -395,153 +485,158 @@
         } else {
           startTimer();
         }
-      });
+      }, 'Pause button');
 
-      document.getElementById('saveBtn').addEventListener('click', () => {
-        console.log('Save button clicked');
-        saveState();
-        alert('Progress saved locally in your browser.');
-      });
+      safeAddListener(document.getElementById('saveBtn'), 'click', () => {
+        alert('Game state saved in memory (localStorage not available in this environment).');
+      }, 'Save button');
 
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        console.log('Reset button clicked');
-        if (!confirm('Restart the tour? This clears saved progress.')) return;
-        localStorage.removeItem('er_index');
-        localStorage.removeItem('er_points');
-        localStorage.removeItem('er_solved');
-        localStorage.removeItem('er_hints');
-        localStorage.removeItem('er_time');
-        location.reload();
-      });
+      safeAddListener(document.getElementById('resetBtn'), 'click', () => {
+        if (confirm('Restart the tour? This will reset all progress.')) {
+          gameState = {
+            index: 0,
+            points: 0,
+            hints: 0,
+            solved: new Array(rooms.length).fill(false),
+            totalTime: 10 * 60
+          };
+          isPaused = false;
+          updateUI();
+          startTimer();
+        }
+      }, 'Reset button');
 
+      // Add room-specific listeners
       rooms.forEach((r, i) => {
         const rid = r.id;
-        const checkBtn = document.getElementById(rid + 'check');
-        const hintBtn = document.getElementById(rid + 'hint');
-        const hintBox = document.getElementById(rid + 'hintbox');
-        if (!checkBtn || !hintBtn || !hintBox) {
-          console.error(`Button or hint box missing for room ${rid}: checkBtn=${!!checkBtn}, hintBtn=${!!hintBtn}, hintBox=${!!hintBox}`);
-          return;
-        }
-        checkBtn.addEventListener('click', () => {
-          console.log(`Submit button clicked for ${rid}`);
-          try {
-            r.check();
-          } catch (e) {
-            console.error(`Error in check function for ${rid}:`, e);
+        const checkBtnId = rid.replace('room', 'r') + 'check';
+        const hintBtnId = rid.replace('room', 'r') + 'hint';
+        const hintBoxId = rid.replace('room', 'r') + 'hintbox';
+        
+        const checkBtn = document.getElementById(checkBtnId);
+        const hintBtn = document.getElementById(hintBtnId);
+        const hintBox = document.getElementById(hintBoxId);
+
+        updateDebug(`Looking for ${checkBtnId}: ${!!checkBtn}`);
+        updateDebug(`Looking for ${hintBtnId}: ${!!hintBtn}`);
+
+        safeAddListener(checkBtn, 'click', () => r.check(), `${checkBtnId} check button`);
+        
+        safeAddListener(hintBtn, 'click', () => {
+          if (hintBox && hintBox.style.display === 'none') {
+            hintBox.style.display = 'block';
+            gameState.hints++;
+            hintsEl.textContent = gameState.hints;
           }
-        });
-        hintBtn.addEventListener('click', () => {
-          console.log(`Hint button clicked for ${rid}`);
-          hintBox.style.display = 'block';
-          hints++;
-          hintsEl.textContent = hints;
-          localStorage.setItem('er_hints', hints);
-        });
+        }, `${hintBtnId} hint button`);
       });
 
+      // Check functions
       function checkR1() {
-        const val = Number(document.getElementById('r1ans').value.trim());
+        const input = document.getElementById('r1ans');
         const msg = document.getElementById('r1msg');
+        if (!input || !msg) return;
+        
+        const val = Number(input.value.trim());
         if (!Number.isFinite(val)) {
           msg.textContent = 'Enter a number.';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
           return;
         }
-        // 2x + 3 = 11 → 2x = 8 → x = 4
         if (val === 4) {
           winRoom(0);
           msg.textContent = 'Correct — Auckland Arena unlocked!';
-          msg.classList.remove('muted');
-          msg.style.color = var(--success);
+          msg.style.color = successColor;
         } else {
           msg.textContent = 'Try subtracting 3 from both sides, then divide by 2.';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
         }
       }
 
       function checkR2() {
-        const val = document.getElementById('r2ans').value.trim().replace(/\s+/g, '');
+        const input = document.getElementById('r2ans');
         const msg = document.getElementById('r2msg');
+        if (!input || !msg) return;
+        
+        const val = input.value.trim().replace(/\s+/g, '');
         if (!val.match(/^\d+\/\d+$/)) {
           msg.textContent = 'Enter a fraction like a/b (e.g., 2/3).';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
           return;
         }
-        // 1/4 + 1/3 = 3/12 + 4/12 = 7/12
-        if (val === '7/12' || val === '7 / 12') {
+        if (val === '7/12') {
           winRoom(1);
           msg.textContent = 'Correct — Wellington Stage ready!';
-          msg.classList.remove('muted');
-          msg.style.color = var(--success);
+          msg.style.color = successColor;
         } else {
           msg.textContent = 'Use a common denominator (12) to add 1/4 + 1/3.';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
         }
       }
 
       function checkR3() {
-        const val = Number(document.getElementById('r3ans').value.trim());
+        const input = document.getElementById('r3ans');
         const msg = document.getElementById('r3msg');
+        if (!input || !msg) return;
+        
+        const val = Number(input.value.trim());
         if (!Number.isFinite(val)) {
           msg.textContent = 'Enter a number.';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
           return;
         }
-        // Perimeter = 2 × (5 + 8) = 2 × 13 = 26
         if (val === 26) {
           winRoom(2);
           msg.textContent = 'Correct — Kiwi Pop Fest stage open!';
-          msg.classList.remove('muted');
-          msg.style.color = var(--success);
+          msg.style.color = successColor;
         } else {
           msg.textContent = 'Use perimeter = 2 × (width + length).';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
         }
       }
 
       function checkR4() {
-        const val = Number(document.getElementById('r4ans').value.trim());
+        const input = document.getElementById('r4ans');
         const msg = document.getElementById('r4msg');
+        if (!input || !msg) return;
+        
+        const val = Number(input.value.trim());
         if (!Number.isFinite(val)) {
           msg.textContent = 'Enter a number.';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
           return;
         }
-        // 2, 5, 8, 11 → +3 → 14
         if (val === 14) {
           winRoom(3);
           msg.textContent = 'Correct — Pop Star Finale unlocked!';
-          msg.classList.remove('muted');
-          msg.style.color = var(--success);
+          msg.style.color = successColor;
         } else {
           msg.textContent = 'Look for the pattern: each number increases by 3.';
-          msg.style.color = var(--danger);
+          msg.style.color = dangerColor;
         }
       }
 
       function winRoom(i) {
-        if (solved[i]) return;
-        solved[i] = true;
-        points += rooms[i].points;
-        document.getElementById('points').textContent = points;
-        localStorage.setItem('er_points', points);
-        localStorage.setItem('er_solved', JSON.stringify(solved));
-        const el = document.getElementById(rooms[i].id);
-        el.classList.add('solved');
-        const next = findNextUnsolved(i + 1);
-        if (next !== null) {
-          index = next;
-          localStorage.setItem('er_index', index);
-          updateUI();
-        } else {
+        if (gameState.solved[i]) return;
+        gameState.solved[i] = true;
+        gameState.points += rooms[i].points;
+        updateUI();
+
+        const allSolved = gameState.solved.every(s => s);
+        if (allSolved) {
           showEnd();
+        } else {
+          const next = findNextUnsolved(i + 1);
+          if (next !== null) {
+            gameState.index = next;
+            updateUI();
+          }
         }
       }
 
       function findNextUnsolved(start) {
         for (let i = start; i < rooms.length; i++) {
-          if (!solved[i]) return i;
+          if (!gameState.solved[i]) return i;
         }
         return null;
       }
@@ -549,24 +644,31 @@
       function updateUI() {
         rooms.forEach((r, i) => {
           const el = document.getElementById(r.id);
-          el.classList.toggle('active', i === index);
-          el.classList.toggle('locked', !(!solved[i] || i === index));
+          if (el) {
+            el.classList.toggle('active', i === gameState.index);
+            el.classList.toggle('locked', !gameState.solved[i] && i !== gameState.index);
+            el.classList.toggle('solved', gameState.solved[i]);
+          }
         });
-        roomIndexEl.textContent = Math.min(index + 1, rooms.length);
-        pointsEl.textContent = points;
-        hintsEl.textContent = hints;
-        const solvedCount = solved.filter(Boolean).length;
-        const pct = Math.round((solvedCount / rooms.length) * 100);
-        progressFill.style.width = pct + '%';
+        
+        if (roomIndexEl) roomIndexEl.textContent = Math.min(gameState.index + 1, rooms.length);
+        if (pointsEl) pointsEl.textContent = gameState.points;
+        if (hintsEl) hintsEl.textContent = gameState.hints;
+        
+        if (progressFill) {
+          const solvedCount = gameState.solved.filter(Boolean).length;
+          const pct = Math.round((solvedCount / rooms.length) * 100);
+          progressFill.style.width = pct + '%';
+        }
       }
 
       function startTimer() {
-        if (isPaused || totalTime <= 0) return;
+        if (isPaused || gameState.totalTime <= 0) return;
         updateTimerDisplay();
+        clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-          totalTime--;
-          localStorage.setItem('er_time', totalTime);
-          if (totalTime <= 0) {
+          gameState.totalTime--;
+          if (gameState.totalTime <= 0) {
             clearInterval(timerInterval);
             onTimeUp();
           }
@@ -575,62 +677,77 @@
       }
 
       function updateTimerDisplay() {
-        const mm = Math.floor(totalTime / 60);
-        const ss = totalTime % 60;
+        if (!timerEl) return;
+        const mm = Math.floor(gameState.totalTime / 60);
+        const ss = gameState.totalTime % 60;
         timerEl.textContent = `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
       }
 
       function onTimeUp() {
         isPaused = true;
-        pauseBtn.textContent = 'Resume';
-        alert('Time’s up! Your teacher can reset the timer or allow retries.');
+        if (pauseBtn) pauseBtn.textContent = 'Resume';
+        alert('Time\'s up! Click restart to try again.');
       }
 
       function showEnd() {
         clearInterval(timerInterval);
         isPaused = true;
-        pauseBtn.textContent = 'Resume';
-        const tpl = document.getElementById('endModal');
-        const clone = tpl.content.cloneNode(true);
-        clone.querySelector('#finalPoints').textContent = points + ' pts';
-        clone.querySelector('#finalHints').textContent = hints;
-        document.body.appendChild(clone);
-        document.getElementById('closeEnd').addEventListener('click', () => {
-          document.querySelector('.modal').remove();
-        });
+        if (pauseBtn) pauseBtn.textContent = 'Resume';
+        
+        const existingModal = document.querySelector('.modal');
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+          <div class="card">
+            <h2>Rocked It! Tour Complete 🎉</h2>
+            <p class="muted">You scored <strong>${gameState.points} pts</strong> and used ${gameState.hints} hints.</p>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+              <button onclick="this.closest('.modal').remove()">Close</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
       }
 
-      function saveState() {
-        localStorage.setItem('er_index', index);
-        localStorage.setItem('er_points', points);
-        localStorage.setItem('er_solved', JSON.stringify(solved));
-        localStorage.setItem('er_hints', hints);
-        localStorage.setItem('er_time', totalTime);
-      }
-
+      // Teacher quick reveal
+      const logo = document.getElementById('logo');
       let pressTimer = null;
-      const logo = document.querySelector('.logo');
-      logo.addEventListener('mousedown', startPress);
-      logo.addEventListener('touchstart', startPress);
-      logo.addEventListener('mouseup', cancelPress);
-      logo.addEventListener('mouseleave', cancelPress);
-      logo.addEventListener('touchend', cancelPress);
+      
+      if (logo) {
+        logo.addEventListener('mousedown', startPress);
+        logo.addEventListener('touchstart', startPress);
+        logo.addEventListener('mouseup', cancelPress);
+        logo.addEventListener('mouseleave', cancelPress);
+        logo.addEventListener('touchend', cancelPress);
+      }
+      
       function startPress(e) {
         pressTimer = setTimeout(() => {
           const reveal = confirm('Teacher quick reveal? This will mark all stages solved.');
           if (reveal) {
-            for (let i = 0; i < rooms.length; i++) solved[i] = true;
-            points = rooms.reduce((s, r) => s + r.points, 0);
-            saveState();
+            for (let i = 0; i < rooms.length; i++) gameState.solved[i] = true;
+            gameState.points = rooms.reduce((s, r) => s + r.points, 0);
             updateUI();
             showEnd();
           }
         }, 900);
       }
+      
       function cancelPress(e) {
         if (pressTimer) clearTimeout(pressTimer);
       }
-    });
+
+      updateDebug('Game initialized successfully');
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeGame);
+    } else {
+      initializeGame();
+    }
   </script>
 </body>
 </html>
