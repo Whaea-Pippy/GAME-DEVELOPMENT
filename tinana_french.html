@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ngā Wāhanga o te Tinana – Kōwhiri Kupu</title>
+<title>Les Parties du Corps – Choisissez le Mot</title>
 <style>
 html, body {
   height: 90vh;
@@ -191,31 +191,31 @@ svg {
   <div class="questions" id="right-questions"></div>
 </div>
 
-<div id="completion-message">Tino Pai!</div>
-<button id="next-question">Next Question</button>
+<div id="completion-message">Excellent!</div>
+<button id="next-question">Question Suivante</button>
 
 <script>
 const items = [
-  {key:"upoko", ma:"Upoko", en:"Head", parts:["upoko-part"]},
-  {key:"kaki", ma:"Kakī", en:"Neck", parts:["kaki-part"]},
-  {key:"taringa", ma:"Taringa", en:"Ears", parts:["taringaL-part","taringaR-part"]},
-  {key:"tukemata", ma:"Tukemata", en:"Eyebrows", parts:["tukemataL-part","tukemataR-part"]},
-  {key:"karu", ma:"Karu", en:"Eyes", parts:["karuL-part","karuR-part"]},
-  {key:"ihu", ma:"Ihu", en:"Nose", parts:["ihu-part"]},
-  {key:"waha", ma:"Waha", en:"Mouth", parts:["waha-part"]},
-  {key:"ngutu", ma:"Ngutu", en:"Lips", parts:["ngutu-part"]},
-  {key:"niho", ma:"Niho", en:"Teeth", parts:["niho-part"]},
-  {key:"kauae", ma:"Kauae", en:"Chin", parts:["kauae-part"]},
-  {key:"pakihiwi", ma:"Pakihiwi", en:"Shoulders", parts:["pakihiwi-part"]},
-  {key:"uma", ma:"Uma", en:"Chest", parts:["uma-part"]},
-  {key:"puku", ma:"Puku", en:"Stomach", parts:["puku-part"]},
-  {key:"hope", ma:"Hope", en:"Hips", parts:["hope-part"]},
-  {key:"ringa", ma:"Ringa", en:"Arms", parts:["ringaL-part","ringaR-part"]},
-  {key:"ringaringa", ma:"Ringa-ringa", en:"Hands", parts:["ringaringaL-part","ringaringaR-part"]},
-  {key:"matimati", ma:"Matimati", en:"Fingers", parts:["matimatiL-part","matimatiR-part"]},
-  {key:"turi", ma:"Turi", en:"Knees", parts:["turiL-part","turiR-part"]},
-  {key:"waewae", ma:"Waewae", en:"Legs", parts:["waewaeL-part","waewaeR-part"]},
-  {key:"waewaeTaha", ma:"mā raro", en:"By foot", parts:["waewaeTahaL-part","waewaeTahaR-part"]}
+  {key:"upoko", fr:"Tête", en:"Head", parts:["upoko-part"]},
+  {key:"kaki", fr:"Cou", en:"Neck", parts:["kaki-part"]},
+  {key:"taringa", fr:"Oreilles", en:"Ears", parts:["taringaL-part","taringaR-part"]},
+  {key:"tukemata", fr:"Sourcils", en:"Eyebrows", parts:["tukemataL-part","tukemataR-part"]},
+  {key:"karu", fr:"Yeux", en:"Eyes", parts:["karuL-part","karuR-part"]},
+  {key:"ihu", fr:"Nez", en:"Nose", parts:["ihu-part"]},
+  {key:"waha", fr:"Bouche", en:"Mouth", parts:["waha-part"]},
+  {key:"ngutu", fr:"Lèvres", en:"Lips", parts:["ngutu-part"]},
+  {key:"niho", fr:"Dents", en:"Teeth", parts:["niho-part"]},
+  {key:"kauae", fr:"Menton", en:"Chin", parts:["kauae-part"]},
+  {key:"pakihiwi", fr:"Épaules", en:"Shoulders", parts:["pakihiwi-part"]},
+  {key:"uma", fr:"Poitrine", en:"Chest", parts:["uma-part"]},
+  {key:"puku", fr:"Ventre", en:"Stomach", parts:["puku-part"]},
+  {key:"hope", fr:"Hanches", en:"Hips", parts:["hope-part"]},
+  {key:"ringa", fr:"Bras", en:"Arms", parts:["ringaL-part","ringaR-part"]},
+  {key:"ringaringa", fr:"Mains", en:"Hands", parts:["ringaringaL-part","ringaringaR-part"]},
+  {key:"matimati", fr:"Doigts", en:"Fingers", parts:["matimatiL-part","matimatiR-part"]},
+  {key:"turi", fr:"Genoux", en:"Knees", parts:["turiL-part","turiR-part"]},
+  {key:"waewae", fr:"Jambes", en:"Legs", parts:["waewaeL-part","waewaeR-part"]},
+  {key:"waewaeTaha", fr:"Pieds", en:"Feet", parts:["waewaeTahaL-part","waewaeTahaR-part"]}
 ];
 
 const palette = [
@@ -225,7 +225,7 @@ const palette = [
   "#f6ffa6","#ffb3b3","#b3ffd9","#d9b3ff","#ffdcb3"
 ];
 
-const allMaori = items.map(x => x.ma);
+const allFrench = items.map(x => x.fr);
 let currentQuestionIndex = 0;
 let score = 0;
 const totalQuestions = items.length;
@@ -270,10 +270,10 @@ items.forEach((it, i) => {
 
   const sel = document.createElement("select");
   const placeholder = document.createElement("option");
-  placeholder.value = ""; placeholder.text = "--select--";
+  placeholder.value = ""; placeholder.text = "--sélectionnez--";
   sel.appendChild(placeholder);
 
-  const opts = shuffle([it.ma, ...shuffle(allMaori.filter(w => w !== it.ma)).slice(0, 3)]);
+  const opts = shuffle([it.fr, ...shuffle(allFrench.filter(w => w !== it.fr)).slice(0, 3)]);
   opts.forEach(o => {
     const op = document.createElement("option");
     op.value = o;
@@ -296,9 +296,9 @@ items.forEach((it, i) => {
   sel.addEventListener("blur", () => { wrap.classList.remove("highlight"); removeGlow(); });
 
   sel.addEventListener("change", () => {
-    if (sel.value === it.ma) {
-      sel.value = it.ma;
-      sel.innerHTML = `<option value="${it.ma}" selected>${it.ma} (${it.en})</option>`;
+    if (sel.value === it.fr) {
+      sel.value = it.fr;
+      sel.innerHTML = `<option value="${it.fr}" selected>${it.fr} (${it.en})</option>`;
       status.textContent = "✓";
       status.style.color = "green";
       sel.dataset.correct = "true";

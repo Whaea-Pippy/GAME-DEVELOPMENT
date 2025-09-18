@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy: Français</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body { height: 100vh; overflow: hidden; background-color: #F5F5DC; }
+        body { font-family: 'Inter', sans-serif; color: #3E2723; margin: 0; display: flex; flex-direction: column; padding-bottom: 10vh; box-sizing: border-box; }
+        #game-container { display: flex; flex-direction: column; flex-grow: 1; min-height: 0; width: 100%; max-width: 1280px; margin: 0 auto; padding: 1rem; box-sizing: border-box; }
+        #game-board { flex-grow: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto repeat(5, 1fr); gap: 0.75rem; min-height: 0; }
+        .jeopardy-title { font-family: 'Luckiest Guy', cursive; color: #5D4037; text-shadow: 1px 1px 0 #D7CCC8; letter-spacing: 0.05em; }
+        .card, .category-header { display: flex; align-items: center; justify-content: center; text-align: center; padding: 0.5rem; min-height: 0; min-width: 0; }
+        .card { transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; cursor: pointer; }
+        .card:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.15); }
+        .point-value { font-family: 'Luckiest Guy', cursive; color: #FFFFFF; text-shadow: 1px 1px 0 #111827; }
+        .team-container { transition: transform 0.3s ease, border 0.3s ease; }
+        .active-turn { border: 4px solid #FBBF24; transform: scale(1.05); }
+        .category-header { font-size: clamp(0.6rem, 2vw, 1rem); }
+        .point-value { font-size: clamp(1rem, 4vw, 2rem); }
+        .difficulty-controls button { background-color: #8B5CF6; color: white; font-weight: bold; padding: 8px 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s; }
+        .difficulty-controls button:hover { background-color: #7C3AED; }
+        .difficulty-controls button.active { background-color: #6D28D9; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="flex-shrink-0 mb-3">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl jeopardy-title text-center">Jeopardy: Français</h1>
+            <div class="flex space-x-4 mt-2 justify-center difficulty-controls">
+                <button id="easy-btn" class="active">Facile</button>
+                <button id="medium-btn">Moyen</button>
+                <button id="hard-btn">Difficile</button>
+            </div>
+        </div>
+        <div id="game-board"></div>
+        <div class="flex space-x-4 mt-3 justify-center flex-shrink-0">
+            <button onclick="resetGame()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-lg shadow-md text-sm sm:text-base">Reset Game</button>
+        </div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+         <div id="modal-content" class="bg-white text-black p-4 sm:p-6 rounded-lg shadow-xl max-w-2xl w-full text-center border-8">
+            <h2 id="modal-category" class="font-bold text-2xl sm:text-3xl mb-4"></h2>
+            <p id="modal-question" class="text-xl sm:text-2xl font-semibold mb-5"></p>
+            <div id="modal-answer-container" class="hidden text-xl font-bold mt-4 mb-4">
+                <span class="block text-gray-500 font-normal text-base">Réponse:</span>
+                <span id="modal-answer-text" class="text-black"></span>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <button onclick="revealAnswer()" id="reveal-btn" class="text-white font-bold py-2 px-6 rounded-lg shadow-md text-lg">Révéler la Réponse</button>
+                <button onclick="closeModal()" id="close-btn" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-6 rounded-lg shadow-md text-lg hidden">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = {
+            easy: [
+                { category: "Couleurs", questions: [ { question: "Red", answer: "Rouge" }, { question: "Blue", answer: "Bleu" }, { question: "Green", answer: "Vert" }, { question: "Yellow", answer: "Jaune" }, { question: "Black", answer: "Noir" } ] },
+                { category: "Animaux", questions: [ { question: "Dog", answer: "Chien" }, { question: "Cat", answer: "Chat" }, { question: "Fish", answer: "Poisson" }, { question: "Bird", answer: "Oiseau" }, { question: "Horse", answer: "Cheval" } ] },
+                { category: "Nourriture", questions: [ { question: "Bread", answer: "Pain" }, { question: "Cheese", answer: "Fromage" }, { question: "Apple", answer: "Pomme" }, { question: "Water", answer: "Eau" }, { question: "Milk", answer: "Lait" } ] },
+                { category: "Nombres", questions: [ { question: "One", answer: "Un" }, { question: "Two", answer: "Deux" }, { question: "Three", answer: "Trois" }, { question: "Four", answer: "Quatre" }, { question: "Five", answer: "Cinq" } ] }
+            ],
+            medium: [
+                { category: "Verbes", questions: [ { question: "To eat", answer: "Manger" }, { question: "To drink", answer: "Boire" }, { question: "To speak", answer: "Parler" }, { question: "To run", answer: "Courir" }, { question: "To sleep", answer: "Dormir" } ] },
+                { category: "Vêtements", questions: [ { question: "Shirt", answer: "Chemise" }, { question: "Pants", answer: "Pantalon" }, { question: "Shoes", answer: "Chaussures" }, { question: "Hat", answer: "Chapeau" }, { question: "Jacket", answer: "Veste" } ] },
+                { category: "Corps", questions: [ { question: "Head", answer: "Tête" }, { question: "Hand", answer: "Main" }, { question: "Foot", answer: "Pied" }, { question: "Eyes", answer: "Yeux" }, { question: "Nose", answer: "Nez" } ] },
+                { category: "Phrases", questions: [ { question: "Hello", answer: "Bonjour" }, { question: "Goodbye", answer: "Au revoir" }, { question: "Thank you", answer: "Merci" }, { question: "Please", answer: "S'il vous plaît" }, { question: "My name is...", answer: "Je m'appelle..." } ] }
+            ],
+            hard: [
+                { category: "Expressions Idiomatiques", questions: [ { question: "To have other fish to fry", answer: "Avoir d'autres chats à fouetter" }, { question: "To cost an arm and a leg", answer: "Coûter les yeux de la tête" }, { question: "It's raining cats and dogs", answer: "Il pleut des cordes" }, { question: "To give one's tongue to the cat (to give up)", answer: "Donner sa langue au chat" }, { question: "To look for a needle in a haystack", answer: "Chercher une aiguille dans une botte de foin" } ] },
+                { category: "Géographie", questions: [ { question: "Capitale de la France", answer: "Paris" }, { question: "Plus long fleuve de France", answer: "La Loire" }, { question: "Pays voisin au sud de la France", answer: "L'Espagne" }, { question: "Montagne la plus haute d'Europe occidentale", answer: "Le Mont Blanc" }, { question: "Ville célèbre pour sa moutarde", answer: "Dijon" } ] },
+                { category: "Cuisine Française", questions: [ { question: "A thin pancake", answer: "Crêpe" }, { question: "A snail dish", answer: "Escargots" }, { question: "A stew of beef braised in red wine", answer: "Bœuf bourguignon" }, { question: "A baked egg custard", answer: "Crème brûlée" }, { question: "A sandwich with ham and cheese, grilled", answer: "Croque-monsieur" } ] },
+                { category: "Faux Amis", questions: [ { question: "'Actuellement' means...", answer: "Currently (not actually)" }, { question: "'Journée' means...", answer: "Day (not journey)" }, { question: "'Librairie' means...", answer: "Bookstore (not library)" }, { question: "'Raisin' means...", answer: "Grape (not raisin)" }, { question: "'Sensible' means...", answer: "Sensitive (not sensible)" } ] }
+            ]
+        };
+
+        const categoryUiColors = ["bg-blue-800", "bg-green-800", "bg-orange-700", "bg-slate-700"];
+        let currentDifficulty = 'easy';
+        const pointValues = [100, 200, 300, 400, 500];
+        let revealedCards = new Set();
+        
+        const board = document.getElementById('game-board');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalCategory = document.getElementById('modal-category');
+        const modalQuestion = document.getElementById('modal-question');
+        const modalAnswerContainer = document.getElementById('modal-answer-container');
+        const modalAnswerText = document.getElementById('modal-answer-text');
+        const revealBtn = document.getElementById('reveal-btn');
+        const closeBtn = document.getElementById('close-btn');
+
+        const shuffleArray = arr => [...arr].sort(() => Math.random() - 0.5);
+
+        const renderBoard = () => {
+            board.innerHTML = '';
+            const categories = shuffleArray(gameData[currentDifficulty]);
+
+            categories.forEach((cat, index) => {
+                const header = document.createElement('div');
+                header.className = `category-header rounded-lg text-white font-bold shadow-md ${categoryUiColors[index % categoryUiColors.length]}`;
+                header.textContent = cat.category.toUpperCase();
+                board.appendChild(header);
+            });
+
+            pointValues.forEach((pointValue, i) => {
+                categories.forEach((cat, index) => {
+                    const question = cat.questions[i];
+                    const cardId = `${currentDifficulty}-${cat.category}-${pointValue}`;
+                    const card = document.createElement('div');
+                    card.className = `card rounded-lg shadow-lg text-white font-bold ${categoryUiColors[index % categoryUiColors.length]} hover:bg-opacity-80`;
+                    
+                    if (revealedCards.has(cardId)) {
+                        card.classList.add('opacity-50', 'cursor-default');
+                    } else {
+                        card.innerHTML = `<div class="point-value">$${pointValue}</div>`;
+                        card.addEventListener('click', () => {
+                            revealedCards.add(cardId);
+                            card.innerHTML = '';
+                            card.classList.add('opacity-50', 'cursor-default');
+                            openModal(cat.category, question.question, question.answer);
+                        }, { once: true });
+                    }
+                    board.appendChild(card);
+                });
+            });
+        };
+
+        const openModal = (category, question, answer) => {
+            modalCategory.textContent = category.toUpperCase();
+            modalQuestion.textContent = question;
+            modalAnswerText.textContent = answer;
+            modalAnswerContainer.classList.add('hidden');
+            revealBtn.classList.remove('hidden');
+            closeBtn.classList.add('hidden');
+            modal.classList.remove('hidden');
+        };
+
+        const closeModal = () => modal.classList.add('hidden');
+        const revealAnswer = () => {
+            modalAnswerContainer.classList.remove('hidden');
+            revealBtn.classList.add('hidden');
+            closeBtn.classList.remove('hidden');
+        };
+
+        const resetGame = () => {
+            revealedCards.clear();
+            renderBoard();
+        };
+
+        const setDifficulty = (difficulty) => {
+            currentDifficulty = difficulty;
+            document.querySelectorAll('.difficulty-controls button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${difficulty}-btn`).classList.add('active');
+            resetGame();
+        };
+
+        document.getElementById('easy-btn').addEventListener('click', () => setDifficulty('easy'));
+        document.getElementById('medium-btn').addEventListener('click', () => setDifficulty('medium'));
+        document.getElementById('hard-btn').addEventListener('click', () => setDifficulty('hard'));
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBoard();
+        });
+    </script>
+</body>
+</html>
