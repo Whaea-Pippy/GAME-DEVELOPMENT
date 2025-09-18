@@ -1,80 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Math Escape Room — Year 10 | Aotearoa</title>
   <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --accent:#60a5fa; --muted:#9ca3af; --success:#34d399; --danger:#fb7185;
-      --max-width:900px; --pad:1rem;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --accent: #3b82f6;
+      --accent-dark: #1e40af;
+      --success: #10b981;
+      --danger: #ef4444;
+      --muted: #6b7280;
+      --text: #1e293b;
+      --max-width: 1000px;
+      --pad: 1.5rem;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; background:linear-gradient(180deg,#071029 0%, #0b1220 100%); color:#e6eef8; display:flex; align-items:center; justify-content:center; padding:1rem}
-    .wrap{width:100%; max-width:var(--max-width);}
-
-    header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
-    .brand{display:flex;gap:.6rem;align-items:center}
-    .logo{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700}
-    h1{font-size:1.05rem;margin:0}
-    p.lead{margin:0;color:var(--muted);font-size:.95rem}
-
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:1rem;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);}
-
-    .topbar{display:flex;gap:.75rem;align-items:center;justify-content:space-between;margin-bottom:1rem}
-    .status{display:flex;gap:.6rem;align-items:center}
-    .chip{background:rgba(255,255,255,0.03);padding:.45rem .65rem;border-radius:999px;font-weight:600}
-    .timer{font-size:1rem}
-
-    .room{display:none}
-    .room.active{display:block}
-
-    .quiz{display:grid;grid-template-columns:1fr;gap:.75rem}
-    @media(min-width:700px){ .quiz{grid-template-columns:1fr 320px} }
-
-    .puzzle{padding:1rem;border-radius:10px;background:rgba(255,255,255,0.02)}
-    label{display:block;margin-bottom:.35rem;color:var(--muted);font-size:.9rem}
-    input[type=text], input[type=number], textarea, select{width:100%;padding:.6rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    button{cursor:pointer;padding:.6rem .85rem;border-radius:8px;border:0;background:var(--accent);color:#042034;font-weight:700}
-    .muted{color:var(--muted)}
-
-    .hint{background:rgba(255,255,255,0.02);padding:.6rem;border-radius:8px;margin-top:.5rem}
-    .footer{margin-top:1rem;display:flex;gap:.5rem;align-items:center;justify-content:flex-end}
-
-    .solved{background:linear-gradient(90deg,#052e14,#083b21);border-left:4px solid var(--success)}
-    .locked{opacity:.6}
-
-    .clue{font-weight:700;font-size:1.05rem}
-
-    .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
-    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7c3aed);width:0%}
-
-    .small{font-size:.85rem}
-
-    /* accessibility focus */
-    :focus{outline:3px solid rgba(96,165,250,0.18);outline-offset:2px}
-
-    /* modal */
-    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(2,6,23,0.6);backdrop-filter:blur(4px)}
-    .modal .card{max-width:680px}
-
-    /* responsive tweaks */
-    @media(max-width:420px){ .logo{width:40px;height:40px} header{gap:.5rem} h1{font-size:1rem} }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: #f8fafc;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--pad);
+      font-size: clamp(16px, 2.5vw, 18px);
+    }
+    .wrap { width: 100%; max-width: var(--max-width); margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .brand { display: flex; gap: 0.8rem; align-items: center; }
+    .logo { width: 60px; height: 60px; border-radius: 12px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
+    .logo svg { width: 40px; height: 40px; fill: #ffffff; }
+    h1 { font-size: clamp(1.5rem, 3vw, 1.8rem); margin: 0; color: var(--text); }
+    p.lead { margin: 0; color: var(--muted); font-size: clamp(0.9rem, 2vw, 1rem); }
+    .card { background: var(--card); padding: var(--pad); border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+    .topbar { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; }
+    .status { display: flex; gap: 0.8rem; align-items: center; }
+    .chip { background: #e5e7eb; padding: 0.5rem 0.8rem; border-radius: 999px; font-weight: 600; font-size: clamp(0.85rem, 2vw, 0.95rem); color: var(--text); }
+    .timer { font-size: clamp(1rem, 2.5vw, 1.1rem); }
+    .room { display: none; }
+    .room.active { display: block; }
+    .quiz { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 600px) { .quiz { grid-template-columns: 1fr 300px; } }
+    @media (min-width: 900px) { .quiz { grid-template-columns: 1fr 350px; } }
+    .puzzle { padding: 1.25rem; border-radius: 12px; background: #f1f5f9; }
+    label { display: block; margin-bottom: 0.5rem; color: var(--muted); font-size: clamp(0.85rem, 2vw, 0.95rem); }
+    input[type=text], input[type=number] { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #d1d5db; background: #ffffff; color: var(--text); font-size: clamp(0.9rem, 2vw, 1rem); }
+    button { cursor: pointer; padding: 0.75rem 1rem; border-radius: 8px; border: 0; background: var(--accent); color: #ffffff; font-weight: 600; font-size: clamp(0.9rem, 2vw, 1rem); transition: background 0.2s; }
+    button:hover { background: var(--accent-dark); }
+    .muted { color: var(--muted); }
+    .hint { background: #e5e7eb; padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; font-size: clamp(0.85rem, 2vw, 0.9rem); }
+    .footer { margin-top: 1.5rem; display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end; }
+    .solved { background: #ecfdf5; border-left: 4px solid var(--success); }
+    .locked { opacity: 0.85; background: #f3f4f6; }
+    .clue { font-weight: 700; font-size: clamp(1.25rem, 2.5vw, 1.4rem); color: var(--text); }
+    .progress { height: 12px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .progress > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), #8b5cf6); width: 0%; transition: width 0.3s ease; }
+    .small { font-size: clamp(0.8rem, 1.8vw, 0.85rem); }
+    :focus { outline: 3px solid rgba(59, 130, 246, 0.3); outline-offset: 2px; }
+    .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: var(--pad); background: rgba(0, 0, 0, 0.5); }
+    .modal .card { max-width: 700px; text-align: center; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo">M</div>
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7v10l10-5V7l-10 5z"/></svg></div>
         <div>
           <h1>Math Escape Room — Year 10</h1>
-          <p class="lead">Aotearoa NZ aligned puzzles: algebra, geometry, percentage & reasoning. Works offline on all devices.</p>
+          <p class="lead">Algebra, geometry, percentages & reasoning. Works offline on all devices.</p>
         </div>
       </div>
-      <div style="margin-left:auto;text-align:right" class="small muted">Teacher: editable hints & answers</div>
     </header>
 
     <div class="card">
@@ -84,289 +84,79 @@
           <div class="chip timer">⏱ <span id="timer">15:00</span></div>
           <div class="chip">Points: <span id="points">0</span></div>
         </div>
-        <div style="display:flex;gap:.5rem;align-items:center">
-          <button id="saveBtn" class="small">Save</button>
-          <button id="resetBtn" class="small">Restart</button>
-        </div>
       </div>
-
-      <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
+      <div class="progress"><i id="progressFill"></i></div>
 
       <!-- Rooms -->
-      <section id="room1" class="room active" aria-labelledby="r1">
-        <h2 id="r1" class="clue">Room 1 — Algebra Lock</h2>
-        <div class="quiz" style="margin-top:.75rem">
+      <section id="room1" class="room active">
+        <h2 class="clue">Room 1 — Algebra Lock</h2>
+        <div class="quiz">
           <div class="puzzle">
-            <p>Solve the linear system — the code uses the value of <strong>x</strong> and <strong>y</strong>.</p>
-            <p class="muted small">Equation A: 3x - 2y = 4<br>Equation B: x + y = 5</p>
-            <label for="r1ans">Enter code as x,y (e.g. 2,3)</label>
-            <input id="r1ans" type="text" inputmode="numeric" placeholder="x,y" aria-label="Room 1 answer" />
-            <div style="display:flex;gap:.5rem;margin-top:.5rem">
-              <button id="r1check">Submit</button>
-              <button id="r1hint" class="small">Hint</button>
-            </div>
-            <div id="r1msg" class="muted small" style="margin-top:.6rem"></div>
+            <p>Solve the system: 2x + y = 10, and x - y = 2.</p>
+            <label for="r1ans">Enter x,y</label>
+            <input id="r1ans" type="text" placeholder="x,y" />
+            <button id="r1check">Submit</button>
+            <button id="r1hint" class="small">Hint</button>
+            <div id="r1msg" class="muted small"></div>
           </div>
-
-          <aside class="puzzle">
-            <h3 class="small">Clues & Tools</h3>
-            <p class="muted small">Use substitution or elimination. Remember to check your arithmetic.</p>
-            <div class="hint small" id="r1hintbox" style="display:none">Try substitute y = 5 - x into Equation A: 3x - 2(5-x) = 4.</div>
-          </aside>
         </div>
       </section>
 
-      <section id="room2" class="room" aria-labelledby="r2">
-        <h2 id="r2" class="clue">Room 2 — Geometry Gate</h2>
-        <div class="quiz" style="margin-top:.75rem">
+      <section id="room2" class="room">
+        <h2 class="clue">Room 2 — Geometry Gate</h2>
+        <div class="quiz">
           <div class="puzzle">
-            <p>A right-angled triangle has area 36 cm². The base is 9 cm. What is the height? (Give whole number)</p>
-            <label for="r2ans">Enter the height in cm</label>
-            <input id="r2ans" type="number" inputmode="numeric" aria-label="Room 2 answer" />
-            <div style="display:flex;gap:.5rem;margin-top:.5rem">
-              <button id="r2check">Submit</button>
-              <button id="r2hint" class="small">Hint</button>
-            </div>
-            <div id="r2msg" class="muted small" style="margin-top:.6rem"></div>
+            <p>A right triangle has area 20 cm² and base 10 cm. Find the height.</p>
+            <input id="r2ans" type="number" />
+            <button id="r2check">Submit</button>
+            <button id="r2hint" class="small">Hint</button>
+            <div id="r2msg" class="muted small"></div>
           </div>
-
-          <aside class="puzzle">
-            <h3 class="small">Clues & Tools</h3>
-            <p class="muted small">Area of triangle = 1/2 × base × height.</p>
-            <div class="hint small" id="r2hintbox" style="display:none">So height = (2 × area) / base.</div>
-          </aside>
         </div>
       </section>
 
-      <section id="room3" class="room" aria-labelledby="r3">
-        <h2 id="r3" class="clue">Room 3 — Percent Puzzle</h2>
-        <div class="quiz" style="margin-top:.75rem">
+      <section id="room3" class="room">
+        <h2 class="clue">Room 3 — Percent Puzzle</h2>
+        <div class="quiz">
           <div class="puzzle">
-            <p>A jacket was on sale 25% off and the sale price was $90. What was the original price? (Whole dollars)</p>
-            <label for="r3ans">Enter original price $</label>
-            <input id="r3ans" type="number" inputmode="numeric" aria-label="Room 3 answer" />
-            <div style="display:flex;gap:.5rem;margin-top:.5rem">
-              <button id="r3check">Submit</button>
-              <button id="r3hint" class="small">Hint</button>
-            </div>
-            <div id="r3msg" class="muted small" style="margin-top:.6rem"></div>
+            <p>A jacket is 20% off, sale price $80. What was original price?</p>
+            <input id="r3ans" type="number" />
+            <button id="r3check">Submit</button>
+            <button id="r3hint" class="small">Hint</button>
+            <div id="r3msg" class="muted small"></div>
           </div>
-
-          <aside class="puzzle">
-            <h3 class="small">Clues & Tools</h3>
-            <p class="muted small">Sale price = original × (1 - discount).</p>
-            <div class="hint small" id="r3hintbox" style="display:none">So original = sale / 0.75.</div>
-          </aside>
         </div>
       </section>
 
-      <section id="room4" class="room" aria-labelledby="r4">
-        <h2 id="r4" class="clue">Final Room — Mixed Reasoning</h2>
-        <div class="quiz" style="margin-top:.75rem">
+      <section id="room4" class="room">
+        <h2 class="clue">Final Room — Reasoning</h2>
+        <div class="quiz">
           <div class="puzzle">
-            <p>Combine knowledge: If f(x) = 2x² - 3x + 1, what is f(2)? Then subtract the number of degrees in a straight angle. (Enter final number)</p>
-            <label for="r4ans">Enter final number</label>
-            <input id="r4ans" type="number" inputmode="numeric" aria-label="Room 4 answer" />
-            <div style="display:flex;gap:.5rem;margin-top:.5rem">
-              <button id="r4check">Submit</button>
-              <button id="r4hint" class="small">Hint</button>
-            </div>
-            <div id="r4msg" class="muted small" style="margin-top:.6rem"></div>
+            <p>If f(x) = x² + 3, find f(5), then subtract 90.</p>
+            <input id="r4ans" type="number" />
+            <button id="r4check">Submit</button>
+            <button id="r4hint" class="small">Hint</button>
+            <div id="r4msg" class="muted small"></div>
           </div>
-
-          <aside class="puzzle">
-            <h3 class="small">Clues & Tools</h3>
-            <p class="muted small">A straight angle = 180°.</p>
-            <div class="hint small" id="r4hintbox" style="display:none">Compute f(2) then subtract 180.</div>
-          </aside>
         </div>
       </section>
-
-      <div class="footer">
-        <div class="muted small">Hints used: <span id="hintsUsed">0</span></div>
-      </div>
     </div>
   </div>
 
-  <template id="endModal">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="card">
-        <h2>Well done! Escape complete 🎉</h2>
-        <p class="muted">You scored <strong id="finalPoints"></strong> points and used <span id="finalHints"></span> hints.</p>
-        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
-          <button id="closeEnd">Close</button>
-        </div>
-      </div>
-    </div>
-  </template>
-
   <script>
-    // Simple offline-friendly Escape Room logic. Teacher can edit answers below.
-    (function(){
-      const rooms = [
-        {id:'room1', check:checkR1, hintText:'Try substitute y = 5 - x into Equation A: 3x - 2(5-x) = 4.', points:25},
-        {id:'room2', check:checkR2, hintText:'height = (2 × area) / base', points:15},
-        {id:'room3', check:checkR3, hintText:'original = sale / 0.75', points:20},
-        {id:'room4', check:checkR4, hintText:'compute f(2) then subtract 180', points:30},
-      ];
-
-      // state
-      let index = Number(localStorage.getItem('er_index') || 0);
-      let points = Number(localStorage.getItem('er_points') || 0);
-      let hints = Number(localStorage.getItem('er_hints') || 0);
-      let solved = JSON.parse(localStorage.getItem('er_solved') || '[]');
-      let totalTime = Number(localStorage.getItem('er_time') || 15*60); // seconds
-      let timerInterval = null;
-
-      const roomIndexEl = document.getElementById('roomIndex');
-      const pointsEl = document.getElementById('points');
-      const hintsEl = document.getElementById('hintsUsed');
-      const timerEl = document.getElementById('timer');
-      const progressFill = document.getElementById('progressFill');
-
-      // init
-      updateUI();
-      startTimer();
-
-      // save / reset
-      document.getElementById('saveBtn').addEventListener('click', ()=>{
-        saveState(); alert('Progress saved locally in your browser.');
-      });
-      document.getElementById('resetBtn').addEventListener('click', ()=>{
-        if(!confirm('Restart the escape room? This clears saved progress.')) return;
-        localStorage.removeItem('er_index'); localStorage.removeItem('er_points'); localStorage.removeItem('er_solved'); localStorage.removeItem('er_hints'); localStorage.removeItem('er_time');
-        location.reload();
-      });
-
-      // wire hints & checks
-      rooms.forEach((r, i)=>{
-        const rid = r.id;
-        const checkBtn = document.getElementById(rid+'check');
-        const hintBtn = document.getElementById(rid+'hint');
-        const hintBox = document.getElementById(rid+'hintbox');
-        checkBtn.addEventListener('click', ()=>{ r.check(); });
-        hintBtn.addEventListener('click', ()=>{ hintBox.style.display = 'block'; hints++; hintsEl.textContent = hints; localStorage.setItem('er_hints', hints); });
-      });
-
-      // functions for checks
-      function parseXY(s){
-        if(!s) return null; const parts = s.split(',').map(x=>x.trim()); if(parts.length!==2) return null; const x=Number(parts[0]), y=Number(parts[1]); if(Number.isNaN(x)||Number.isNaN(y)) return null; return {x,y};
-      }
-
-      function checkR1(){
-        const val = document.getElementById('r1ans').value.trim(); const parsed = parseXY(val);
-        const msg = document.getElementById('r1msg');
-        if(!parsed){ msg.textContent='Please enter both x and y separated by a comma.'; return; }
-        // correct solution manually solved: x=3, y=2
-        if(parsed.x===3 && parsed.y===2){ winRoom(0); msg.textContent='Correct — the lock opens!'; msg.classList.remove('muted'); }
-        else{ msg.textContent='Not quite — re-check substitution or elimination.'; }
-      }
-
-      function checkR2(){
-        const val = Number(document.getElementById('r2ans').value);
-        const msg = document.getElementById('r2msg');
-        if(!Number.isFinite(val)){ msg.textContent='Enter a number.'; return; }
-        // area 36 = 1/2 * base(9) * h => h = (2*36)/9 = 8
-        if(Math.round(val)===8){ winRoom(1); msg.textContent='Correct — gate unlocked!'; }
-        else{ msg.textContent='Try using area = 1/2 × base × height.'; }
-      }
-
-      function checkR3(){
-        const val = Math.round(Number(document.getElementById('r3ans').value));
-        const msg = document.getElementById('r3msg');
-        if(!Number.isFinite(val)){ msg.textContent='Enter a number.'; return; }
-        // original = 90 / 0.75 = 120
-        if(val===120){ winRoom(2); msg.textContent='Correct — discount code accepted!'; }
-        else{ msg.textContent='Check percentage: sale price = original × 0.75.'; }
-      }
-
-      function checkR4(){
-        const val = Number(document.getElementById('r4ans').value);
-        const msg = document.getElementById('r4msg');
-        if(!Number.isFinite(val)){ msg.textContent='Enter a number.'; return; }
-        // f(2)=2*(4)-3*(2)+1 = 8-6+1=3 ; 3-180 = -177
-        if(val===-177){ winRoom(3); msg.textContent='Correct — final door opens!'; }
-        else{ msg.textContent='Compute f(2) = 2(2)^2 - 3(2) + 1, then subtract 180.'; }
-      }
-
-      function winRoom(i){
-        if(solved[i]) return; solved[i]=true; points += rooms[i].points; document.getElementById('points').textContent = points; localStorage.setItem('er_points', points);
-        localStorage.setItem('er_solved', JSON.stringify(solved));
-        // visual
-        const el = document.getElementById(rooms[i].id); el.classList.add('solved');
-        // advance
-        const next = findNextUnsolved(i+1);
-        if(next!==null){ index = next; localStorage.setItem('er_index', index); updateUI(); }
-        else{ // finished
-          showEnd();
-        }
-      }
-
-      function findNextUnsolved(start){ for(let i=start;i<rooms.length;i++){ if(!solved[i]) return i; } return null; }
-
-      function updateUI(){
-        // rooms visibility
-        rooms.forEach((r, i)=>{
-          const el = document.getElementById(r.id);
-          el.classList.toggle('active', i===index);
-          el.classList.toggle('locked', !(!solved[i] || i===index));
-        });
-        roomIndexEl.textContent = Math.min(index+1, rooms.length);
-        pointsEl.textContent = points;
-        hintsEl.textContent = hints;
-        // progress
-        const solvedCount = solved.filter(Boolean).length; const pct = Math.round((solvedCount/rooms.length)*100);
-        progressFill.style.width = pct + '%';
-      }
-
-      function startTimer(){
-        updateTimerDisplay();
-        timerInterval = setInterval(()=>{
-          totalTime--; localStorage.setItem('er_time', totalTime);
-          if(totalTime<=0){ clearInterval(timerInterval); onTimeUp(); }
-          updateTimerDisplay();
-        },1000);
-      }
-
-      function updateTimerDisplay(){
-        const mm = Math.floor(totalTime/60); const ss = totalTime%60; timerEl.textContent = `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-      }
-
-      function onTimeUp(){
-        alert('Time is up! Your teacher can reset the timer or allow retries.');
-      }
-
-      function showEnd(){
-        clearInterval(timerInterval);
-        const tpl = document.getElementById('endModal'); const clone = tpl.content.cloneNode(true);
-        clone.getElementById('finalPoints').textContent = points + ' pts';
-        clone.getElementById('finalHints').textContent = hints;
-        document.body.appendChild(clone);
-        document.getElementById('closeEnd').addEventListener('click', ()=>{ document.querySelector('.modal').remove(); });
-      }
-
-      function saveState(){
-        localStorage.setItem('er_index', index); localStorage.setItem('er_points', points); localStorage.setItem('er_solved', JSON.stringify(solved)); localStorage.setItem('er_hints', hints); localStorage.setItem('er_time', totalTime);
-      }
-
-      // teacher helpers: allow quick reveal by long-press (for teachers only)
-      let pressTimer = null; document.querySelector('.logo').addEventListener('mousedown',startPress); document.querySelector('.logo').addEventListener('touchstart',startPress);
-      document.querySelector('.logo').addEventListener('mouseup',cancelPress); document.querySelector('.logo').addEventListener('mouseleave',cancelPress); document.querySelector('.logo').addEventListener('touchend',cancelPress);
-      function startPress(e){ pressTimer = setTimeout(()=>{ const reveal = confirm('Teacher quick reveal? This will mark all rooms solved.'); if(reveal){ for(let i=0;i<rooms.length;i++){ solved[i]=true; } points = rooms.reduce((s,r)=>s+r.points,0); saveState(); updateUI(); showEnd(); } }, 900); }
-      function cancelPress(e){ if(pressTimer) clearTimeout(pressTimer); }
-
-      // load any saved solved markers into UI classes
-      solved = Array.isArray(solved) && solved.length? solved : new Array(rooms.length).fill(false);
-      // ensure index is valid
-      if(index<0 || index>=rooms.length) index = 0;
-      updateUI();
-
-      // accessibility: allow Enter to submit in each room input
-      document.querySelectorAll('input').forEach(inp=>{
-        inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ const id = inp.id.replace('ans',''); const btn = document.getElementById(id+'check'); if(btn) btn.click(); } });
-      });
-
-    })();
+  (function(){
+    const rooms=[{id:'room1',check:checkR1},{id:'room2',check:checkR2},{id:'room3',check:checkR3},{id:'room4',check:checkR4}];
+    let index=0,points=0,solved=[false,false,false,false];
+    function parseXY(s){if(!s)return null;const p=s.split(',').map(x=>x.trim());if(p.length!==2)return null;const x=+p[0],y=+p[1];if(isNaN(x)||isNaN(y))return null;return{x,y};}
+    function checkR1(){const parsed=parseXY(document.getElementById('r1ans').value);const msg=document.getElementById('r1msg');if(!parsed){msg.textContent='Enter x,y';return;}if(parsed.x===4&&parsed.y===2){winRoom(0);msg.textContent='Correct!';msg.style.color='var(--success)';}else msg.textContent='Try again.';}
+    function checkR2(){const v=+document.getElementById('r2ans').value;const msg=document.getElementById('r2msg');if(v===4){winRoom(1);msg.textContent='Correct!';msg.style.color='var(--success)';}else msg.textContent='Hint: ½×base×height.';}
+    function checkR3(){const v=+document.getElementById('r3ans').value;const msg=document.getElementById('r3msg');if(v===100){winRoom(2);msg.textContent='Correct!';msg.style.color='var(--success)';}else msg.textContent='Sale=original×0.8';}
+    function checkR4(){const v=+document.getElementById('r4ans').value;const msg=document.getElementById('r4msg');if(v===-62){winRoom(3);msg.textContent='Correct!';msg.style.color='var(--success)';}else msg.textContent='f(5)=25+3=28, then subtract 90';}
+    function winRoom(i){if(solved[i])return;solved[i]=true;points+=10;document.getElementById('points').textContent=points;document.getElementById(rooms[i].id).classList.add('solved');if(i+1<rooms.length){index=i+1;updateUI();}}
+    function updateUI(){rooms.forEach((r,i)=>{document.getElementById(r.id).classList.toggle('active',i===index);});document.getElementById('roomIndex').textContent=index+1;}
+    rooms.forEach((r,i)=>{document.getElementById(r.id.replace('room','r')+'check').addEventListener('click',r.check);});
+    updateUI();
+  })();
   </script>
 </body>
 </html>
