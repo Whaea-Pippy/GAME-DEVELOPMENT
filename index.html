@@ -58,13 +58,15 @@
 
     .games-container {
         padding-bottom: 50px; /* Add space for the overlapping hexagons */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .games-container .hexagon-row {
         list-style-type: none;
         padding: 0;
         display: flex;
-        justify-content: center;
         margin-bottom: -45px; /* Overlap hexagons vertically */
         gap: 10px; /* Adjusted gap */
     }
@@ -76,17 +78,17 @@
     }
     
     .games-container .hexagon-row.offset {
-       margin-left: 95px; /* Adjusted offset */
+       transform: translateX(calc( (180px / 2) + (10px / 2) ));
     }
 
     /* New Color Palette */
     .color-red    { background-color: #FF0000; } /* Red */
-    .color-orange { background-color: #FFA500; } /* Orange */
+    .color-orange { background-color: hsl(37, 93%, 52%); } /* Orange */
     .color-yellow { background-color: #FFFF00; } /* Yellow */
-    .color-green  { background-color: #008000; } /* Green */
+    .color-green  { background-color: hsl(120, 53%, 45%); } /* Green */
     .color-blue   { background-color: #0000FF; } /* Blue */
-    .color-pink   { background-color: #FFC0CB; } /* Pink */
-    .color-purple { background-color: #800080; } /* Purple */
+    .color-pink   { background-color: hsl(312, 79%, 57%); } /* Pink */
+    .color-purple { background-color: hsl(273, 58%, 52%); } /* Purple */
 
     .dark-text { color: black; }
 
