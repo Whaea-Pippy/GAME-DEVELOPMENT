@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossword Layout Designer</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        #grid-container {
+            display: grid;
+            border: 2px solid black;
+        }
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            background-color: white;
+            cursor: pointer;
+        }
+        .grid-cell.black {
+            background-color: black;
+        }
+        #export-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crossword Layout Designer</h1>
+    <div id="controls">
+        <label for="grid-size">Grid Size:</label>
+        <select id="grid-size">
+            <option value="15">15x15</option>
+            <option value="13">13x13</option>
+            <option value="21">21x21</option>
+            <option value="custom">Custom</option>
+        </select>
+        <input type="number" id="custom-size" placeholder="Size" style="display: none;">
+        <button id="create-grid">Create Grid</button>
+        <label>
+            <input type="checkbox" id="symmetry"> Rotational Symmetry
+        </label>
+        <button id="clear-grid">Clear Grid</button>
+        <button id="export-map">Export Map</button>
+    </div>
+    <div id="grid-container"></div>
+    <div id="export-container">
+        <h3>Exported Map:</h3>
+        <pre id="exported-map"></pre>
+    </div>
+
+    <script>
+        const gridSizeSelect = document.getElementById('grid-size');
+        const customSizeInput = document.getElementById('custom-size');
+        const createGridButton = document.getElementById('create-grid');
+        const gridContainer = document.getElementById('grid-container');
+        const symmetryCheckbox = document.getElementById('symmetry');
+        const clearGridButton = document.getElementById('clear-grid');
+        const exportMapButton = document.getElementById('export-map');
+        const exportedMapPre = document.getElementById('exported-map');
+
+        let gridSize = 15;
+
+        gridSizeSelect.addEventListener('change', () => {
+            if (gridSizeSelect.value === 'custom') {
+                customSizeInput.style.display = 'inline-block';
+            } else {
+                customSizeInput.style.display = 'none';
+            }
+        });
+
+        createGridButton.addEventListener('click', () => {
+            if (gridSizeSelect.value === 'custom') {
+                gridSize = parseInt(customSizeInput.value) || 15;
+            } else {
+                gridSize = parseInt(gridSizeSelect.value);
+            }
+            createGrid();
+        });
+
+        clearGridButton.addEventListener('click', clearGrid);
+        exportMapButton.addEventListener('click', exportMap);
+
+        function createGrid() {
+            gridContainer.innerHTML = '';
+            gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 40px)`;
+            gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 40px)`;
+
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('grid-cell');
+                cell.dataset.index = i;
+                cell.addEventListener('click', handleCellClick);
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            cell.classList.toggle('black');
+
+            if (symmetryCheckbox.checked) {
+                const index = parseInt(cell.dataset.index);
+                const symmetricalIndex = (gridSize * gridSize - 1) - index;
+                const symmetricalCell = gridContainer.children[symmetricalIndex];
+                symmetricalCell.classList.toggle('black', cell.classList.contains('black'));
+            }
+        }
+
+        function clearGrid() {
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach(cell => cell.classList.remove('black'));
+        }
+
+        function exportMap() {
+            let map = '';
+            const cells = document.querySelectorAll('.grid-cell');
+            for (let i = 0; i < cells.length; i++) {
+                map += cells[i].classList.contains('black') ? 'X' : 'O';
+                if ((i + 1) % gridSize === 0) {
+                    map += '\n';
+                }
+            }
+            exportedMapPre.textContent = map;
+        }
+
+        // Initial grid creation
+        createGrid();
+    </script>
+</body>
+</html>

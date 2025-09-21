@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Crossword</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+        .crossword-and-clues {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .crossword-container {
+            display: grid;
+            border: 2px solid black;
+            width: 90vw;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+        }
+        .cell {
+            border: 1px solid black;
+            text-align: center;
+            position: relative;
+        }
+        .cell input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            border: none;
+            font-size: clamp(16px, 5vw, 24px);
+            background-color: transparent;
+            box-sizing: border-box;
+            text-transform: uppercase;
+        }
+        .clue-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: clamp(8px, 2vw, 12px);
+        }
+        .clues {
+            text-align: left;
+            width: 90vw;
+            max-width: 400px;
+        }
+        .clues ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .clues li {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .clues li:hover, .clues li.selected {
+            background-color: #d0e3f0;
+        }
+        .highlighted {
+            background-color: #a0c4e0;
+        }
+        .button-container {
+            margin-top: 10px;
+        }
+        .back-link {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        @media (min-width: 768px) {
+            .main-container {
+                flex-wrap: nowrap;
+            }
+            .clues {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="crossword-and-clues">
+            <h1>Mini Crossword</h1>
+            <div class="crossword-container" id="crossword-grid"></div>
+            <div class="button-container">
+                <button id="check-puzzle">Check</button>
+            </div>
+            <a href="index_crossword.html" class="back-link">Back to Crossword Index</a>
+        </div>
+        <div class="clues">
+            <h2>Clues</h2>
+            <h3>Across</h3>
+            <ul id="across-clues"></ul>
+            <h3>Down</h3>
+            <ul id="down-clues"></ul>
+        </div>
+    </div>
+    <script>
+        const gridElement = document.getElementById('crossword-grid');
+        const acrossCluesElement = document.getElementById('across-clues');
+        const downCluesElement = document.getElementById('down-clues');
+        const checkPuzzleButton = document.getElementById('check-puzzle');
+
+        const currentPuzzle = {
+            size: 4,
+            words: [
+                { word: "CUTE", clue: "Adorable", row: 0, col: 0, direction: "across" },
+                { word: "USED", clue: "Not new", row: 1, col: 0, direction: "across" },
+                { word: "TEAR", clue: "A drop of water from the eye", row: 2, col: 0, direction: "across" },
+                { word: "EDGY", clue: "Nervous or tense", row: 3, col: 0, direction: "across" },
+                { word: "CUTE", clue: "Adorable", row: 0, col: 0, direction: "down" },
+                { word: "USED", clue: "Not new", row: 0, col: 1, direction: "down" },
+                { word: "TEAR", clue: "A drop of water from the eye", row: 0, col: 2, direction: "down" },
+                { word: "EDGY", clue: "Nervous or tense", row: 0, col: 3, direction: "down" }
+            ]
+        };
+
+        let selectedWord = null;
+        let wordObjects = [];
+
+        function generatePuzzle() {
+            gridElement.innerHTML = '';
+            acrossCluesElement.innerHTML = '';
+            downCluesElement.innerHTML = '';
+            wordObjects = [];
+
+            const { size, words } = currentPuzzle;
+
+            gridElement.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+            gridElement.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+            const clueNumbering = {};
+            let clueCounter = 1;
+
+            words.forEach(wordData => {
+                const { row, col } = wordData;
+                const key = `${row}-${col}`;
+                if (!clueNumbering[key]) {
+                    clueNumbering[key] = clueCounter++;
+                }
+                wordData.number = clueNumbering[key];
+                wordObjects.push(wordData);
+
+                const li = document.createElement('li');
+                li.textContent = `${wordData.number}. ${wordData.clue}`;
+                li.addEventListener('click', () => selectWord(wordData, li));
+                
+                if (wordData.direction === 'across') {
+                    acrossCluesElement.appendChild(li);
+                } else {
+                    downCluesElement.appendChild(li);
+                }
+            });
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    
+                    const key = `${r}-${c}`;
+                    if (clueNumbering[key]) {
+                        const wordsStartingHere = words.filter(w => w.row === r && w.col === c);
+                        if(wordsStartingHere.length > 0){
+                            const clueNumberDiv = document.createElement('div');
+                            clueNumberDiv.classList.add('clue-number');
+                            clueNumberDiv.textContent = wordsStartingHere[0].number;
+                            cell.appendChild(clueNumberDiv);
+                        }
+                    }
+                    
+                    const input = document.createElement('input');
+                    input.setAttribute('maxlength', 1);
+                    input.id = `input-${r}-${c}`;
+                    input.addEventListener('input', (e) => handleInput(e, r, c));
+                    input.addEventListener('click', () => handleCellClick(r,c));
+                    cell.appendChild(input);
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+        
+        function handleCellClick(r, c) {
+             if(selectedWord) {
+                const inWord = selectedWord.direction === 'across' ? 
+                    (r === selectedWord.row && c >= selectedWord.col && c < selectedWord.col + selectedWord.word.length) :
+                    (c === selectedWord.col && r >= selectedWord.row && r < selectedWord.row + selectedWord.word.length);
+                if (!inWord) {
+                   selectWord(null);
+                }
+            }
+        }
+
+        function selectWord(wordData, liElement) {
+            document.querySelectorAll('.clues li').forEach(li => li.classList.remove('selected'));
+            document.querySelectorAll('.cell input').forEach(input => {
+                input.classList.remove('highlighted');
+                if (input.style.backgroundColor !== 'lightgreen' && input.style.backgroundColor !== 'lightcoral') {
+                    input.style.backgroundColor = '';
+                }
+            });
+            
+            if(!wordData) {
+                selectedWord = null;
+                return;
+            }
+            
+            selectedWord = wordData;
+            liElement.classList.add('selected');
+
+            for (let i = 0; i < wordData.word.length; i++) {
+                let r = wordData.row, c = wordData.col;
+                if (wordData.direction === 'across') c += i; else r += i;
+                const inputElement = document.getElementById(`input-${r}-${c}`);
+                if (inputElement) inputElement.classList.add('highlighted');
+            }
+            const firstLetterInputElement = document.getElementById(`input-${wordData.row}-${wordData.col}`);
+            if (firstLetterInputElement) firstLetterInputElement.focus();
+        }
+
+        function handleInput(e, r, c) {
+            if (e.target.value.length === 1 && selectedWord) {
+                let nextR = r, nextC = c;
+                if (selectedWord.direction === 'across') {
+                    if (c < selectedWord.col + selectedWord.word.length - 1) nextC++;
+                } else {
+                    if (r < selectedWord.row + selectedWord.word.length - 1) nextR++;
+                }
+                const nextInputElement = document.getElementById(`input-${nextR}-${nextC}`);
+                if (nextInputElement && nextInputElement.classList.contains('highlighted')) {
+                    nextInputElement.focus();
+                }
+            }
+        }
+
+        function checkPuzzle() {
+            const { size, words } = currentPuzzle;
+            const solution = Array(size).fill(null).map(() => Array(size).fill(null));
+
+            words.forEach(wordData => {
+                for (let i = 0; i < wordData.word.length; i++) {
+                    let r = wordData.row, c = wordData.col;
+                    if (wordData.direction === 'across') c += i; else r += i;
+                    if (r < size && c < size) {
+                        solution[r][c] = wordData.word[i];
+                    }
+                }
+            });
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const inputElement = document.getElementById(`input-${r}-${c}`);
+                    if (solution[r][c]) {
+                        const userInput = inputElement.value.toUpperCase();
+                        if (userInput === '') {
+                            inputElement.style.backgroundColor = '';
+                        } else if (userInput === solution[r][c]) {
+                            inputElement.style.backgroundColor = 'lightgreen';
+                        } else {
+                            inputElement.style.backgroundColor = 'lightcoral';
+                        }
+                    }
+                }
+            }
+        }
+
+        checkPuzzleButton.addEventListener('click', checkPuzzle);
+
+        generatePuzzle();
+    </script>
+</body>
+</html>
