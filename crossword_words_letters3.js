@@ -1,4 +1,4 @@
-const words = [
+const words3 = [
   { "word": "Aba", "clue": "A loose sleeveless outer garment worn by Arabs." },
   { "word": "Abs", "clue": "Abdominal muscles (short form)." },
   { "word": "Ace", "clue": "A playing card with a single spot." },
@@ -41,7 +41,6 @@ const words = [
   { "word": "Ate", "clue": "Past of 'eat'." },
   { "word": "Ava", "clue": "An aromatic plant of the pepper family, native to the Pacific islands." },
   { "word": "Ave", "clue": "An avenue." },
-  { "word": "Awa", "clue": "A New Zealand marine fish with a bluish-green back and silvery-white belly." },
   { "word": "Awe", "clue": "A feeling of reverential respect mixed with fear or wonder." },
   { "word": "Awl", "clue": "A small pointed tool used for piercing holes, especially in leather." },
   { "word": "Aye", "clue": "Yes." },

@@ -5,32 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crossword Layout Designer</title>
     <style>
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
             font-family: sans-serif;
+            background-color: #f0f0f0;
+        }
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            margin-top: 0;
+            text-align: center;
         }
         #controls {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
         }
         #grid-container {
             display: grid;
             border: 2px solid black;
+            width: 80vmin;
+            height: 80vmin;
+            max-width: 600px;
+            max-height: 600px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         .grid-cell {
-            width: 40px;
-            height: 40px;
             border: 1px solid #ccc;
             box-sizing: border-box;
             background-color: white;
             cursor: pointer;
+            transition: background-color 0.1s ease;
         }
         .grid-cell.black {
             background-color: black;
         }
         #export-container {
             margin-top: 20px;
+            width: 80vmin;
+            max-width: 600px;
+        }
+        #exported-map {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: rgba(0,0,0,0.28);
+            color: rgb(36, 28, 33);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: transform 0.15s;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -39,9 +85,10 @@
     <div id="controls">
         <label for="grid-size">Grid Size:</label>
         <select id="grid-size">
-            <option value="15">15x15</option>
-            <option value="13">13x13</option>
-            <option value="21">21x21</option>
+            <option value="5" selected>5x5</option>
+            <option value="7">7x7</option>
+            <option value="9">9x9</option>
+            <option value="11">11x11</option>
             <option value="custom">Custom</option>
         </select>
         <input type="number" id="custom-size" placeholder="Size" style="display: none;">
@@ -68,7 +115,7 @@
         const exportMapButton = document.getElementById('export-map');
         const exportedMapPre = document.getElementById('exported-map');
 
-        let gridSize = 15;
+        let gridSize = 5;
 
         gridSizeSelect.addEventListener('change', () => {
             if (gridSizeSelect.value === 'custom') {
@@ -80,7 +127,7 @@
 
         createGridButton.addEventListener('click', () => {
             if (gridSizeSelect.value === 'custom') {
-                gridSize = parseInt(customSizeInput.value) || 15;
+                gridSize = parseInt(customSizeInput.value) || 5;
             } else {
                 gridSize = parseInt(gridSizeSelect.value);
             }
@@ -92,8 +139,9 @@
 
         function createGrid() {
             gridContainer.innerHTML = '';
-            gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 40px)`;
-            gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 40px)`;
+            // Use fractional units for a responsive grid
+            gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
             for (let i = 0; i < gridSize * gridSize; i++) {
                 const cell = document.createElement('div');
@@ -102,6 +150,7 @@
                 cell.addEventListener('click', handleCellClick);
                 gridContainer.appendChild(cell);
             }
+            exportedMapPre.textContent = ''; // Clear previous map
         }
 
         function handleCellClick(event) {
@@ -112,13 +161,17 @@
                 const index = parseInt(cell.dataset.index);
                 const symmetricalIndex = (gridSize * gridSize - 1) - index;
                 const symmetricalCell = gridContainer.children[symmetricalIndex];
-                symmetricalCell.classList.toggle('black', cell.classList.contains('black'));
+                if (symmetricalCell) {
+                    // Use toggle with the 'force' argument to ensure it matches the clicked cell
+                    symmetricalCell.classList.toggle('black', cell.classList.contains('black'));
+                }
             }
         }
 
         function clearGrid() {
             const cells = document.querySelectorAll('.grid-cell');
             cells.forEach(cell => cell.classList.remove('black'));
+            exportedMapPre.textContent = '';
         }
 
         function exportMap() {
@@ -130,7 +183,7 @@
                     map += '\n';
                 }
             }
-            exportedMapPre.textContent = map;
+            exportedMapPre.textContent = map.trim();
         }
 
         // Initial grid creation

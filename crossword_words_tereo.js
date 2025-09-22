@@ -1,4 +1,4 @@
-const words = [
+const wordstereo = [
     { word: "WAHA", translation: "Mouth" },
     { word: "ARERO", translation: "Tongue" },
     { word: "RINGA", translation: "Hand" },
