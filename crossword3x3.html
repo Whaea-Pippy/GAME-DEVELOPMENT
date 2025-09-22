@@ -168,6 +168,49 @@
                 width: auto;
             }
         }
+
+        /* Congratulations Modal Styles */
+        .congrats-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .congrats-content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .congrats-text {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        .next-after-complete {
+            padding: 12px 24px;
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .next-after-complete:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -178,10 +221,8 @@
             <div class="level-indicator" id="level-indicator">Level 1 / 20</div>
             <button id="next-level">Next ▶</button>
         </div>
-
-
-    <div class="progress-bar" id="progress-bar"></div>
-</div>
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
 
     <div class="main-container">
         <div class="crossword-and-clues">
@@ -201,6 +242,14 @@
         </div>
     </div>
 
+    <!-- Congratulations Modal -->
+    <div id="congrats-modal" class="congrats-modal">
+        <div class="congrats-content">
+            <h2 class="congrats-text" id="congrats-text">Tino Pai! Level 1 Completed</h2>
+            <button id="next-after-complete" class="next-after-complete">Next Level</button>
+        </div>
+    </div>
+
     <script>
         const gridElement = document.getElementById('crossword-grid');
         const acrossCluesElement = document.getElementById('across-clues');
@@ -211,6 +260,9 @@
         const nextLevelButton = document.getElementById('next-level');
         const levelIndicator = document.getElementById('level-indicator');
         const progressBar = document.getElementById('progress-bar');
+        const congratsModal = document.getElementById('congrats-modal');
+        const congratsText = document.getElementById('congrats-text');
+        const nextAfterComplete = document.getElementById('next-after-complete');
 
         const LEVELS = [
             { 
@@ -474,6 +526,7 @@ words: [
                 square.addEventListener('click', () => {
                     currentLevel = index;
                     generatePuzzle();
+                    gridElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 });
                 progressBar.appendChild(square);
             });
@@ -536,6 +589,23 @@ words: [
                     gridElement.appendChild(cell);
                 }
             }
+
+            // If level is completed, fill with solution and color green
+            if (completedLevels.has(currentLevel)) {
+                const solution = getSolution();
+                for (let r = 0; r < size; r++) {
+                    for (let c = 0; c < size; c++) {
+                        if (solution[r][c]) {
+                            const inputElement = document.getElementById(`input-${r}-${c}`);
+                            inputElement.value = solution[r][c];
+                            inputElement.style.backgroundColor = 'lightgreen';
+                        }
+                    }
+                }
+            }
+
+            // Scroll to grid
+            gridElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function handleCellClick(r, c) {
@@ -626,7 +696,10 @@ words: [
             if (allCorrect) {
                 completedLevels.add(currentLevel);
                 initProgressBar();
-                alert('Congratulations! Level complete!');
+                congratsText.textContent = `Tino Pai! Level ${currentLevel + 1} Completed`;
+                congratsModal.style.display = 'flex';
+            } else {
+                alert('Some answers are incorrect or incomplete. Please try again.');
             }
         }
 
@@ -658,6 +731,7 @@ words: [
             }, 3000);
         }
 
+        // Event listeners
         prevLevelButton.addEventListener('click', () => {
             if (currentLevel > 0) {
                 currentLevel--;
@@ -674,6 +748,21 @@ words: [
 
         checkPuzzleButton.addEventListener('click', checkPuzzle);
         revealAnswerButton.addEventListener('click', revealAnswer);
+
+        nextAfterComplete.addEventListener('click', () => {
+            congratsModal.style.display = 'none';
+            if (currentLevel < LEVELS.length - 1) {
+                currentLevel++;
+                generatePuzzle();
+            }
+        });
+
+        // Close modal on outside click
+        congratsModal.addEventListener('click', (e) => {
+            if (e.target === congratsModal) {
+                congratsModal.style.display = 'none';
+            }
+        });
 
         generatePuzzle();
     </script>
