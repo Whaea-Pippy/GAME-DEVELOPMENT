@@ -1,3 +1,6 @@
+workspace: KumiKupu
+last updated: 2025-09-25
+
 # Gemini Interaction Protocol
 
 To ensure clear, predictable, and user-approved actions, I will adhere to the following protocol:

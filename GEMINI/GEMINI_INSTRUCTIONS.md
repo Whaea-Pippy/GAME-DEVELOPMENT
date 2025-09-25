@@ -1,3 +1,6 @@
+workspace: KumiKupu
+last updated: 2025-09-25
+
 ## **Working with Gemini: A User Guide**
 
 To help us work together more effectively, here's a guide to my capabilities and how we can collaborate to solve problems. My goal is to be a productive assistant and a true partner in your projects.

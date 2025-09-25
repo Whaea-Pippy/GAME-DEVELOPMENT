@@ -1,3 +1,6 @@
+workspace: KumiKupu
+last updated: 2025-09-25
+
 # File Naming Structure for Crossword Project
 
 All files related to the crossword puzzle functionality must be prefixed with "crossword_", with the exception of `index_crossword.html`.
