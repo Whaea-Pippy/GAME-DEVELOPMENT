@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐋 Kei te mātakitaki i ngā orca</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #f0f9ff;
+    margin: 0;
+    padding: 20px;
+    color: #222;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #0077b6;
+    margin-bottom: 20px;
+  }
+  .conversation {
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .line {
+    background: white;
+    border-radius: 18px;
+    padding: 15px 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .line:hover {
+    transform: scale(1.02);
+  }
+  .speaker {
+    font-weight: bold;
+  }
+  .maori {
+    color: #004b23;
+  }
+  .english {
+    display: none;
+    margin-top: 6px;
+    color: #444;
+  }
+  .line.show .english {
+    display: block;
+  }
+  .reset-btn {
+    margin: 30px auto 0;
+    display: block;
+    background: #00b4d8;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .reset-btn:hover {
+    background: #0096c7;
+  }
+
+  /* Flashcards */
+  .flashcard-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 12px;
+    text-align: center;
+  }
+  .fc-card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  .fc-card {
+    width: clamp(150px, 40vw, 180px);
+    height: 100px;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+  .fc-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+  .fc-card.flipped .fc-card-inner {
+    transform: rotateY(180deg);
+  }
+  .fc-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    font-weight: 700;
+    border: 3px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .fc-card-face p {
+    margin: 0;
+  }
+  .fc-card-face-front {
+    background: #c7d2fe;
+    color: #312e81;
+  }
+  .fc-card-face-back {
+    background: #fecdd3;
+    color: #881337;
+    transform: rotateY(180deg);
+  }
+</style>
+</head>
+<body>
+
+<h1>🐋 Kei te mātakitaki i ngā orca</h1>
+
+<div class="conversation">
+  <div class="line"><span class="speaker">Aroha:</span> <span class="maori">Titiro, Hemi! Kei reira, tata ki te poti mā!</span><div class="english">Look, Hemi! Over there, near the white boat!</div></div>
+  <div class="line"><span class="speaker">Hemi:</span> <span class="maori">Āe! Ka kite au i tētahi orca!</span><div class="english">Yes! I can see an orca!</div></div>
+  <div class="line"><span class="speaker">Aroha:</span> <span class="maori">Titiro ki te parirau tuarā o te orca!</span><div class="english">Look at the orca’s dorsal fin!</div></div>
+  <div class="line"><span class="speaker">Hemi:</span> <span class="maori">He nui rawa te parirau tuarā! Ka rawe!</span><div class="english">That dorsal fin is huge! Awesome!</div></div>
+  <div class="line"><span class="speaker">Aroha:</span> <span class="maori">E whā pea ngā orca e kaukau ana i te awa.</span><div class="english">There are maybe four orcas swimming in the estuary.</div></div>
+  <div class="line"><span class="speaker">Hemi:</span> <span class="maori">Āe, kotahi te mea nui, ā, toru ngā mea iti ake.</span><div class="english">Yes, one big one, and three smaller ones.</div></div>
+  <div class="line"><span class="speaker">Aroha:</span> <span class="maori">Titiro! Kei te taha tonu o ngā kaihoe papa reti wai!</span><div class="english">Look! They’re right beside the paddle boarders!</div></div>
+  <div class="line"><span class="speaker">Hemi:</span> <span class="maori">Tērā pea ka mataku rātou! Kei te tata rawa atu!</span><div class="english">They might be scared! They’re so close!</div></div>
+  <div class="line"><span class="speaker">Aroha:</span> <span class="maori">Engari he ātaahua te ata nei — te rā e whiti ana, te wai e mārie ana.</span><div class="english">But what a beautiful morning — the sun is shining, the water is calm.</div></div>
+  <div class="line"><span class="speaker">Hemi:</span> <span class="maori">Āe, he wheako whakamīharo tēnei. Kāore au e wareware i tēnei rā.</span><div class="english">Yes, this is an amazing experience. I’ll never forget this day.</div></div>
+</div>
+
+<button class="reset-btn">🔄 Huna anō ngā whakamāoritanga / Hide translations</button>
+
+<div class="flashcard-container">
+  <h2>Flashcards</h2>
+  <div id="flashcard-grid" class="fc-card-grid"></div>
+</div>
+
+<script>
+  // Conversation toggle
+  const lines = document.querySelectorAll('.line');
+  const resetBtn = document.querySelector('.reset-btn');
+  lines.forEach(line => line.addEventListener('click', () => line.classList.toggle('show')));
+  resetBtn.addEventListener('click', () => lines.forEach(line => line.classList.remove('show')));
+
+  // Corrected vocab list (Te Aka verified)
+  const flashcardVocab = [
+    { teReo: "titiro", english: "look" },
+    { teReo: "poti", english: "boat" },
+    { teReo: "orca", english: "orca (killer whale)" },
+    { teReo: "parirau tuarā", english: "dorsal fin" },
+    { teReo: "nui", english: "big" },
+    { teReo: "iti", english: "small" },
+    { teReo: "awa", english: "river / estuary" },
+    { teReo: "kaihoe", english: "paddler" },
+    { teReo: "papa reti wai", english: "paddleboard" },
+    { teReo: "rā", english: "sun / day" },
+    { teReo: "mārie", english: "calm, peaceful" },
+    { teReo: "ata", english: "morning" },
+    { teReo: "wheako", english: "experience" },
+    { teReo: "whakamīharo", english: "amazing, wonderful" },
+    { teReo: "mataku", english: "fear, be afraid" },
+    { teReo: "engari", english: "but" }
+  ];
+
+  function createFlashcards() {
+    const grid = document.getElementById('flashcard-grid');
+    grid.innerHTML = '';
+    flashcardVocab.forEach(wordPair => {
+      const card = document.createElement('div');
+      card.className = 'fc-card';
+      card.innerHTML = `
+        <div class="fc-card-inner">
+          <div class="fc-card-face fc-card-face-front"><p>${wordPair.teReo}</p></div>
+          <div class="fc-card-face fc-card-face-back"><p>${wordPair.english}</p></div>
+        </div>`;
+      grid.appendChild(card);
+      card.addEventListener('click', () => card.classList.toggle('flipped'));
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', createFlashcards);
+</script>
+
+</body>
+</html>

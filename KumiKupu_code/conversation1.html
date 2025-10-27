@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Te Reo Kōrero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* updated colours */
+      --aroha-front: #ffd6e8; /* light pink Māori side */
+      --aroha-back: #ede7f6;  /* light purple English side */
+      --hemi-front:  #bbdefb; /* light blue Māori side */
+      --hemi-back:   #dcedc8; /* light green English side */
+
+      --card-radius:12px;
+      --card-padding:18px;
+      --card-gap:14px;
+      --max-width:900px;
+    }
+
+    body{margin:0;font-family:Nunito,system-ui;background:#f7f7f7;color:#000;}
+    .wrap{max-width:var(--max-width);margin:24px auto;padding:12px;text-align:center;}
+    h1{font-size:1.5rem;margin-bottom:1.2rem;}
+
+    .card{display:flex;justify-content:center;align-items:center;perspective:1000px;margin-bottom:var(--card-gap);}
+    .inner{width:100%;max-width:100%;border-radius:var(--card-radius);padding:var(--card-padding);box-shadow:0 6px 18px rgba(0,0,0,.08);cursor:pointer;transform-style:preserve-3d;transition:transform .45s ease;position:relative;min-height:80px;}
+
+    .front,.back{position:absolute;inset:0;border-radius:var(--card-radius);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;text-align:center;padding:16px;backface-visibility:hidden;}
+
+    .card.flipped .inner{transform:rotateY(180deg)}
+
+    .aroha .front{background:var(--aroha-front);} 
+    .aroha .back{background:var(--aroha-back);transform:rotateY(180deg);} 
+    .hemi .front{background:var(--hemi-front);} 
+    .hemi .back{background:var(--hemi-back);transform:rotateY(180deg);} 
+
+    .speaker{position:absolute;top:8px;left:12px;font-size:.85rem;font-weight:700;opacity:.7;}
+    .note{font-size:.9rem;color:#333;margin-top:18px;}
+
+    /* --- Flashcard Styles --- */
+    .fc-card-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 40px;
+    }
+    .fc-card {
+        width: clamp(150px, 40vw, 180px);
+        height: 100px;
+        perspective: 1000px;
+        cursor: pointer;
+    }
+    .fc-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.6s;
+    }
+    .fc-card.flipped .fc-card-inner {
+        transform: rotateY(180deg);
+    }
+    .fc-card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 10px;
+        box-sizing: border-box;
+        font-weight: 700;
+        border: 3px solid white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .fc-card-face-front {
+        background: #c7d2fe; /* Light Indigo */
+        color: #312e81;
+    }
+    .fc-card-face-back {
+        background: #fecdd3; /* Light Rose */
+        color: #881337;
+        transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Kōrero ia rā, ia rā!</h1>
+
+    <!-- 1 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Kia ora! Kei te pēhea koe?</div>
+        <div class="back">Hi! How are you?</div>
+      </div>
+    </div>
+
+    <!-- 2 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>Kei te pai, tēnā koe! Ā koe?</div>
+        <div class="back">Great, thanks! And you?</div>
+      </div>
+    </div>
+
+    <!-- 3 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Kei te ngenge ahau. Kāore au i te moe pai ināpō.</div>
+        <div class="back">I’m tired. I didn’t sleep well last night.</div>
+      </div>
+    </div>
+
+    <!-- 4 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>Aue! He tino hōhā tērā. Āe rā, me pēhea tō pāpā?</div>
+        <div class="back">Oh no! That’s annoying. Anyway, how’s your dad?</div>
+      </div>
+    </div>
+
+    <!-- 5 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Kua māuiui ia.</div>
+        <div class="back">He’s been sick.</div>
+      </div>
+    </div>
+
+    <!-- 6 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>He aha tana mate?</div>
+        <div class="back">What has he had?</div>
+      </div>
+    </div>
+
+    <!-- 7 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>He huangō. He wā kino tēnei mō te puehu puāwai.</div>
+        <div class="back">Asthma. It’s a bad time of year for pollen.</div>
+      </div>
+    </div>
+
+    <!-- 8 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>Āe, tika tāu. Ā, pēhea te pēpi?</div>
+        <div class="back">Yes, you’re right. And how about the baby?</div>
+      </div>
+    </div>
+
+    <!-- 9 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Kei te pai ia. Kei te menemene, ā, kei te whakarongo ki te katoa.</div>
+        <div class="back">She’s great! She’s smiling and listening to everyone.</div>
+      </div>
+    </div>
+
+    <!-- 10 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>Ka pai tērā! Engari, e rere ana ahau ki te mahi ināianei.</div>
+        <div class="back">That’s great! But I’m rushing off to work now.</div>
+      </div>
+    </div>
+
+    <!-- 11 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Kā pai. Ka kite i a koe ā te Paraire.</div>
+        <div class="back">Alright. See you on Friday.</div>
+      </div>
+    </div>
+
+    <!-- 12 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>Ataahua! He pai ki ahau te kite i a koe i tēnei rā.</div>
+        <div class="back">Lovely to see you today.</div>
+      </div>
+    </div>
+
+    <!-- 13 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Āe, me te titiro whakamua ki te Paraire!</div>
+        <div class="back">Yes, I’m looking forward to Friday!</div>
+      </div>
+    </div>
+
+    <!-- 14 Hemi -->
+    <div class="card hemi" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Hemi</span>Hei konā rā!</div>
+        <div class="back">Bye!</div>
+      </div>
+    </div>
+
+    <!-- 15 Aroha -->
+    <div class="card aroha" tabindex="0">
+      <div class="inner" role="button" aria-pressed="false">
+        <div class="front"><span class="speaker">Aroha</span>Hei konā!</div>
+        <div class="back">Bye!</div>
+      </div>
+    </div>
+
+    <p class="note">Tap or press Enter/Space on a card to flip it. Māori front (Aroha = pink, Hemi = blue). English back (Aroha = light purple, Hemi = light green).</p>
+  </div>
+
+  <div class="wrap">
+    <h2 style="margin-top: 40px;">Flashcards</h2>
+    <div id="flashcard-grid" class="fc-card-grid">
+      <!-- Flashcards will be generated here -->
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.card').forEach(card=>{
+      const inner = card.querySelector('.inner');
+      card.addEventListener('click',()=>{
+        card.classList.toggle('flipped');
+        const pressed = inner.getAttribute('aria-pressed')==='true';
+        inner.setAttribute('aria-pressed', String(!pressed));
+      });
+      card.addEventListener('keydown',e=>{
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();card.click();}
+      });
+    });
+
+    const flashcardVocab = [
+        { teReo: "Kia ora", english: "hello / hi" },
+        { teReo: "pai", english: "good" },
+        { teReo: "ngenge", english: "tired" },
+        { teReo: "moe", english: "sleep" },
+        { teReo: "māuiui", english: "sick / unwell" },
+        { teReo: "huangō", english: "asthma" },
+        { teReo: "puehu", english: "dust" },
+        { teReo: "puāwai", english: "flower / blossom" },
+        { teReo: "pēpi", english: "baby" },
+        { teReo: "menemene", english: "smile" },
+        { teReo: "mahi", english: "work" },
+        { teReo: "Paraire", english: "Friday" }
+    ];
+
+    function createFlashcards() {
+        const grid = document.getElementById('flashcard-grid');
+        grid.innerHTML = ''; // Clear previous cards
+
+        flashcardVocab.forEach(wordPair => {
+            const card = document.createElement('div');
+            card.className = 'fc-card';
+
+            const inner = document.createElement('div');
+            inner.className = 'fc-card-inner';
+
+            const front = document.createElement('div');
+            front.className = 'fc-card-face fc-card-face-front';
+            front.innerHTML = `<p>${wordPair.teReo}</p>`;
+
+            const back = document.createElement('div');
+            back.className = 'fc-card-face fc-card-face-back';
+            back.innerHTML = `<p>${wordPair.english}</p>`;
+
+            inner.appendChild(front);
+            inner.appendChild(back);
+            card.appendChild(inner);
+            grid.appendChild(card);
+
+            card.addEventListener('click', () => {
+                card.classList.toggle('flipped');
+            });
+        });
+    }
+
+    // Create flashcards on load
+    window.addEventListener('load', createFlashcards);
+  </script>
+</body>
+</html>

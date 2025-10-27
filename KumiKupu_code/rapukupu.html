@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--13th September 2025 - added auto reset when stuck & fixed issue of words not getting on the board-->
 <!--10th September 2025 WebApp by Gemini on Firebase-->
 <!--Created by Priscilla Allan with help from Grok, ChatGPT, and a little Gemini-->
 <!--I am learning HTML, Java script & how to harness FREE ai-coding help-->
@@ -615,6 +616,7 @@ margin-bottom: 8px;
             <p>The progress bar at the top shows your progress through the levels.</p>
             <h3>Tips</h3>
             <p>Look carefully — bonus words can sneak through the purple filler letters!</p>
+            <p>If there is too many bonus words on the board it resets automatically</p>
             <p>The later levels get more colourful and challenging.</p>
             <h2>Copy the learning log</h2>
             <h3>Copy then paste as an EMBED into your google site</h3>
@@ -657,6 +659,7 @@ const messageBox = document.getElementById('message-box');
         const FIND_COUNT_PER_WORD = 1;
         const TOTAL_STARS = 15;
 
+        let purpleResetTimeout = null; // 13th September
         let gameBoard = [];
         let selectedTiles = [];
         let foundWordCounts = {};
@@ -668,7 +671,8 @@ const messageBox = document.getElementById('message-box');
         let stars = [];
         let starsUsedCount = 0;
         let completedLevels = new Set();
-        let score = 0;
+        // let score = 0; 14th September Score Saving
+        let score = parseInt(localStorage.getItem('gameScore')) || 0;
         let foundWordsTrail = [];
         let normalizedTranslations = {};
         let selectionStartTime = null; // To track time taken for word selection
@@ -1107,9 +1111,14 @@ const messageBox = document.getElementById('message-box');
             }
         }
 
-        function updateScoreDisplay() {
-            scoreDisplay.textContent = `Score: ${score}`;
-        }
+    // function updateScoreDisplay() {
+    //   scoreDisplay.textContent = `Score: ${score}`;
+    //    }
+    function updateScoreDisplay() {
+    scoreDisplay.textContent = `Score: ${score}`;
+    localStorage.setItem('gameScore', score);
+}
+// modified to save score
 
         function displayWordList() {
             wordListEl.innerHTML = '';
@@ -1287,108 +1296,80 @@ const messageBox = document.getElementById('message-box');
         }
 
         function refreshBoard() {
-            const MAX_OVERALL_ATTEMPTS = 50;
-            const startTime = performance.now();
-            let overallAttempt = 0;
-            let success = false;
-            let words = wordsToFind.map(w => wordInfo[w].obj);
-            words.sort((a, b) => b.w.length - a.length);
+    const MAX_ATTEMPTS = 50;
+    let attempts = 0;
+    let boardIsValid = false;
+    let mainWords = wordsToFind.map(w => wordInfo[w].obj);
+    mainWords.sort((a, b) => b.w.length - a.length); // Start with the longest words
 
-            while (!success && overallAttempt < MAX_OVERALL_ATTEMPTS && performance.now() - startTime < 2000) {
-                const localBoard = Array.from({length:GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
-                let allPlaced = true;
-                for (const wobj of words) {
-                    const placed = placeWord(wobj, localBoard);
-                    if (!placed) { allPlaced = false; break; }
-                }
-                if (allPlaced && validateBoard(localBoard)) {
-                    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
-                    otherWords.sort((a, b) => b.length - a.length);
-                    const purpleShades = [
-                        'bg-[#c084fc] text-black',
-                        'bg-[#a855f7] text-white',
-                        'bg-[#9333ea] text-white',
-                        'bg-[#7e22ce] text-white',
-                        'bg-[#6b21a8] text-white'
-                    ];
-                    for (let i = 0; i < otherWords.length; i++) {
-                        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
-                        placeWord(wordObj, localBoard);
-                    }
-                    let remainingWords = shuffle(getAllWords().filter(w => w.length === 5 || w.length === 4));
-                    let remainingWordIndex = 0;
-                    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
-                    let vowelIndex = 0;
-                    for (let r = 0; r < GRID_SIZE; r++) {
-                        for (let c = 0; c < GRID_SIZE; c++) {
-                            if (localBoard[r][c] === null) {
-                                if (remainingWordIndex < remainingWords.length) {
-                                    let wordObj = { w: remainingWords[remainingWordIndex], c: 'bg-[#d8b4fe] text-black' };
-                                    if (placeWord(wordObj, localBoard)) {
-                                        remainingWordIndex++;
-                                    } else {
-                                        localBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                        vowelIndex = (vowelIndex + 1) % vowels.length;
-                                    }
-                                } else {
-                                    localBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                    vowelIndex = (vowelIndex + 1) % vowels.length;
-                                }
-                            }
-                        }
-                    }
-                    gameBoard = localBoard;
-                    success = true;
-                }
-                overallAttempt++;
+    let finalBoard = null; // Will hold the board only if it's a 100% success
+    let lastAttemptBoard = null; // Will hold the board from the most recent attempt
+
+    // --- Start of change ---
+    // Phase 1: Tirelessly attempt to place ONLY the required words for the level.
+    while (!boardIsValid && attempts < MAX_ATTEMPTS) {
+        const localBoard = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+        let allPlaced = true;
+
+        for (const wobj of mainWords) {
+            if (!placeWord(wobj, localBoard)) {
+                allPlaced = false;
+                break; // If any word fails, scrap this attempt and start over.
             }
-
-            if (!success) {
-                gameBoard = Array.from({length:GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
-                for (const w of words) placeWord(w, gameBoard);
-                let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
-                otherWords.sort((a, b) => b.length - a.length);
-                const purpleShades = [
-                    'bg-[#c084fc] text-black',
-                    'bg-[#a855f7] text-white',
-                    'bg-[#9333ea] text-white',
-                    'bg-[#7e22ce] text-white',
-                    'bg-[#6b21a8] text-white'
-                ];
-                for (let i = 0; i < otherWords.length; i++) {
-                    let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
-                    placeWord(wordObj, gameBoard);
-                }
-                let remainingWords = shuffle(getAllWords().filter(w => w.length === 5 || w.length === 4));
-                let remainingWordIndex = 0;
-                const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
-                let vowelIndex = 0;
-                for (let r = 0; r < GRID_SIZE; r++) {
-                    for (let c = 0; c < GRID_SIZE; c++) {
-                        if (gameBoard[r][c] === null) {
-                            if (remainingWordIndex < remainingWords.length) {
-                                let wordObj = { w: remainingWords[remainingWordIndex], c: 'bg-[#d8b4fe] text-black' };
-                                if (placeWord(wordObj, gameBoard)) {
-                                    remainingWordIndex++;
-                                } else {
-                                    gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                    vowelIndex = (vowelIndex + 1) % vowels.length;
-                                }
-                            } else {
-                                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                vowelIndex = (vowelIndex + 1) % vowels.length;
-                            }
-                        }
-                    }
-                }
-                if (!validateBoard(gameBoard)) {
-                    showMessage('Board may be incomplete. Use a star to refresh.');
-                }
-            }
-
-            renderBoard();
-            displayWordList();
         }
+        
+        lastAttemptBoard = localBoard; // We save every attempt, even failures.
+
+        // If all words were placed perfectly, we have our final board.
+        if (allPlaced && validateBoard(localBoard)) {
+            boardIsValid = true;
+            finalBoard = localBoard; // Success! A perfect board.
+        }
+        attempts++;
+    }
+
+    // Phase 2: Decide which board to use.
+    if (boardIsValid) {
+        // If we found a perfect board, use it.
+        gameBoard = finalBoard;
+    } else {
+        // If not, use the very last attempt we saved instead of a blank one.
+        gameBoard = lastAttemptBoard;
+        showMessage('Could not place all words. Using last attempt.', 3000);
+    }
+    // --- End of change ---
+
+    // Phase 3: Now that main words are secured, fill the empty spaces.
+    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 10);
+    otherWords.sort((a, b) => b.length - a.length);
+    const purpleShades = [
+        'bg-[#c084fc] text-black', 'bg-[#a855f7] text-white',
+        'bg-[#9333ea] text-white', 'bg-[#7e22ce] text-white',
+        'bg-[#6b21a8] text-white'
+    ];
+    for (let i = 0; i < otherWords.length; i++) {
+        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
+        placeWord(wordObj, gameBoard); // placeWord already respects existing letters.
+    }
+
+    // Finally, fill any remaining empty spots with random purple vowels.
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+    let vowelIndex = 0;
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (gameBoard[r][c] === null) {
+                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
+                vowelIndex = (vowelIndex + 1) % vowels.length;
+            }
+        }
+    }
+
+    // Phase 4: Render the final board.
+    renderBoard();
+    displayWordList();
+}
+// END OF THE CHANGE IN REFRESH BOARD
+
 
         function initBoard() {
             foundWordCounts = {};
@@ -1446,6 +1427,37 @@ const messageBox = document.getElementById('message-box');
             messageBox.style.opacity = '1';
             setTimeout(() => { messageBox.style.opacity = '0'; }, duration);
         }
+// counting purple tiles so the board will reset when stuck        
+function countPurpleTilesOnBoard() {
+    let purpleCount = 0;
+    const purpleClasses = [
+        'bg-[#c084fc]', 'bg-[#a855f7]', 'bg-[#9333ea]', 
+        'bg-[#7e22ce]', 'bg-[#6b21a8]', 'bg-[#d8b4fe]'
+    ];
+
+    if (!gameBoard) return 0;
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            const cell = gameBoard[r] && gameBoard[r][c];
+
+            // Check if the tile's background color is one of the purple shades
+            const isPurple = cell && cell.color && purpleClasses.some(pClass => cell.color.includes(pClass));
+
+            if (isPurple) {
+                // Check if the tile is part of a word in the current level's main word list
+                const isMainWordTile = cell.word && wordsToFind.includes(cell.word);
+
+                // Only increment the counter if it's a purple tile that is NOT a main word
+                if (!isMainWordTile) {
+                    purpleCount++;
+                }
+            }
+        }
+    }
+    return purpleCount;
+}
+
 //Kristen Upgrade
 // Kristen Upgrade
 function showBonusWord(word, translation) {
@@ -1671,94 +1683,73 @@ async function handleEnd() {
 //            checkWinCondition();
 //        }
 
-        function dropLettersAndRefill(tilesToRemove) {
-            const newGameBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
-            const removeSet = new Set(tilesToRemove.map(t => `${t.row},${t.col}`));
-            for (let c = 0; c < GRID_SIZE; c++) {
-                const columnStack = [];
-                for (let r = GRID_SIZE - 1; r >= 0; r--) {
-                    const coord = `${r},${c}`;
-                    if (!removeSet.has(coord) && gameBoard[r][c]) columnStack.push(gameBoard[r][c]);
-                }
-                let fillRow = GRID_SIZE - 1;
-                for (let i = 0; i < columnStack.length; i++) {
-                    newGameBoard[fillRow][c] = columnStack[i];
-                    fillRow--;
-                }
-            }
-            gameBoard = newGameBoard;
+// refreshboard and droplettersandrefill both changed 13sep25
+function dropLettersAndRefill(tilesToRemove) {
+    // Phase 1: Remove the found word and let letters fall.
+    const newGameBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
+    const removeSet = new Set(tilesToRemove.map(t => `${t.row},${t.col}`));
 
-            const wordsToFindStillRemaining = wordsToFind.filter(w => foundWordCounts[w] < FIND_COUNT_PER_WORD);
-            const wordsOnGrid = new Set();
-            for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (gameBoard[r][c] && gameBoard[r][c].word) wordsOnGrid.add(gameBoard[r][c].word);
-            let attempts = 0;
-            const maxAttempts = 100;
-            const startTime = performance.now();
-            while (wordsOnGrid.size < wordsToFindStillRemaining.length && attempts < maxAttempts && performance.now() - startTime < 1000) {
-                let wordsNotOnGrid = wordsToFindStillRemaining.filter(w => !wordsOnGrid.has(w));
-                wordsNotOnGrid.sort((a, b) => b.length - a.length);
-                for (const w of wordsNotOnGrid) {
-                    if (placeWord(wordInfo[w].obj, gameBoard)) {
-                        wordsOnGrid.add(w);
-                    }
-                }
-                if (wordsOnGrid.size < wordsToFindStillRemaining.length) {
-                    const nonWordTiles = [];
-                    for (let r = 0; r < GRID_SIZE; r++) for (let c = 0; c < GRID_SIZE; c++) if (!gameBoard[r][c] || !gameBoard[r][c].word) nonWordTiles.push({r, c});
-                    shuffle(nonWordTiles);
-                    const tilesToReplace = nonWordTiles.slice(0, Math.min(20, nonWordTiles.length));
-                    tilesToReplace.forEach(({r, c}) => gameBoard[r][c] = null);
-                    for (const w of wordsNotOnGrid) {
-                        if (placeWord(wordInfo[w].obj, gameBoard)) {
-                            wordsOnGrid.add(w);
-                        }
-                    }
-                }
-                attempts++;
+    for (let c = 0; c < GRID_SIZE; c++) {
+        const columnStack = [];
+        for (let r = GRID_SIZE - 1; r >= 0; r--) {
+            if (!removeSet.has(`${r},${c}`) && gameBoard[r][c]) {
+                columnStack.push(gameBoard[r][c]);
             }
-            if (wordsOnGrid.size < wordsToFindStillRemaining.length) {
-                showMessage('Some main words could not be placed. Use a star to refresh if needed.');
-            }
-
-            let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
-            otherWords.sort((a, b) => b.length - a.length);
-            const purpleShades = [
-                'bg-[#c084fc] text-black',
-                'bg-[#a855f7] text-white',
-                'bg-[#9333ea] text-white',
-                'bg-[#7e22ce] text-white',
-                'bg-[#6b21a8] text-white'
-            ];
-            for (let i = 0; i < otherWords.length; i++) {
-                let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
-                placeWord(wordObj, gameBoard);
-            }
-
-            let remainingWords = shuffle(getAllWords().filter(w => w.length === 5 || w.length === 4));
-            let remainingWordIndex = 0;
-            const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
-            let vowelIndex = 0;
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    if (gameBoard[r][c] === null) {
-                        if (remainingWordIndex < remainingWords.length) {
-                            let wordObj = { w: remainingWords[remainingWordIndex], c: 'bg-[#d8b4fe] text-black' };
-                            if (placeWord(wordObj, gameBoard)) {
-                                remainingWordIndex++;
-                            } else {
-                                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                                vowelIndex = (vowelIndex + 1) % vowels.length;
-                            }
-                        } else {
-                            gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
-                            vowelIndex = (vowelIndex + 1) % vowels.length;
-                        }
-                    }
-                }
-            }
-
-            renderBoard();
         }
+        let fillRow = GRID_SIZE - 1;
+        for (let i = 0; i < columnStack.length; i++) {
+            newGameBoard[fillRow][c] = columnStack[i];
+            fillRow--;
+        }
+    }
+    gameBoard = newGameBoard;
+
+    // Phase 2: Check which main words are still needed and prioritize placing them.
+    const wordsToFindStillRemaining = wordsToFind.filter(w => foundWordCounts[w] < FIND_COUNT_PER_WORD);
+    const wordsOnGrid = new Set(
+        gameBoard.flat().filter(c => c && c.word).map(c => c.word)
+    );
+
+    let wordsNotOnGrid = wordsToFindStillRemaining.filter(w => !wordsOnGrid.has(w));
+    if (wordsNotOnGrid.length > 0) {
+        wordsNotOnGrid.sort((a,b) => b.length - a.length);
+        for (const wordStr of wordsNotOnGrid) {
+            // Attempt to place the missing required word into the new gaps.
+            placeWord(wordInfo[wordStr].obj, gameBoard);
+        }
+    }
+
+    // Phase 3: Now fill the rest of the gaps with bonus/filler letters.
+    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
+    otherWords.sort((a, b) => b.length - a.length);
+    const purpleShades = [
+        'bg-[#c084fc] text-black', 'bg-[#a855f7] text-white', 'bg-[#9333ea] text-white'
+    ];
+    for (let i = 0; i < otherWords.length; i++) {
+        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
+        placeWord(wordObj, gameBoard);
+    }
+
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+    let vowelIndex = 0;
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (gameBoard[r][c] === null) {
+                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
+                vowelIndex = (vowelIndex + 1) % vowels.length;
+            }
+        }
+    }
+
+    // Phase 4: Render and perform the purple-overload check.
+    renderBoard();
+
+    const purpleCount = countPurpleTilesOnBoard();
+    if (purpleCount >= 30) {
+        showMessage('Purple overload! Free board refresh!', 2500);
+        purpleResetTimeout = setTimeout(refreshBoard, 2500);
+    }
+}
 
         function checkWinCondition() {
             const allFound = wordsToFind.every(word => foundWordCounts[word] >= FIND_COUNT_PER_WORD);
@@ -1798,6 +1789,7 @@ async function handleEnd() {
         }
 
         function resetGame() {
+            clearTimeout(purpleResetTimeout); // 13th September
             winScreen.classList.add('hidden');
             winScreen.innerHTML = '';
             initBoard();

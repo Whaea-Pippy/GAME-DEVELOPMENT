@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Te Reo Passive Verb Flashcards</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --rainbow: linear-gradient(135deg, #f9a8d4, #fcd34d, #86efac, #93c5fd, #c4b5fd);
+    }
+    body { font-family: Poppins, Nunito, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; margin: 0; background: var(--bg); color: #000; }
+    .wrap { max-width: 980px; margin: 30px auto; padding: 20px; }
+    h1 { font-size: 1.8rem; margin: 0 0 8px; background: var(--rainbow); -webkit-background-clip: text; color: transparent; }
+    p.note { margin: 0 0 18px; color: #334155; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    button { background: var(--rainbow); color: #fff; border: 0; padding: 8px 14px; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 18px var(--shadow); font-weight: 600; }
+    input[type=search] { padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; min-width: 220px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+    .card {
+      perspective: 1000px;
+      container-type: inline-size;
+      container-name: card;
+    }
+    .inner {
+      height: 190px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px var(--shadow);
+      transform-style: preserve-3d;
+      transition: transform .6s;
+    }
+    .inner.flipped { transform: rotateY(180deg); }
+    .face {
+      position: absolute;
+      backface-visibility: hidden;
+      padding: 10px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      width: 100%;
+      color: #000;
+    }
+    .front {
+      font-weight: 700;
+    }
+    .front .verb {
+        color: #00008B; /* Dark Blue */
+        max-width: 90%;
+        font-size: clamp(1rem, 18cqw, 2.2rem);
+     }
+    .back {
+      transform: rotateY(180deg);
+      font-size: clamp(1.2rem, 15vw, 1.8rem);
+      line-height: 1.5;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+    .muted { color: #475569; font-size: clamp(0.9rem, 10vw, 1.1rem); margin-top: 6px; }
+    .controls .stat { background: #fff; color: #0b0f0f; padding: 8px 12px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    footer { margin-top: 18px; color: #334155; font-size: 0.9rem; }
+    .hint { font-size: 0.85rem; color: #334155; margin-top: 8px; }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Te Reo: Passive Verb Flashcards</h1>
+    <p class="note">Front = active verb and its English meaning. Back = all commonly accepted passive forms for that verb. Use the search to filter verbs.</p>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search verb (eg. tiki, ako, hanga)" />
+      <button id="shuffle">Shuffle</button>
+      <button id="showAll">Show all backs</button>
+      <button id="hideAll">Hide all backs</button>
+      <div class="stat" id="count">0 cards</div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <footer>
+      <div class="hint">Note: Māori passive endings vary by dialect, register, and historical usage. The forms here are commonly accepted variants — By ChatGPT</div>
+    </footer>
+  </div>
+  <script>
+    const cards = [
+      {v:'ako', e:'learn / teach', p:['akohia','akotia']},
+      {v:'aroha', e:'love', p:['arohatia','arohahia']},
+      {v:'whāngai', e:'feed', p:['whāngaia']},
+      {v:'whakaae', e:'agree / consent', p:['whakaaetia','whakaaeia']},
+      {v:'whakaako', e:'teach', p:['whakaakohia','whakaakona']},
+      {v:'kai', e:'eat', p:['kainga','kiainga']},
+      {v:'inu', e:'drink', p:['inumia','inuhia']},
+      {v:'kite', e:'see', p:['kitea','kitia']},
+      {v:'rongo', e:'hear', p:['rangona','rongohia']},
+      {v:'hopu', e:'catch', p:['hopukia','hopua']},
+      {v:'tiki', e:'fetch', p:['tikina','tikihia','tikiria']},
+      {v:'tango', e:'take', p:['tangohia']},
+      {v:'hoko', e:'buy', p:['hokona']},
+      {v:'hanga', e:'build / make', p:['hangaia','hangahia']},
+      {v:'whakapai', e:'improve / tidy', p:['whakapaingia']},
+      {v:'whakarongo', e:'listen', p:['whakarongohia','whakarongona']},
+      {v:'pātai', e:'ask', p:['pātaitia','pātaihia']},
+      {v:'kōrero', e:'speak', p:['kōrerotia','kōrerohia']},
+      {v:'karanga', e:'call', p:['karangatia']},
+      {v:'karakia', e:'pray', p:['karakiatia','karakiahia']},
+      {v:'tahu', e:'light / ignite', p:['tahuna','tahutia']},
+      {v:'pupuri', e:'hold', p:['pupuritia']},
+      {v:'āwhina', e:'help', p:['āwhinatia']},
+      {v:'kimi', e:'seek / search', p:['kimihia']},
+      {v:'titiro', e:'look at', p:['tirohia','titirohia']},
+      {v:'wehe', e:'separate / leave', p:['wehea','wehena']},
+      {v:'oma', e:'run', p:['omatia','omahia']},
+      {v:'tunu', e:'cook', p:['tunua']},
+      {v:'horoi', e:'wash', p:['horoia']},
+      {v:'whakamārama', e:'explain', p:['whakamāramatia']},
+      {v:'whakawhanake', e:'develop', p:['whakawhanaketia','whakawhanakea']},
+      {v:'whakaputa', e:'release / deliver', p:['whakaputahia','whakaputatia']},
+      {v:'whakapuaki', e:'express / articulate', p:['whakapuakihia','whakapuakitia']},
+      {v:'patu', e:'hit / strike', p:['patua']},
+      {v:'whawhai', e:'fight', p:['whawhaitia']},
+      {v:'horo', e:'swallow / demolish', p:['horotia']},
+      {v:'whiri', e:'plait / decide', p:['whiria']},
+      {v:'tātai', e:'calculate / count', p:['tātaia','tātaihia']},
+      {v:'mahi', e:'work / do', p:['mahihia','mahia']},
+      {v:'whakaniko', e:'embellish / enhance', p:['whakanikotia','whakanikoia']},
+      {v:'taunaki', e:'support / advocate', p:['taunakitia']},
+      {v:'whakatau', e:'settle / decide', p:['whakatauria','whakatauia']}
+    ];
+
+    const grid = document.getElementById('grid');
+    const count = document.getElementById('count');
+    const pastelPalette = ['#ffd1dc', '#ffeadb', '#ffffd1', '#d1ffdb', '#d1ffff', '#d1dbff', '#ead1ff'];
+
+    function render(list) {
+      grid.innerHTML = '';
+      list.forEach((c, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const inner = document.createElement('div');
+        inner.className = 'inner';
+        inner.style.backgroundColor = pastelPalette[i % pastelPalette.length];
+
+        const front = document.createElement('div');
+        front.className = 'face front';
+        const verbDiv = document.createElement('div');
+        verbDiv.className = 'verb';
+        verbDiv.textContent = c.v;
+        front.appendChild(verbDiv);
+
+        const meaningDiv = document.createElement('div');
+        meaningDiv.className = 'muted';
+        meaningDiv.textContent = c.e;
+        front.appendChild(meaningDiv);
+
+        const back = document.createElement('div');
+        back.className = 'face back';
+        back.innerHTML = `<div>${c.p.join('<br>')}</div>`;
+
+        inner.appendChild(front);
+        inner.appendChild(back);
+        inner.addEventListener('click', () => inner.classList.toggle('flipped'));
+
+        card.appendChild(inner);
+        grid.appendChild(card);
+      });
+      count.textContent = list.length + ' cards';
+    }
+
+    render(cards);
+
+    document.getElementById('search').addEventListener('input', e => {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) return render(cards);
+      const filtered = cards.filter(c => c.v.toLowerCase().includes(q) || c.p.join(' ').toLowerCase().includes(q));
+      render(filtered);
+    });
+
+    document.getElementById('shuffle').addEventListener('click', () => {
+      const copy = [...cards];
+      for (let i = copy.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[copy[i], copy[j]] = [copy[j], copy[i]] }
+      render(copy);
+    });
+
+    document.getElementById('showAll').addEventListener('click', () => {
+      document.querySelectorAll('.inner').forEach(i => i.classList.add('flipped'));
+    });
+    document.getElementById('hideAll').addEventListener('click', () => {
+      document.querySelectorAll('.inner').forEach(i => i.classList.remove('flipped'));
+    });
+  </script>
+</body>
+</html>

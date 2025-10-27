@@ -12,7 +12,7 @@ For any request that requires me to use tools to modify your project (such as wr
 **I will not execute this plan until you have reviewed it and given your explicit approval.**
 
 ### Exception: Deploy Command
-If you ask me to "deploy", I will immediately proceed with the deployment by running `firebase deploy` without seeking prior approval.
+If you ask me to "deploy", I will immediately proceed with the deployment by running `firebase deploy --only hosting` without seeking prior approval.
 
 ## 2. Use Precise Language
 
