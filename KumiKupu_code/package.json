@@ -4,7 +4,8 @@
   "description": "A project for static web files.",
   "main": "index.html",
   "scripts": {
-    "dev": "http-server -c-1 ."
+    "dev": "http-server -c-1 .",
+    "deploy": "firebase deploy --only hosting"
   },
   "dependencies": {
     "http-server": "^14.1.1"

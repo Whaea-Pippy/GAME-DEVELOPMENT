@@ -6,44 +6,127 @@
 <title>Te Reo Māori — Connections</title>
 <style>
   :root{
-    --blue: #b3d8ff;    /* animals */
-    --green:#bdecc8;    /* pronouns */
-    --orange:#ffd39b;   /* feelings */
-    --purple:#d2b6ff;   /* months */
-    --gold:#ffe680;     /* weekdays */
-    --red:#ffb3b3;      /* seasons */
-    --brown:#d2a679;    /* tense (lighter) */
-    --pink:#ffc0dd;     /* food */
-    --location:#FFD700; /* location (gold) */
-    --yellow:#fff7a8;   /* default card */
+    --blue: #b3d8ff;
+    --green:#bdecc8;
+    --orange:#ffd39b;
+    --purple:#d2b6ff;
+    --gold:#ffe680;
+    --red:#ffb3b3;
+    --brown:#d2a679;
+    --pink:#ffc0dd;
+    --location:#FFD700;
+    --yellow:#fff7a8;
     --ink:#1f2937;
   }
+
   *{box-sizing:border-box}
-  body{font-family:Inter, system-ui, -apple-system, Arial, sans-serif; margin:0; background:#fbfbff; color:var(--ink)}
+  body{
+    font-family:Inter, system-ui, -apple-system, Arial, sans-serif;
+    margin:0;
+    background:#fbfbff;
+    color:var(--ink);
+  }
+
   header{padding:18px 14px; text-align:center}
   h1{margin:0;font-size:24px}
   .sub{color:#5b6270;font-size:13px;margin-top:6px}
-  .controls{display:flex;gap:12px;justify-content:center;align-items:center;margin:14px 8px}
-  button{background:#fff;border:0;padding:10px 14px;border-radius:10px;box-shadow:0 6px 18px rgba(25,25,25,.06);cursor:pointer}
+
+  .controls{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    align-items:center;
+    margin:14px 8px;
+    flex-wrap:wrap;
+  }
+
+  button{
+    background:#fff;
+    border:0;
+    padding:10px 14px;
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(25,25,25,.06);
+    cursor:pointer;
+  }
   #newBtn{background:#0ea5a4;color:#fff}
   #cheatBtn{background:#f97316;color:#fff}
-  #tries{background:#eef2ff;padding:6px 10px;border-radius:999px;font-weight:700}
+  #tries{
+    background:#eef2ff;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:700;
+  }
 
   #wrap{max-width:900px;margin:0 auto;padding:8px}
   #solved{display:flex;flex-direction:column;gap:12px;align-items:center;margin:10px auto}
-  .group-row{display:grid;grid-template-columns:repeat(4,140px);gap:10px;padding:10px;border-radius:14px;align-items:center;max-width:92%;}
-  .group-title{grid-column:1/-1;text-align:left;font-weight:800;padding:8px;border-radius:10px;background:rgba(255,255,255,.55);box-shadow:0 1px 3px rgba(0,0,0,.06)}
 
-  #grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px;margin:12px auto;max-width:560px}
-  .card{background:var(--yellow);padding:16px;border-radius:12px;min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;box-shadow:0 8px 20px rgba(15,15,15,.06);transition:transform .12s ease,box-shadow .12s ease}
+  .group-row{
+    display:grid;
+    grid-template-columns:repeat(4,140px);
+    gap:10px;
+    padding:10px;
+    border-radius:14px;
+    align-items:center;
+  }
+
+  .group-title{
+    grid-column:1/-1;
+    text-align:left;
+    font-weight:800;
+    padding:8px;
+    border-radius:10px;
+    background:rgba(255,255,255,.55);
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+
+  /* ---- GRID ---- */
+  #grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(120px,1fr));
+    gap:12px;
+    margin:12px auto;
+    max-width:560px;
+  }
+
+  /* ✅ Mobile layout: 8 rows of 2 */
+  @media (max-width: 640px) {
+    #grid {
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      max-width: 340px;
+    }
+    .group-row {
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      max-width: 340px;
+    }
+  }
+
+  .card{
+    background:var(--yellow);
+    padding:16px;
+    border-radius:12px;
+    min-height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-weight:700;
+    box-shadow:0 8px 20px rgba(15,15,15,.06);
+    transition:transform .12s ease,box-shadow .12s ease
+  }
   .card:hover{transform:translateY(-3px);box-shadow:0 18px 30px rgba(15,15,15,.08)}
   .card.selected{outline:3px solid #111}
   .card.matched{cursor:default;opacity:0.98}
   .small{font-size:13px;font-weight:700}
 
   /* modal */
-  .modal-backdrop{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.36);z-index:50}
-  .modal{background:#fff;padding:18px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.25);max-width:520px;width:92%}
+  .modal-backdrop{
+    position:fixed;inset:0;display:none;place-items:center;
+    background:rgba(0,0,0,.36);z-index:50
+  }
+  .modal{
+    background:#fff;padding:18px;border-radius:12px;
+    box-shadow:0 12px 40px rgba(0,0,0,.25);max-width:520px;width:92%
+  }
   .modal h2{margin:0 0 6px}
   .modal p{margin:0 0 12px;color:#374151}
   .modal .actions{display:flex;gap:8px;justify-content:flex-end}
@@ -78,7 +161,6 @@
 </div>
 
 <script>
-// --- data ---
 const categories = {
   animals: { label:'Animals', color:'var(--blue)', words:[
     {maori:'kurī',english:'dog'},{maori:'ngeru',english:'cat'},{maori:'hoiho',english:'horse'},{maori:'manu',english:'bird'},{maori:'poaka',english:'pig'},{maori:'hipi',english:'sheep'},{maori:'kāhu',english:'hawk'},{maori:'whekī',english:'octopus'},{maori:'tuna',english:'eel'},{maori:'pīpī',english:'chick'},{maori:'kākā',english:'parrot'},{maori:'tīrairaka',english:'fantail'},{maori:'pūngāwerewere',english:'spider'},{maori:'mango',english:'shark'},{maori:'pāpaka',english:'crab'},{maori:'kiore',english:'rat'},{maori:'kererū',english:'wood pigeon'},{maori:'pīwaiwaka',english:'fantail'},{maori:'tīeke',english:'saddleback'},{maori:'tohorā',english:'whale'} ]},
@@ -175,7 +257,7 @@ function selectCard(card){
     if(correct){
       handleMatch(cat, selected);
       if(solvedCats.size === 4){
-        setTimeout(()=> showModal('Ka mau te wehi! You win!','You found all four groups. Kia ora!')), 250;
+        setTimeout(()=> showModal('Ka mau te wehi! You win!','You found all four groups. Kia ora!'), 250);
       }
     } else {
       tries++;
