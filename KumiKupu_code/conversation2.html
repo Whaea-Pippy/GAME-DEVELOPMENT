@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Te Reo Flashcards — Extended Conversation (Updated Colours)</title>
+  <title>Ngā hararei o te Kirihimete</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
       /* updated colours */
-      --aroha-front: #ffd6e8; /* light pink Māori side */
-      --aroha-back: #ede7f6;  /* light purple English side */
-      --hemi-front:  #bbdefb; /* light blue Māori side */
-      --hemi-back:   #dcedc8; /* light green English side */
+      --aroha-front: rgba(220, 160, 160, 0.8);
+      --aroha-back: rgba(200, 140, 140, 0.8);
+      --hemi-front:  rgba(160, 200, 160, 0.8);
+      --hemi-back:   rgba(140, 180, 140, 0.8);
 
       --card-radius:12px;
       --card-padding:18px;
@@ -19,7 +19,16 @@
       --max-width:900px;
     }
 
-    body{margin:0;font-family:Nunito,system-ui;background:#f7f7f7;color:#000;}
+    body{
+        margin:0;
+        font-family:Nunito,system-ui;
+        background:#f7f7f7;
+        color:#000;
+        background-image: url('images/flowers1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
     .wrap{max-width:var(--max-width);margin:24px auto;padding:12px;text-align:center;}
     h1{font-size:1.5rem;margin-bottom:1.2rem;}
 
@@ -79,11 +88,11 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .fc-card-face-front {
-        background: #c7d2fe; /* Light Indigo */
+        background:   rgba(160, 200, 160, 0.8);
         color: #312e81;
     }
     .fc-card-face-back {
-        background: #fecdd3; /* Light Rose */
+        background: rgba(220, 160, 160, 0.8);
         color: #881337;
         transform: rotateY(180deg);
     }
@@ -91,7 +100,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Te Reo Flashcards — Extended Conversation</h1>
+    <h1>Ngā hararei o te Kirihimete</h1>
 
     <!-- 1 Aroha -->
     <div class="card aroha" tabindex="0">
@@ -212,8 +221,6 @@
         <div class="back">Bye!</div>
       </div>
     </div>
-
-    <p class="note">Tap or press Enter/Space on a card to flip it. Māori front (Aroha = pink, Hemi = blue). English back (Aroha = light purple, Hemi = light green).</p>
   </div>
 
   <div class="wrap">

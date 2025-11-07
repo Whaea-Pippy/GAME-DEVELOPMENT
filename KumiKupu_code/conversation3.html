@@ -7,17 +7,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --miriama-front:#ffd6e8; /* light pink Māori side */
-      --miriama-back:#ede7f6;  /* light purple English side */
-      --hemi-front:#bbdefb;    /* light blue Māori side */
-      --hemi-back:#dcedc8;     /* light green English side */
+      --miriama-front: rgba(173, 216, 230, 0.8);
+      --miriama-back: rgba(153, 196, 210, 0.8);
+      --hemi-front: rgba(144, 238, 144, 0.8);
+      --hemi-back: rgba(124, 218, 124, 0.8);
       --card-radius:12px;
       --card-padding:18px;
       --card-gap:14px;
       --max-width:900px;
     }
 
-    body{margin:0;font-family:Nunito,system-ui;background:#f7f7f7;color:#000;}
+    body{
+        margin:0;
+        font-family:Nunito,system-ui;
+        background:#f7f7f7;
+        color:#000;
+        background-image: url('images/conversation1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
     .wrap{max-width:var(--max-width);margin:24px auto;padding:12px;text-align:center;}
     h1{font-size:1.5rem;margin-bottom:1.2rem;}
 
@@ -81,11 +91,11 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .fc-card-face-front {
-        background: #c7d2fe; /* Light Indigo */
+        background: rgba(210, 180, 140, 0.8);
         color: #312e81;
     }
     .fc-card-face-back {
-        background: #fecdd3; /* Light Rose */
+        background: rgba(190, 160, 120, 0.8);
         color: #881337;
         transform: rotateY(180deg);
     }
