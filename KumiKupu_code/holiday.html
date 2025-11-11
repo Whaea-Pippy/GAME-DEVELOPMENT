@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Māori Holiday Greetings</title>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --text-color: #333;
+      --card-bg: #ffffff;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+      --font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 2.5rem;
+      margin: 20px 0;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* New wrapper to contain all cards for better layout control */
+    .content-wrapper {
+      width: 90vw;
+      height: 85vh;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-auto-rows: 1fr;
+      gap: 20px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    /* This allows the flashcard and nav-link children to be direct grid items of content-wrapper */
+    .flashcard-container, .nav-links {
+      display: contents;
+    }
+
+    /* --- Flipping Card --- */
+    .flashcard {
+      perspective: 1000px;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.7s;
+      transform-style: preserve-3d;
+      box-shadow: var(--shadow);
+      border-radius: 14px;
+    }
+
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      box-sizing: border-box;
+      font-size: 1.2rem;
+      line-height: 1.4;
+    }
+
+    .flashcard-front {
+      color: white;
+    }
+
+    .flashcard-back {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      transform: rotateY(180deg);
+      font-style: italic;
+    }
+
+    /* --- Link Card --- */
+    .link-card {
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      box-sizing: border-box;
+      font-size: 1.2rem;
+      line-height: 1.4;
+      color: white;
+      text-decoration: none;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .link-card:hover {
+      transform: scale(1.05);
+    }
+
+    /* Color classes for cards */
+    .color-1 { background: linear-gradient(135deg, #3498db, #2980b9); }
+    .color-2 { background: linear-gradient(135deg, #e67e22, #d35400); }
+    .color-3 { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
+    .color-4 { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+
+
+    /* --- MOBILE STYLES --- */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; margin: 15px 0; }
+      
+      /* On mobile, stack flashcards on top of nav links */
+      .content-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 88vh;
+        gap: 15px;
+      }
+
+      /* The flashcard container becomes a single-column grid, taking up most of the space */
+      .flashcard-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        flex-grow: 1; /* Allows this container to expand */
+        grid-auto-rows: 1fr; /* Each flashcard has equal height */
+      }
+      
+      /* The nav links container becomes a two-column grid */
+      .nav-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        flex-shrink: 0; /* Prevents this container from shrinking */
+      }
+
+      /* Set a smaller, fixed height for the nav links on mobile */
+      .nav-links .link-card {
+        min-height: 50px;
+        height: 50px;
+      }
+
+      /* General font size adjustment for mobile */
+      .flashcard-front, .flashcard-back, .link-card { font-size: 1rem; }
+    }
+
+    @media (max-width: 900px) and (min-width: 601px) {
+      /* On tablets, the main grid has 2 columns */
+      .content-wrapper { 
+        grid-template-columns: repeat(2, 1fr); 
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ngā Mihi Hararei</h1>
+
+  <div class="content-wrapper">
+    <div class="flashcard-container">
+      <!-- Simple & Casual -->
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-1">Kia pai tō hararei</div><div class="flashcard-back">Have a good holiday.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-1">Kia pai te wā whakatā</div><div class="flashcard-back">Enjoy your break/holiday time.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-1">Kia ngahau tō hararei</div><div class="flashcard-back">Have a fun holiday.</div></div></div>
+
+      <!-- Warm & Friendly -->
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-2">Kia harikoa tō hararei</div><div class="flashcard-back">Have a joyful holiday.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-2">Kia pai te noho ki tō whānau i te hararei</div><div class="flashcard-back">Enjoy being with your family in the holidays.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-2">Kia tau ngā manaakitanga i tō hararei</div><div class="flashcard-back">May blessings rest upon your holiday.</div></div></div>
+
+      <!-- Formal / Respectful -->
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-3">Ngā mihi o te hararei ki a koe</div><div class="flashcard-back">Holiday greetings to you.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-3">Ngā mihi o te wā whakatā</div><div class="flashcard-back">Greetings of the holiday season.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-3">Kia haumaru tō hararei</div><div class="flashcard-back">Have a safe holiday.</div></div></div>
+
+      <!-- Uplifting & Encouraging -->
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front color-4">Kia pai, kia koa, kia haumaru tō hararei!</div><div class="flashcard-back">May your holiday be good, happy, and safe!</div></div></div>
+    </div>
+
+    <div class="nav-links">
+      <a class="link-card color-4" href="https://kumikupu.web.app/">Home</a>
+      <a class="link-card color-4" href="https://kumikupu.web.app/KarakiaHeHon.html">Karakia</a>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.flashcard').forEach(card => {
+      card.addEventListener('click', () => {
+        card.classList.toggle('flipped');
+      });
+    });
+  </script>
+
+</body>
+</html>

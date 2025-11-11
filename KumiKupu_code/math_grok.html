@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Teacher Resources</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        #container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+        #header {
+            flex: 0 0 auto;
+        }
+        #content {
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="container">
+        <header id="header" class="bg-blue-600 text-white text-center py-4">
+            <h1 class="text-2xl md:text-3xl font-bold">Math Teacher Resources Showcase</h1>
+            <p class="text-sm md:text-base mt-1">Interactive Tools for All Devices</p>
+        </header>
+        <main id="content" class="p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 h-full">
+                <!-- Calculator -->
+                <div class="bg-white rounded-lg shadow-lg p-4 flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">Graphing Calculator</h2>
+                    <p class="text-sm flex-grow">Interactive tool for plotting functions, solving equations, and visualizing data.</p>
+                    <div class="mt-2">
+                        <input type="text" placeholder="Enter equation (e.g., y = x^2)" class="w-full p-2 border rounded">
+                        <button class="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Plot</button>
+                    </div>
+                </div>
+                <!-- Worksheet Generator -->
+                <div class="bg-white rounded-lg shadow-lg p-4 flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">Worksheet Generator</h2>
+                    <p class="text-sm flex-grow">Create customizable math worksheets for algebra, geometry, and more.</p>
+                    <div class="mt-2">
+                        <select class="w-full p-2 border rounded">
+                            <option>Algebra</option>
+                            <option>Geometry</option>
+                            <option>Calculus</option>
+                        </select>
+                        <button class="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Generate</button>
+                    </div>
+                </div>
+                <!-- Interactive Whiteboard -->
+                <div class="bg-white rounded-lg shadow-lg p-4 flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">Interactive Whiteboard</h2>
+                    <p class="text-sm flex-grow">Draw graphs, shapes, and equations in real-time for classroom engagement.</p>
+                    <div class="mt-2 flex-grow bg-gray-200 rounded flex items-center justify-center">
+                        <span class="text-gray-500">Canvas Placeholder</span>
+                    </div>
+                </div>
+                <!-- Quiz Maker -->
+                <div class="bg-white rounded-lg shadow-lg p-4 flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">Quiz Maker</h2>
+                    <p class="text-sm flex-grow">Design quizzes with multiple-choice, true/false, or open-ended questions.</p>
+                    <div class="mt-2">
+                        <input type="text" placeholder="Question title" class="w-full p-2 border rounded">
+                        <button class="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Create Quiz</button>
+                    </div>
+                </div>
+                <!-- Formula Reference -->
+                <div class="bg-white rounded-lg shadow-lg p-4 flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">Formula Reference</h2>
+                    <p class="text-sm flex-grow">Quick access to key formulas in algebra, geometry, trigonometry, and calculus.</p>
+                    <div class="mt-2">
+                        <select class="w-full p-2 border rounded">
+                            <option>Quadratic Formula</option>
+                            <option>Pythagorean Theorem</option>
+                            <option>Trigonometric Identities</option>
+                        </select>
+                        <button class="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">View Formula</button>
+                    </div>
+                </div>
+                <!-- Lesson Planner -->
+                <div class="bg-white rounded-lg shadow-lg p-4 flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">Lesson Planner</h2>
+                    <p class="text-sm flex-grow">Organize lessons with objectives, activities, and assessment tools.</p>
+                    <div class="mt-2">
+                        <input type="text" placeholder="Lesson title" class="w-full p-2 border rounded">
+                        <button class="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Plan Lesson</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

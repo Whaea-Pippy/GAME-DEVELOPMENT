@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Millionaire FINAL — Te Reo (Year 10, Term 3)</title>
+  <style>
+    :root{
+      --bg:#f3e5f5; --card:#ffffff; --accent:#ff9800; --muted:#444; --good:#28a745; --bad:#e63946;
+      font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg, #e1bee7 0%, #ce93d8 100%);color:#222}
+    .wrap{height:90vh;width:95%;max-width:1100px;margin:2vh auto;display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+    @media (max-width:900px){.wrap{grid-template-columns:1fr;padding-bottom:10vh}}
+
+    header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+    h1{font-size:1.8rem;margin:0;color:#e65100}
+    .meta{font-size:1rem;color:#666}
+
+    .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 6px 20px rgba(0,0,0,0.05)}
+    .game{min-height:60vh; display: flex; flex-direction: column;}
+    
+    #status { font-size: 1.25rem; font-weight: bold; padding: 12px; background-color: #f5f5f5; border-radius: 8px; text-align: center; margin-bottom: 1rem; width: 100%; box-sizing: border-box; }
+    #game-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    .question{font-size:1.5rem;margin-bottom:14px;color:#222}
+    .question small{display:block;color:var(--muted);font-size:1rem;margin-top:6px}
+
+    .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:600px){.answers{grid-template-columns:1fr}}
+
+    .btn{background:#ffe0b2;border:2px solid #ffb74d;padding:14px;border-radius:10px;cursor:pointer;text-align:left;font-size:1.15rem}
+    .btn:hover{background:#ffcc80}
+    .btn.correct{border-color:var(--good);background:#e6f8ec}
+    .btn.wrong{border-color:var(--bad);background:#fdeaea}
+    
+    #resetBtn { background: #fce4ec; border: 2px solid #f8bbd0; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
+    #resetBtn:hover { background: #f48fb1; }
+
+    .sidebar{position:sticky;top:16px;height:fit-content}
+    .ladder{list-style:none;padding:12px;margin:0;}
+    .ladder li{padding:10px 12px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;background:#f5f5f5;font-size:1rem}
+    .ladder li.active{background:var(--accent);color:#fff;font-weight:bold}
+
+    .lifelines{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .life{padding:8px 12px;border-radius:8px;background:#ffe0b2;cursor:pointer;border:2px solid #ffb74d;font-size:0.95rem}
+    .life.used{opacity:0.4;text-decoration:line-through;cursor:default}
+    
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:var(--muted)}
+    .tiny{font-size:0.95rem}
+
+    #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:100}
+
+    .teacher-joke{font-style:italic;color:#555;margin-top:6px;font-size:1rem}
+    
+    .end-screen { text-align: center; }
+    .end-screen .title { font-size: 3rem; font-weight: bold; }
+    .end-screen .subtitle { font-size: 1.5rem; color: var(--muted); }
+    .end-screen.win .title { color: var(--good); }
+    .end-screen.lose .title { color: var(--bad); }
+
+    @media (max-width:420px){
+      h1{font-size:1.3rem}
+      #status { font-size: 1rem; }
+      .question{font-size:1.2rem}
+      .btn{font-size:1rem;padding:12px}
+      .end-screen .title { font-size: 2.2rem; }
+      .end-screen .subtitle { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Millionaire FINAL Kura Edition ✨🔮</h1>
+        <div class="meta">Purple & Orange Edition</div>
+      </div>
+      <button id="resetBtn">Reset Game</button>
+    </header>
+
+    <main class="card game">
+      <div id="status" style="display:none;">Question <span id="qIndex">1</span> / <span id="qTotal">10</span> • Winnings: <strong id="points">$0</strong></div>
+      <div id="game-content"></div>
+      <div class="footer" style="display:none;">
+        <div>
+          <div id="lifelines" class="lifelines">
+            <div class="life" data-life="50">50:50</div>
+            <div class="life" data-life="ask">Ask the Class</div>
+            <div class="life" data-life="skip">Skip</div>
+          </div>
+          <div class="teacher-joke" id="joke"></div>
+        </div>
+        <div class="tiny">
+          <button id="nextBtn" class="btn" style="padding:8px 14px; display: none;">Next</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="card sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <div class="tiny">Whakamahi / Session</div>
+          <div id="lastPlayed">Last played: never</div>
+        </div>
+        <div style="text-align:right">
+          <div class="tiny">Kaute</div>
+          <div id="userPoints">Saved: $0</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <strong>Prize ladder</strong>
+        <ul class="ladder" id="ladder"></ul>
+      </div>
+      <div>
+        <strong>Hints</strong>
+        <p class="tiny">He kēmu ngahau mō ngā tau 10. Enjoy the purple and orange vibes! 🔮</p>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const QUESTIONS = [
+      {q: 'What is the Māori word for "friend"?', choices: ['Iwi', 'Hoa', 'Tamariki', 'Whānau'], answer: 1, hint: 'It starts with H!'},
+      {q: 'Which of these is a traditional Māori weapon?', choices: ['Mere', 'Patu', 'Wahaika', 'Taiaha'], answer: 3, hint: 'It’s long, wooden, and used in ceremonies and battle.'},
+      {q: 'What does "Kai" mean in Māori?', choices: ['Water', 'House', 'Food', 'School'], answer: 2, hint: 'Think about something everyone loves to share!'},
+      {q: 'What does "Haere mai" mean?', choices: ['Welcome', 'Go away', 'Good night', 'Be careful'], answer: 0, hint: 'You say this when inviting someone in.'},
+      {q: 'What does "Awa" mean in Māori?', choices: ['Mountain', 'Forest', 'Ocean', 'River'], answer: 3, hint: 'It flows through the land.'},
+      {q: 'What does "Tino pai" mean?', choices: ['Very good', 'Very bad', 'So-so', 'Amazing'], answer: 0, hint: 'You say it when something is excellent!'},
+      {q: 'What is "Whānau"?', choices: ['School', 'Village', 'Family', 'Garden'], answer: 2, hint: 'It’s more than just your parents and siblings.'},
+      {q: 'Which Māori festival celebrates the new year of the stars?', choices: ['Hui', 'Anzac Day', 'Matariki', 'Waitangi Day'], answer: 2, hint: 'It happens when the star cluster rises in winter.'},
+      {q: 'What does "Wai" mean in Māori?', choices: ['Water', 'River', 'Lake', 'Ocean'], answer: 0, hint: 'It’s essential for life!'},
+      {q: 'What does "Rā" mean?', choices: ['Moon', 'Star', 'Sun', 'Day'], answer: 3, hint: 'It’s in "Rāhina" (Monday) and other days of the week.'}
+    ];
+    const PRIZES = [100, 200, 300, 500, 1000, 2000, 8000, 16000, 250000, 1000000];
+
+    const gameContentEl = document.getElementById('game-content');
+    const statusEl = document.getElementById('status');
+    const footerEl = document.querySelector('.footer');
+    const qIndexEl = document.getElementById('qIndex');
+    const pointsEl = document.getElementById('points');
+    const ladderEl = document.getElementById('ladder');
+    const lifelinesEl = document.getElementById('lifelines');
+    const nextBtn = document.getElementById('nextBtn');
+    const jokeEl = document.getElementById('joke');
+    
+    let currentQ = 0;
+    let winnings = 0;
+
+    function init() {
+        document.getElementById('qTotal').innerText = QUESTIONS.length;
+        PRIZES.slice().reverse().forEach((p, i) => {
+            const li = document.createElement('li');
+            li.id = 'lad-' + (PRIZES.length - 1 - i);
+            li.innerHTML = `<span>${PRIZES.length - i}.</span> <strong>$${p.toLocaleString()}</strong>`;
+            ladderEl.appendChild(li);
+        });
+        loadSession();
+        resetGame();
+    }
+
+    function resetGame() {
+        currentQ = 0;
+        winnings = 0;
+        
+        statusEl.style.display = 'block';
+        footerEl.style.display = 'flex';
+        pointsEl.innerText = '$0';
+        lifelinesEl.style.display = 'flex';
+        document.querySelectorAll('.life').forEach(l => l.classList.remove('used'));
+        jokeEl.innerText = 'Why did the student bring a ladder to kura? To reach high marks! 🔮';
+        nextBtn.style.display = 'none';
+
+        renderQuestion();
+    }
+    
+    function renderQuestion() {
+        qIndexEl.innerText = currentQ + 1;
+        const Q = QUESTIONS[currentQ];
+
+        gameContentEl.innerHTML = `
+            <div class="question">${Q.q}<small>${Q.hint || ''}</small></div>
+            <div class="answers"></div>
+        `;
+
+        const answersEl = gameContentEl.querySelector('.answers');
+        Q.choices.forEach((c, i) => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = c;
+            b.dataset.index = i;
+            b.addEventListener('click', onAnswer);
+            answersEl.appendChild(b);
+        });
+
+        document.querySelectorAll('.ladder li').forEach(li => li.classList.remove('active'));
+        document.getElementById('lad-' + currentQ)?.classList.add('active');
+    }
+
+    function onAnswer(e) {
+        const chosen = Number(e.currentTarget.dataset.index);
+        const Q = QUESTIONS[currentQ];
+        gameContentEl.querySelectorAll('.answers .btn').forEach(btn => btn.disabled = true);
+
+        if (chosen === Q.answer) {
+            e.currentTarget.classList.add('correct');
+            winnings = PRIZES[currentQ];
+            pointsEl.innerText = `$${winnings.toLocaleString()}`;
+            jokeEl.innerText = pickTeacherPraise();
+            saveSession();
+
+            if (currentQ === QUESTIONS.length - 1) {
+                setTimeout(() => gameOver(true), 1000);
+            } else {
+                nextBtn.style.display = 'block';
+                setTimeout(triggerSmallConfetti, 400);
+            }
+        } else {
+            e.currentTarget.classList.add('wrong');
+            const correctBtn = gameContentEl.querySelector(`.answers .btn[data-index='${Q.answer}']`);
+            correctBtn?.classList.add('correct');
+            winnings = 0;
+            saveSession();
+            setTimeout(() => gameOver(false), 2000);
+        }
+    }
+
+    function gameOver(isWinner) {
+        statusEl.style.display = 'none';
+        footerEl.style.display = 'none';
+
+        if (isWinner) {
+            gameContentEl.innerHTML = `
+                <div class="end-screen win">
+                    <div class="title">Kua Toa! You're a Millionaire!</div>
+                    <div class="subtitle">Final Winnings: <strong>$${winnings.toLocaleString()}</strong></div>
+                </div>`;
+            triggerWinningCelebration();
+        } else {
+            gameContentEl.innerHTML = `
+                <div class="end-screen lose">
+                    <div class="title">HĒ - TĪMATA ANO</div>
+                    <div class="subtitle">WRONG - START OVER</div>
+                </div>`;
+            triggerBlackConfetti();
+            setTimeout(resetGame, 5000);
+        }
+    }
+    
+    function nextQuestion() {
+        currentQ++;
+        nextBtn.style.display = 'none';
+        renderQuestion();
+    }
+
+    function useLifeline(name, el) {
+      el.classList.add('used');
+      const Q = QUESTIONS[currentQ];
+
+      if (name === '50') {
+        shuffleArray(
+            Q.choices
+             .map((c, i) => i)
+             .filter(i => i !== Q.answer)
+        ).slice(0, 2).forEach(removeIdx => {
+            const btn = gameContentEl.querySelector(`.answers .btn[data-index='${removeIdx}']`);
+            if(btn) { btn.disabled = true; btn.style.opacity = 0.35; }
+        });
+      } else if (name === 'ask') {
+        const poll = [10, 10, 10, 10];
+        poll[Q.answer] += 60;
+        jokeEl.innerText = 'Ask the Class: ' + poll.map((p, i) => `${String.fromCharCode(65 + i)}:${p + Math.round(Math.random()*10-5)}%`).join(' ');
+      } else if (name === 'skip') {
+        jokeEl.innerText = 'Skipped — kia pai!';
+        nextQuestion();
+      }
+    }
+    
+    function saveSession() {
+      const now = new Date().toLocaleString();
+      localStorage.setItem('wwtbam_winnings_final', winnings);
+      localStorage.setItem('wwtbam_last_final', now);
+      document.getElementById('userPoints').innerText = `Saved: $${winnings.toLocaleString()}`;
+      document.getElementById('lastPlayed').innerText = `Last played: ${now}`;
+    }
+
+    function loadSession() {
+      const savedWinnings = localStorage.getItem('wwtbam_winnings_final') || 0;
+      const lastPlayed = localStorage.getItem('wwtbam_last_final') || 'never';
+      document.getElementById('userPoints').innerText = `Saved: $${Number(savedWinnings).toLocaleString()}`;
+      document.getElementById('lastPlayed').innerText = `Last played: ${lastPlayed}`;
+    }
+
+    function pickTeacherPraise() {
+      const list = ["Ka pai!", "Tino pai!", "Ka rawe!", "Pai rawa!", "Ka pai tō mahi!", "He pai rawa atu!", "Ka mau te wehi!", "He whakamīharo tō mahi!", "Ka toa!", "He toa koe!", "Kia kaha!", "Kia manawanui!", "Ka whakamīharo!", "Ka ū!", "Ngā mihi!", "Ngā mihi nui!", "Ka rawe rawa!", "He tino kaha tō mahi!", "He tino whakamīharo!", "Ngā manaakitanga!"];
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    let confettiAnimationId;
+    
+    function resizeCanvas() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas);
+    
+    function createConfetti(type) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiPieces = [];
+        let count, duration;
+
+        if (type === 'small') {
+            count = 100;
+            duration = 2000;
+            for (let i = 0; i < count; i++) {
+                confettiPieces.push({ type: 'block', x: Math.random() * confettiCanvas.width, y: Math.random() * -confettiCanvas.height, r: Math.random() * 4 + 3, d: Math.random() * 2 + 1, tilt: Math.random() * 10, color: `hsl(${Math.random() * 360}, 70%, 60%)` });
+            }
+        } else if (type === 'win') {
+            count = 250;
+            duration = 10000;
+             for (let i = 0; i < count; i++) {
+                confettiPieces.push({ type: 'ribbon', x: Math.random() * confettiCanvas.width, y: -50, r: Math.random() * 7 + 5, d: Math.random() * 2.5 + 1.5, tilt: Math.random() * 360, tiltAngle: (Math.random() - 0.5) * 0.15, color: `hsl(${Math.random() * 360}, 90%, 65%)` });
+            }
+        } else { // loss
+            count = 200;
+            duration = 5000;
+            for (let i = 0; i < count; i++) {
+                confettiPieces.push({ type: 'block', x: Math.random() * confettiCanvas.width, y: Math.random() * -confettiCanvas.height, r: Math.random() * 10 + 8, d: Math.random() * 2 + 1, tilt: Math.random() * 10, color: `hsl(0, 0%, ${Math.random() * 40}%)`});
+            }
+        }
+        
+        drawConfetti();
+        if(duration > 0) {
+            setTimeout(() => cancelAnimationFrame(confettiAnimationId), duration);
+        }
+    }
+    
+    function drawConfetti() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        confettiPieces.forEach((p, i) => {
+            p.y += p.d;
+            if (p.y > confettiCanvas.height) confettiPieces.splice(i, 1);
+
+            if (p.type === 'ribbon') {
+                p.tilt += p.tiltAngle;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.d * 0.1);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(0, 0, p.r * Math.sin(p.tilt * 0.1), 15);
+                ctx.restore();
+            } else { // block
+                p.tilt += 0.1;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.tilt * 0.02);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6);
+                ctx.restore();
+            }
+        });
+        if (confettiPieces.length) {
+            confettiAnimationId = requestAnimationFrame(drawConfetti);
+        }
+    }
+
+    const triggerSmallConfetti = () => createConfetti('small');
+    const triggerWinningCelebration = () => createConfetti('win');
+    const triggerBlackConfetti = () => createConfetti('loss');
+
+    function shuffleArray(a) {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    
+    nextBtn.addEventListener('click', nextQuestion);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+    lifelinesEl.addEventListener('click', (ev) => {
+      const t = ev.target.closest('.life');
+      if (!t || t.classList.contains('used')) return;
+      useLifeline(t.dataset.life, t);
+    });
+
+    resizeCanvas();
+    init();
+  </script>
+</body>
+</html>

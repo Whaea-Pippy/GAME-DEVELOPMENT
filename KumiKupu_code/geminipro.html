@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kōrero Mai - Te Reo Practice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for responsive sizing */
+        :root {
+            --card-size: clamp(70px, min(18vw, 22vh), 150px); /* Responsive to width and height */
+            --card-gap: clamp(10px, 2vw, 20px);
+        }
+
+        /* General Setup */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #e8ef7e;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            overflow: hidden; /* Prevent scrolling on desktop */
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            width: 100%;
+            height: 100dvh; /* Use dynamic viewport height */
+            padding: 20px;
+            box-sizing: border-box; /* Include padding in height calculation */
+        }
+
+        /* Header Layout */
+        header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 6vw, 3rem);
+            color: #333;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* Circle Grid Layout */
+        .circle-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            justify-content: space-evenly;
+            max-width: 90%;
+            margin: 0 auto;
+            gap: var(--card-gap);
+            min-height: 0;
+        }
+
+        .circle-row {
+            display: flex;
+            justify-content: center;
+            gap: var(--card-gap);
+            width: 100%;
+        }
+
+        /* The Card - 3D Flip Container */
+        .circle-card {
+            width: var(--card-size);
+            aspect-ratio: 1 / 1; /* Ensures circles are never ovals */
+            perspective: 1000px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .circle-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .circle-card.flipped .circle-inner {
+            transform: rotateY(180deg);
+        }
+        
+        /* The Circle Shape Itself (Front and Back Faces) */
+        .circle-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10%;
+            box-sizing: border-box;
+            color: black;
+            font-weight: 700;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .circle-face-front {
+            font-size: clamp(0.9rem, 2.2vw, 1.3rem);
+        }
+
+        .circle-face-back {
+            transform: rotateY(180deg);
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+        }
+
+        .circle-face p {
+            margin: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-width: 100%;
+            line-height: 1.2;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary { background-color: #8119c7; }
+        .btn-secondary { background-color: #1e5dab; }
+
+        /* --- Responsive Mobile Experience --- */
+        @media (max-width: 600px) {
+            :root {
+                /* Make circles larger on mobile screens */
+                --card-size: clamp(85px, 24vw, 130px);
+            }
+
+            /* Mobile header: Title on top, buttons side-by-side below */
+            header {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px 20px;
+            }
+
+            header h1 {
+                order: -1; 
+                width: 100%;
+            }
+        }
+
+        /* The provided color gradients */
+        .bg-level-1 { background: linear-gradient(135deg,#ba60e7 0%, #3a73d6 100%); }
+        .bg-level-2 { background: linear-gradient(135deg, #3b82f6 0%, #3beb5b 100%); }
+        .bg-level-3 { background: linear-gradient(135deg, #755ded 0%, #39f2dc 100%); }
+        .bg-level-4 { background: linear-gradient(135deg, #22c55e 0%, #86efac 100%); }
+        .bg-level-5 { background: linear-gradient(135deg, #16a34a 0%, #1fb2e4 100%); }
+        .bg-level-6 { background: linear-gradient(135deg, #f6f210 0%, #84fe0b 100%); }
+        .bg-level-7 { background: linear-gradient(135deg, #f39a16 0%, #fbbf24 100%); }
+        .bg-level-8 { background: linear-gradient(135deg, #fffb00 0%, #0babf5 100%); }
+        .bg-level-9 { background: linear-gradient(135deg, #f242c9 0%, #fb923c 100%); }
+        .bg-level-10 { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+        .bg-level-11 { background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); }
+        .bg-level-12 { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .bg-level-13 { background: linear-gradient(135deg, #db2777 0%, #ec4899 100%); }
+        .bg-level-14 { background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%); }
+        .bg-level-15 { background: linear-gradient(135deg, #f408e8 0%, #a78bfa 100%); }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <button id="reset-btn" class="btn btn-secondary">Reset</button>
+            <h1>Kōrero Mai</h1>
+            <button id="flip-all-btn" class="btn btn-primary">Flip All</button>
+        </header>
+        <div id="circle-grid" class="circle-grid">
+            <!-- Circles will be generated here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const words = [
+            { teReo: 'Haere mai', english: 'Welcome' },
+            { teReo: 'Whare- paku', english: 'Toilet' },
+            { teReo: 'Wā tina', english: 'Lunch time' },
+            { teReo: 'E noho', english: 'Sit down' },
+            { teReo: 'E tū', english: 'Stand up' },
+            { teReo: 'Haere mai ki konei', english: 'Come here' },
+            { teReo: 'Tū rarangi', english: 'Line up' },
+            { teReo: 'Whaka- rongo', english: 'Listen' },
+            { teReo: 'Kia ngāwari', english: 'Be quiet / gentle' },
+            { teReo: 'Ka pai', english: 'Good job' },
+            { teReo: 'Titiro', english: 'Look' },
+            { teReo: 'Puka- puka', english: 'Book' },
+            { teReo: 'Kaiako', english: 'Teacher' },
+            { teReo: 'E hoa', english: 'Friend' }
+        ];
+
+        const colorClasses = [
+            'bg-level-1', 'bg-level-2', 'bg-level-3', 'bg-level-4', 'bg-level-5', 
+            'bg-level-6', 'bg-level-7', 'bg-level-8', 'bg-level-9', 'bg-level-10', 
+            'bg-level-11', 'bg-level-12', 'bg-level-13', 'bg-level-14', 'bg-level-15'
+        ];
+
+        const gridContainer = document.getElementById('circle-grid');
+        const resetButton = document.getElementById('reset-btn');
+        const flipAllButton = document.getElementById('flip-all-btn');
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function createGame() {
+            gridContainer.innerHTML = '';
+            
+            const shuffledWords = shuffle([...words]);
+            const shuffledColors = shuffle([...colorClasses]);
+            let wordIndex = 0;
+
+            const isMobile = window.innerWidth <= 600;
+            const layout = isMobile ? [3, 3, 2, 3, 3] : [5, 4, 5];
+
+            layout.forEach((numCircles) => {
+                const row = document.createElement('div');
+                row.className = 'circle-row';
+
+                for (let i = 0; i < numCircles; i++) {
+                    if (wordIndex >= shuffledWords.length) break;
+                    
+                    const wordPair = shuffledWords[wordIndex];
+                    const colorClass = shuffledColors[wordIndex];
+                    
+                    const card = document.createElement('div');
+                    card.className = 'circle-card';
+
+                    const inner = document.createElement('div');
+                    inner.className = 'circle-inner';
+
+                    const front = document.createElement('div');
+                    front.className = `circle-face circle-face-front ${colorClass}`;
+                    front.innerHTML = `<p>${wordPair.teReo}</p>`;
+
+                    const back = document.createElement('div');
+                    back.className = `circle-face circle-face-back ${colorClass}`;
+                    back.innerHTML = `<p>${wordPair.english}</p>`;
+
+                    inner.appendChild(front);
+                    inner.appendChild(back);
+                    card.appendChild(inner);
+                    row.appendChild(card);
+                    
+                    card.addEventListener('click', () => {
+                        card.classList.toggle('flipped');
+                    });
+
+                    wordIndex++;
+                }
+                gridContainer.appendChild(row);
+            });
+        }
+
+        function flipAllCards() {
+            const cards = document.querySelectorAll('.circle-card');
+            const allFlipped = Array.from(cards).every(card => card.classList.contains('flipped'));
+            cards.forEach(card => card.classList.toggle('flipped', !allFlipped));
+        }
+
+        resetButton.addEventListener('click', createGame);
+        flipAllButton.addEventListener('click', flipAllCards);
+
+        window.addEventListener('load', createGame);
+        window.addEventListener('resize', createGame); // Re-run game on resize to adjust layout
+    </script>
+</body>
+</html>

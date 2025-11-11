@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroque Composer Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    /* FIX: Lighter background overlay */
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/images/music1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .deck-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+  }
+
+  .card-container {
+    width: 80vw;
+    height: 80vh;
+    position: absolute;
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .card-container {
+      height: 70vh;
+    }
+  }
+
+  .card-container.active {
+    display: block;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+    cursor: pointer;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .card-container.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    /* FIX: Semi-transparent card background */
+    background-color: rgba(44, 62, 80, 0.85);
+  }
+
+  .card-front {
+    padding: 20px;
+  }
+
+  .card-front img {
+    max-width: 90%;
+    max-height: 65%;
+    border-radius: 10px;
+    border: 3px solid white;
+    object-fit: contain;
+  }
+
+  .card-front h1 {
+    font-size: clamp(1.2rem, 5vw, 2.5rem);
+    font-weight: 600;
+    margin-top: 15px;
+    text-align: center;
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    /* FIX: Adjust padding and remove scroll */
+    padding: 20px;
+    justify-content: center;
+  }
+
+  .card-back ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  .card-back li {
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    /* FIX: Adjust font size and spacing to fit card */
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: clamp(0.7rem, 2.2vw, 0.95rem);
+  }
+
+  .navigation {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    background: #f1c40f;
+    color: #2c3e50;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: background 0.3s;
+  }
+
+  .nav-btn:hover {
+    background: #f39c12;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="deck-container">
+    <!-- Card 1: Bach -->
+    <div class="card-container" data-composer="Bach">
+      <div class="card-inner">
+        <div class="card-front">
+          <img src="/images/musicbach.jpg" alt="Johann Sebastian Bach">
+          <h1>Johann Sebastian Bach</h1>
+        </div>
+        <div class="card-back">
+          <!-- FIX: Removed h2 heading -->
+          <ul>
+            <li><strong>Born:</strong> Germany (1685–1750), one of the greatest Baroque composers.</li>
+            <li><strong>Famous For:</strong> ‘Brandenburg Concertos’, many church cantatas and keyboard works.</li>
+            <li><strong>Family:</strong> Came from a long line of musicians.</li>
+            <li><strong>Instruments:</strong> A brilliant organ, violin, and harpsichord player.</li>
+            <li><strong>Style:</strong> Known for complex counterpoint and rich harmony.</li>
+            <li><strong>Character:</strong> Serious, hardworking, and deeply religious.</li>
+            <li><strong>Legacy:</strong> Influenced later composers like Mozart and Beethoven.</li>
+            <li><strong>Fun Fact:</strong> Had 20 children, and several became musicians.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Handel -->
+    <div class="card-container" data-composer="Handel">
+      <div class="card-inner">
+        <div class="card-front">
+          <img src="/images/musichandel.jpg" alt="George Frideric Handel">
+          <h1>George Frideric Handel</h1>
+        </div>
+        <div class="card-back">
+          <!-- FIX: Removed h2 heading -->
+          <ul>
+            <li><strong>Born:</strong> Germany (1685–1759), later became a British citizen.</li>
+            <li><strong>Famous For:</strong> ‘Messiah’ (Hallelujah Chorus) and ‘Water Music’.</li>
+            <li><strong>Family:</strong> His father wanted him to study law, not music.</li>
+            <li><strong>Instruments:</strong> Played organ, harpsichord, and violin.</li>
+            <li><strong>Style:</strong> Grand, dramatic, and often for royal events.</li>
+            <li><strong>Character:</strong> Confident, independent, and determined.</li>
+            <li><strong>Legacy:</strong> His music is still performed worldwide at holidays.</li>
+            <li><strong>Fun Fact:</strong> Went blind near the end of his life but still composed.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Card 3: Vivaldi -->
+    <div class="card-container" data-composer="Vivaldi">
+      <div class="card-inner">
+        <div class="card-front">
+          <img src="/images/musicvivaldi.jpg" alt="Antonio Vivaldi">
+          <h1>Antonio Vivaldi</h1>
+        </div>
+        <div class="card-back">
+          <!-- FIX: Removed h2 heading -->
+          <ul>
+            <li><strong>Born:</strong> Venice, Italy (1678–1741), nicknamed ‘The Red Priest.’</li>
+            <li><strong>Famous For:</strong> ‘The Four Seasons’ violin concertos.</li>
+            <li><strong>Career:</strong> Taught at a girls’ orphanage in Venice.</li>
+            <li><strong>Instruments:</strong> A brilliant violinist and teacher.</li>
+            <li><strong>Style:</strong> Known for energetic rhythms and bright melodies.</li>
+            <li><strong>Character:</strong> Passionate, innovative, and energetic.</li>
+            <li><strong>Legacy:</strong> Rediscovered and became hugely popular in the 20th century.</li>
+            <li><strong>Fun Fact:</strong> Called 'The Red Priest' because of his red hair.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Purcell -->
+    <div class="card-container" data-composer="Purcell">
+      <div class="card-inner">
+        <div class="card-front">
+          <img src="/images/musicpurcell.jpg" alt="Henry Purcell">
+          <h1>Henry Purcell</h1>
+        </div>
+        <div class="card-back">
+          <!-- FIX: Removed h2 heading -->
+          <ul>
+            <li><strong>Born:</strong> London (1659–1695), England’s most famous Baroque composer.</li>
+            <li><strong>Famous For:</strong> ‘Dido and Aeneas’, one of the first English operas.</li>
+            <li><strong>Family:</strong> Came from a musical family working for the royal court.</li>
+            <li><strong>Career:</strong> Organist at Westminster Abbey and composer for the King.</li>
+            <li><strong>Style:</strong> Blended English, French, and Italian influences.</li>
+            <li><strong>Character:</strong> Brilliant, respected, but died young at age 36.</li>
+            <li><strong>Legacy:</strong> Helped shape English Baroque traditions.</li>
+            <li><strong>Fun Fact:</strong> His music was played at Queen Elizabeth II’s coronation in 1953.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="navigation">
+  <button id="prevBtn" class="nav-btn">❮ Previous</button>
+  <button id="nextBtn" class="nav-btn">Next ❯</button>
+</div>
+
+<script>
+  const cards = Array.from(document.querySelectorAll('.card-container'));
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let currentCardIndex = 0;
+
+  function showCard(index) {
+    cards.forEach((card, i) => {
+      card.classList.toggle('active', i === index);
+      card.classList.remove('flipped'); // Always show the front first
+    });
+  }
+
+  function nextCard() {
+    currentCardIndex = (currentCardIndex + 1) % cards.length;
+    showCard(currentCardIndex);
+  }
+
+  function prevCard() {
+    currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
+    showCard(currentCardIndex);
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.toggle('flipped');
+    });
+  });
+
+  nextBtn.addEventListener('click', nextCard);
+  prevBtn.addEventListener('click', prevCard);
+
+  // Show the first card initially
+  showCard(currentCardIndex);
+</script>
+
+</body>
+</html>

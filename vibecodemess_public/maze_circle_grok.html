@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Circular Maze</title>
+    <style>
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: #f0f0f0; 
+        }
+        canvas { 
+            border: 5px solid #000; 
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border: none;
+            color: white;
+            border-radius: 5px;
+        }
+        #toggleSolution {
+            background-color: blue;
+        }
+        #generateNew {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="mazeCanvas" width="600" height="600"></canvas>
+    <div class="button-container">
+        <button id="toggleSolution">Show Solution</button>
+        <button id="generateNew">Generate New Maze</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const rings = 10;
+        const cellsPerRing = 16;
+        const cellSize = width / (2 * rings);
+        let showSolution = false;
+        let animationStartTime = null;
+        const animationDuration = 10000; // 10 seconds
+        let solutionPath = [];
+        let maze = [];
+        let start = {};
+        let end = {};
+        let entranceCell = -1;
+
+        function initMaze() {
+            maze = Array(rings).fill().map(() => Array(cellsPerRing).fill().map(() => ({
+                inner: true, outer: true, left: true, right: true, visited: false
+            })));
+            end = { ring: 0, cell: 0 }; // End at center
+            start = { ring: rings - 1, cell: Math.floor(Math.random() * cellsPerRing) }; // Start at outer ring
+            entranceCell = Math.floor(Math.random() * cellsPerRing); // Random entrance to center
+
+            // Clear innermost ring (middle 10%), control outer walls
+            for (let c = 0; c < cellsPerRing; c++) {
+                maze[0][c].inner = false;
+                maze[0][c].left = false;
+                maze[0][c].right = false;
+                maze[0][c].outer = (c !== entranceCell); // Single entrance
+            }
+
+            // Clear start cell walls for entry
+            maze[start.ring][start.cell].outer = false;
+            maze[start.ring][start.cell].left = false;
+            maze[start.ring][start.cell].right = false;
+        }
+
+        // Shuffle array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Generate maze
+        function generateMaze(ring, cell) {
+            maze[ring][cell].visited = true;
+
+            const directions = shuffle([
+                { dr: 0, dc: 1, wall: 'right', oppWall: 'left' },
+                { dr: 0, dc: -1, wall: 'left', oppWall: 'right' },
+                { dr: -1, dc: 0, wall: 'inner', oppWall: 'outer' },
+                { dr: 1, dc: 0, wall: 'outer', oppWall: 'inner' }
+            ]);
+
+            for (const { dr, dc, wall, oppWall } of directions) {
+                const newRing = ring + dr;
+                const newCell = (cell + dc + cellsPerRing) % cellsPerRing;
+
+                if (newRing >= 0 && newRing < rings && !maze[newRing][newCell].visited) {
+                    if (newRing === 1 && newCell === entranceCell && wall === 'inner') continue;
+                    if (ring === 0 && cell === entranceCell && wall === 'outer') continue;
+
+                    maze[ring][cell][wall] = false;
+                    maze[newRing][newCell][oppWall] = false;
+                    generateMaze(newRing, newCell);
+                }
+            }
+
+            // Ensure at least one inner/outer gap per ring (except innermost and outermost)
+            if (ring > 1 && ring < rings - 1) {
+                const hasInnerGap = maze[ring].some(cell => !cell.inner);
+                const hasOuterGap = maze[ring].some(cell => !cell.outer);
+                if (!hasInnerGap) {
+                    const randCell = Math.floor(Math.random() * cellsPerRing);
+                    maze[ring][randCell].inner = false;
+                    maze[ring - 1][randCell].outer = false;
+                }
+                if (!hasOuterGap) {
+                    const randCell = Math.floor(Math.random() * cellsPerRing);
+                    maze[ring][randCell].outer = false;
+                    maze[ring + 1][randCell].inner = false;
+                }
+            }
+
+            // Enforce single entrance to center
+            if (ring === 1) {
+                for (let c = 0; c < cellsPerRing; c++) {
+                    maze[1][c].inner = (c !== entranceCell);
+                }
+            }
+        }
+
+        // Find solution path using BFS
+        function findSolutionPath() {
+            const queue = [{ ring: start.ring, cell: start.cell, path: [{ ring: start.ring, cell: start.cell }] }];
+            const visited = Array(rings).fill().map(() => Array(cellsPerRing).fill(false));
+            visited[start.ring][start.cell] = true;
+
+            while (queue.length > 0) {
+                const { ring, cell, path } = queue.shift();
+                if (ring === end.ring && cell === end.cell) return path;
+
+                const directions = [
+                    { dr: 0, dc: 1, wall: 'right' },
+                    { dr: 0, dc: -1, wall: 'left' },
+                    { dr: -1, dc: 0, wall: 'inner' },
+                    { dr: 1, dc: 0, wall: 'outer' }
+                ];
+
+                for (const { dr, dc, wall } of directions) {
+                    const newRing = ring + dr;
+                    const newCell = (cell + dc + cellsPerRing) % cellsPerRing;
+
+                    if (newRing >= 0 && newRing < rings && !visited[newRing][newCell] && !maze[ring][cell][wall]) {
+                        visited[newRing][newCell] = true;
+                        queue.push({ ring: newRing, cell: newCell, path: [...path, { ring: newRing, cell: newCell }] });
+                    }
+                }
+            }
+            return [];
+        }
+
+        // Get cell center coordinates
+        function getCellCenter(pos) {
+            const { ring, cell } = pos;
+            const radius = (ring + 0.5) * cellSize;
+            const angle = ((cell + 0.5) / cellsPerRing) * 2 * Math.PI;
+            return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+        }
+
+        // Get midpoint of wall between two cells
+        function getWallMidpoint(from, to) {
+            const { ring: r1, cell: c1 } = from;
+            const { ring: r2, cell: c2 } = to;
+            let radius, angle;
+
+            if (r1 === r2) { // Left or right wall
+                radius = (r1 + 0.5) * cellSize;
+                angle = (((c1 < c2 ? c1 : c2) + 1) / cellsPerRing) * 2 * Math.PI;
+            } else { // Inner or outer wall
+                radius = Math.min(r1, r2) * cellSize;
+                angle = ((c1 + 0.5) / cellsPerRing) * 2 * Math.PI;
+            }
+
+            return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+        }
+
+        // Get start marker point at outer wall
+        function getStartMarkerPoint() {
+            const radius = rings * cellSize; // Outer wall
+            const angle = ((start.cell + 0.5) / cellsPerRing) * 2 * Math.PI;
+            return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+        }
+
+        // Generate smooth path points starting from start cell center
+        function generateSmoothPath() {
+            const points = [getCellCenter(solutionPath[0])]; // Start from cell center
+            for (let i = 0; i < solutionPath.length - 1; i++) {
+                points.push(getWallMidpoint(solutionPath[i], solutionPath[i + 1]));
+                points.push(getCellCenter(solutionPath[i + 1]));
+            }
+            return points;
+        }
+
+        // Interpolate along smooth path
+        function interpolatePath(points, progress) {
+            const totalSegments = points.length - 1;
+            const scaledProgress = progress * totalSegments;
+            const segment = Math.floor(scaledProgress);
+            if (segment >= totalSegments) return { ...points[points.length - 1], hue: 360 };
+
+            const frac = scaledProgress - segment;
+            const p1 = points[segment];
+            const p2 = points[segment + 1];
+            return {
+                x: p1.x + frac * (p2.x - p1.x),
+                y: p1.y + frac * (p2.y - p1.y),
+                hue: (scaledProgress / totalSegments) * 360
+            };
+        }
+
+        // Calculate direction angle for character rotation
+        function getDirectionAngle(p1, p2) {
+            return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        }
+
+        // Draw Paw Patrol character (Chase)
+        function drawChase(x, y, angle, hue) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            const size = cellSize * 2; // 100% larger
+            // Head (blue oval)
+            ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, size * 0.6, size * 0.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Snout (white)
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(size * 0.3, 0, size * 0.2, size * 0.15, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Eyes (black)
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(size * 0.2, -size * 0.2, size * 0.1, 0, 2 * Math.PI);
+            ctx.arc(size * 0.2, size * 0.2, size * 0.1, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Police hat (blue triangle with red badge)
+            ctx.fillStyle = '#000080';
+            ctx.beginPath();
+            ctx.moveTo(-size * 0.4, -size * 0.5);
+            ctx.lineTo(size * 0.4, -size * 0.5);
+            ctx.lineTo(0, -size * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.5, size * 0.1, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Draw the maze
+        function drawMaze(timestamp) {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw rainbow background outside
+            const mazeRadius = rings * cellSize;
+            const outerRadius = Math.sqrt(2) * (width / 2);
+            const gradient = ctx.createRadialGradient(width / 2, height / 2, mazeRadius, width / 2, height / 2, outerRadius);
+            gradient.addColorStop(0, 'red');
+            gradient.addColorStop(0.166, 'orange');
+            gradient.addColorStop(0.333, 'yellow');
+            gradient.addColorStop(0.5, 'green');
+            gradient.addColorStop(0.666, 'blue');
+            gradient.addColorStop(0.833, 'indigo');
+            gradient.addColorStop(1, 'violet');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw white circle for maze
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, mazeRadius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.translate(width / 2, height / 2);
+
+            // Draw maze walls
+            for (let r = 0; r < rings; r++) {
+                for (let c = 0; c < cellsPerRing; c++) {
+                    const innerRadius = r * cellSize;
+                    const outerRadius = (r + 1) * cellSize;
+                    const startAngle = (c / cellsPerRing) * 2 * Math.PI;
+                    const endAngle = ((c + 1) / cellsPerRing) * 2 * Math.PI;
+
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 4; // Thick lines
+
+                    if (maze[r][c].inner && r > 0) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, innerRadius, startAngle, endAngle);
+                        ctx.stroke();
+                    }
+
+                    if (maze[r][c].outer && r < rings - 1) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, outerRadius, startAngle, endAngle);
+                        ctx.stroke();
+                    }
+
+                    if (maze[r][c].left) {
+                        ctx.beginPath();
+                        ctx.moveTo(innerRadius * Math.cos(startAngle), innerRadius * Math.sin(startAngle));
+                        ctx.lineTo(outerRadius * Math.cos(startAngle), outerRadius * Math.sin(startAngle));
+                        ctx.stroke();
+                    }
+
+                    if (maze[r][c].right) {
+                        ctx.beginPath();
+                        ctx.moveTo(innerRadius * Math.cos(endAngle), innerRadius * Math.sin(endAngle));
+                        ctx.lineTo(outerRadius * Math.cos(endAngle), outerRadius * Math.sin(endAngle));
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Draw solution path
+            if (showSolution && solutionPath.length > 0) {
+                if (animationStartTime === null) animationStartTime = timestamp;
+
+                const progress = Math.min((timestamp - animationStartTime) / animationDuration, 1);
+                const points = generateSmoothPath();
+
+                // Draw trail
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                let prevPoint = points[0];
+                ctx.moveTo(prevPoint.x, prevPoint.y);
+                for (let i = 1; i < points.length; i++) {
+                    const t = i / (points.length - 1);
+                    if (t <= progress) {
+                        const point = points[i];
+                        ctx.strokeStyle = `hsl(${t * 360}, 100%, 50%)`;
+                        ctx.lineTo(point.x, point.y);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(point.x, point.y);
+                        prevPoint = point;
+                    } else {
+                        const frac = (progress - (i - 1) / (points.length - 1)) / (1 / (points.length - 1));
+                        if (frac > 0) {
+                            const point = points[i];
+                            const interX = prevPoint.x + frac * (point.x - prevPoint.x);
+                            const interY = prevPoint.y + frac * (point.y - prevPoint.y);
+                            ctx.strokeStyle = `hsl(${progress * 360}, 100%, 50%)`;
+                            ctx.lineTo(interX, interY);
+                            ctx.stroke();
+                        }
+                        break;
+                    }
+                }
+
+                // Draw Chase
+                if (progress < 1) {
+                    const { x, y, hue } = interpolatePath(points, progress);
+                    const nextIndex = Math.min(Math.ceil(progress * (points.length - 1)), points.length - 1);
+                    const nextPoint = points[nextIndex];
+                    const angle = getDirectionAngle({ x, y }, nextPoint);
+                    drawChase(x, y, angle, hue);
+                    requestAnimationFrame(drawMaze);
+                }
+            }
+
+            // Draw end (red) at center with sign
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(0, 0, cellSize / 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('End', 0, cellSize / 2);
+
+            // Draw start (green) at outer wall midpoint
+            const startPos = getStartMarkerPoint();
+            ctx.fillStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(startPos.x, startPos.y, cellSize / 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Start', startPos.x, startPos.y + cellSize / 2);
+
+            ctx.translate(-width / 2, -height / 2);
+        }
+
+        // Generate new maze
+        function generateNewMaze() {
+            let attempts = 0;
+            do {
+                // Full reset
+                maze = [];
+                solutionPath = [];
+                start = {};
+                end = {};
+                entranceCell = -1;
+                showSolution = false;
+                animationStartTime = null;
+                document.getElementById('toggleSolution').textContent = 'Show Solution';
+
+                initMaze();
+                maze[start.ring][start.cell].visited = true;
+                generateMaze(start.ring, start.cell);
+                solutionPath = findSolutionPath();
+                attempts++;
+                if (attempts > 50) {
+                    console.error('Failed to generate maze with solution after 50 attempts');
+                    break;
+                }
+            } while (solutionPath.length === 0);
+
+            ctx.clearRect(0, 0, width, height); // Clear canvas
+            requestAnimationFrame(drawMaze);
+        }
+
+        // Initial generation
+        generateNewMaze();
+
+        // Setup buttons
+        document.getElementById('toggleSolution').addEventListener('click', () => {
+            showSolution = !showSolution;
+            animationStartTime = null;
+            document.getElementById('toggleSolution').textContent = showSolution ? 'Hide Solution' : 'Show Solution';
+            if (showSolution && solutionPath.length === 0) solutionPath = findSolutionPath();
+            ctx.clearRect(0, 0, width, height); // Clear canvas
+            requestAnimationFrame(drawMaze);
+        });
+
+        document.getElementById('generateNew').addEventListener('click', generateNewMaze);
+    </script>
+</body>
+</html>

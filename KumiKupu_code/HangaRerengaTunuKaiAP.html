@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hanga Rerenga Tunu Kai – Active & Passive</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff0f5;
+      padding: 20px;
+      font-size: 1.3em;
+    }
+    .input-row {
+      margin: 10px 0;
+    }
+    label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    select {
+      padding: 5px;
+      font-size: 1em;
+      font-family: inherit;
+    }
+    .green select, .green label { color: green; }
+    .blue select, .blue label { color: blue; }
+    .red select, .red label { color: red; }
+    .purple select, .purple label { color: purple; }
+
+    .output {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .green { color: green; }
+    .red { color: red; }
+    .blue { color: blue; }
+    .purple { color: purple; }
+  </style>
+</head>
+<body>
+
+<h2>Hanga Rerenga Tunu Kai – Active & Passive</h2>
+
+<div class="input-row green">
+  <label for="tense">Tense:</label>
+  <select id="tense">
+    <option value="Ka|will">Ka</option>
+    <option value="Kei te|is">Kei te</option>
+    <option value="Kua|has">Kua</option>
+  </select>
+</div>
+
+<div class="input-row blue">
+  <label for="agent">Agent:</label>
+  <select id="agent">
+    <option value="au|I|me">au</option>
+    <option value="koe|you|you">koe</option>
+    <option value="ia|he/she|him/her">ia</option>
+    <option value="mātou|we|us">mātou</option>
+    <option value="rātou|they|them">rātou</option>
+    <option value="te kaiako|the teacher|the teacher">te kaiako</option>
+  </select>
+</div>
+
+<div class="input-row red">
+  <label for="verb">Verb:</label>
+  <select id="verb" onchange="updateObjects()">
+    <option value="tunu">tunu</option>
+    <option value="whakaranu">whakaranu</option>
+    <option value="tāpiri">tāpiri</option>
+    <option value="tātari">tātari</option>
+    <option value="whakamahana">whakamahana</option>
+    <option value="whakarewa">whakarewa</option>
+    <option value="whiu">whiu</option>
+    <option value="ranu">ranu</option>
+    <option value="tapahi">tapahi</option>
+    <option value="horoi">horoi</option>
+    <option value="whāranu">whāranu</option>
+    <option value="whāngai">whāngai</option>
+  </select>
+</div>
+
+<div class="input-row purple">
+  <label for="object">Object:</label>
+  <select id="object"></select>
+</div>
+
+<div class="output" id="activeM"></div>
+<div class="output" id="activeE"></div>
+<div class="output" id="passiveM"></div>
+<div class="output" id="passiveE"></div>
+
+<script>
+const verbData = {
+  tunu: { en: "bake", passive: "tunua", objects: ["i te keke|the cake"] },
+  whakaranu: { en: "mix", passive: "whakaranuatia", objects: ["i ngā kai|the ingredients"] },
+  tāpiri: { en: "add", passive: "tāpiritia", objects: ["i te miraka|the milk"] },
+  tātari: { en: "sift", passive: "tātaria", objects: ["i te puehu parāoa|the flour"] },
+  whakamahana: { en: "heat", passive: "whakamahanatia", objects: ["i te umu|the oven"] },
+  whakarewa: { en: "melt", passive: "whakarewaina", objects: ["i te pata|the butter"] },
+  whiu: { en: "whisk", passive: "whiua", objects: ["i ngā hēki|the eggs"] },
+  ranu: { en: "combine", passive: "ranua", objects: ["i ngā whakauru|the ingredients"] },
+  tapahi: { en: "cut", passive: "tapahia", objects: ["i te keke|the cake"] },
+  horoi: { en: "wash", passive: "horoia", objects: ["i ngā taputapu|the utensils"] },
+  whāranu: { en: "stir", passive: "whāranua", objects: ["i te ranunga|the mixture"] },
+  whāngai: { en: "serve", passive: "whāngaia", objects: ["i te keke ki ngā ākonga|the cake to the students"] }
+};
+
+// Irregular verbs list
+const irregularPast = {
+  cut: "cut",
+  put: "put",
+  run: "run",
+  make: "made",
+  take: "taken",
+  bake: "baked"
+};
+
+function correctPastParticiple(verb) {
+  if (irregularPast[verb]) return irregularPast[verb];
+  if (verb.endsWith("e")) return verb + "d";
+  if (verb.endsWith("y") && !/[aeiou]y$/.test(verb)) return verb.slice(0, -1) + "ied";
+  return verb + "ed";
+}
+
+function toPresentParticiple(verb) {
+  if (verb.endsWith("ie")) return verb.slice(0, -2) + "ying";
+  if (verb.endsWith("e") && verb !== "be" && verb !== "see") return verb.slice(0, -1) + "ing";
+  if (/[^aeiou][aeiou][^aeiou]$/.test(verb)) return verb + verb.slice(-1) + "ing";
+  return verb + "ing";
+}
+
+function updateObjects() {
+  const verb = document.getElementById("verb").value;
+  const objectSelect = document.getElementById("object");
+  objectSelect.innerHTML = "";
+  verbData[verb].objects.forEach(obj => {
+    const [mi, en] = obj.split("|");
+    const option = document.createElement("option");
+    option.value = `${mi}|${en}`;
+    option.textContent = mi;
+    objectSelect.appendChild(option);
+  });
+  updateSentences();
+}
+
+function updateSentences() {
+  const [tenseM, tenseE] = document.getElementById("tense").value.split("|");
+  const [agentM, agentE, agentPassive] = document.getElementById("agent").value.split("|");
+  const verb = document.getElementById("verb").value;
+  const [objectM, objectE] = document.getElementById("object").value.split("|");
+  const passiveVerb = verbData[verb].passive;
+  const verbE = verbData[verb].en;
+
+  const agentMFormatted = `e ${agentM}`;
+  const agentMActive = agentM === "te kaiako" ? `a ${agentM}` : agentM;
+
+  const activeM = `<span class="green">${tenseM}</span> <span class="red">${verb}</span> <span class="blue">${agentMActive}</span> <span class="purple">${objectM}</span>.`;
+  const passiveM = `<span class="green">${tenseM}</span> <span class="red">${passiveVerb}</span> <span class="purple">${objectM.replace(/^i /, '')}</span> <span class="blue">${agentMFormatted}</span>.`;
+
+  let englishVerb = "";
+  if (tenseE === "is") {
+    const aux = agentE === "I" ? "am" : ["you", "we", "they"].includes(agentE) ? "are" : "is";
+    englishVerb = `${aux} ${toPresentParticiple(verbE)}`;
+  } else if (tenseE === "has") {
+    const aux = ["I", "you", "we", "they"].includes(agentE) ? "have" : "has";
+    englishVerb = `${aux} ${correctPastParticiple(verbE)}`;
+  } else {
+    englishVerb = `will ${verbE}`;
+  }
+
+  const activeE = `<span class="blue">${agentE.charAt(0).toUpperCase() + agentE.slice(1)}</span> <span class="green">${englishVerb.split(" ")[0]}</span> <span class="red">${englishVerb.split(" ").slice(1).join(" ")}</span> <span class="purple">${objectE}</span>.`;
+
+  let passiveAux = tenseE === "is" ? "is being" : tenseE === "has" ? "have been" : "will be";
+  if (["the cake", "the milk", "the oven", "the mixture"].includes(objectE)) {
+    passiveAux = tenseE === "has" ? "has been" : tenseE === "is" ? "is being" : "will be";
+  }
+
+  const passiveE = `<span class="purple">${objectE.charAt(0).toUpperCase() + objectE.slice(1)}</span> <span class="green">${passiveAux}</span> <span class="red">${correctPastParticiple(verbE)}</span> <span class="blue">by ${agentPassive}</span>.`;
+
+  document.getElementById("activeM").innerHTML = "Māori (Active): " + activeM;
+  document.getElementById("activeE").innerHTML = "English (Active): " + activeE;
+  document.getElementById("passiveM").innerHTML = "Māori (Passive): " + passiveM;
+  document.getElementById("passiveE").innerHTML = "English (Passive): " + passiveE;
+}
+
+document.querySelectorAll("select").forEach(sel => {
+  sel.addEventListener("change", updateSentences);
+});
+
+updateObjects(); // Initialize on load
+</script>
+
+</body>
+</html>
