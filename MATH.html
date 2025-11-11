@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+  <meta charset="UTF-8">
+  <title>Te Reo Māori Pāngarau Pātaitaitanga</title>
+  <style>
+    body, input, button {
+      font-family: Arial, sans-serif;
+      font-size: 24px;
+    }
+    .correct { color: green; }
+    .incorrect { color: red; }
+.equals-green, .equals-red {
+  font-weight: bold;
+  color: purple;
+}
+
+    .difficulty-button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+    }
+    #easy { background-color: green; color: white; }
+    #medium { background-color: orange; color: white; }
+    #hard { background-color: red; color: white; }
+    #regenerate { background-color: gray; color: white; }
+    .ka-puta { color: purple; }
+    .operation { color: purple; }
+  </style>
+</head>
+<body>
+<h3 style="display: inline;">Te Reo Māori Pāngarau Pātaitaitanga</h3>
+<h3 id="report-date" style="display: inline; font-size: 0.7em; margin-left: 10px;"></h3>
+  <h3><span class="operation">+</span> tāpiri, <span class="operation">-</span> tango, <span class="operation">*</span> whakarau, <span class="operation">/</span> whakawehe, <span class="ka-puta">= ka puta</span></h3>
+  <div>
+    <button class="difficulty-button" id="easy" onclick="generateQuiz('easy')">Ngāwari</button>
+    <button class="difficulty-button" id="medium" onclick="generateQuiz('medium')">Waenga</button>
+    <button class="difficulty-button" id="hard" onclick="generateQuiz('hard')">Uaua</button>
+    <button class="difficulty-button" id="regenerate" onclick="generateQuiz(currentDifficulty)">Anō</button>
+  </div>
+  <form id="quiz-form"></form>
+
+  <script>
+    const numberWords = [
+      "kore", "tahi", "rua", "toru", "whā", "rima", "ono", "whitu", "waru", "iwa", "tekau",
+      "tekau mā tahi", "tekau mā rua", "tekau mā toru", "tekau mā whā", "tekau mā rima",
+      "tekau mā ono", "tekau mā whitu", "tekau mā waru", "tekau mā iwa", "rua tekau",
+      "rua tekau mā tahi", "rua tekau mā rua", "rua tekau mā toru", "rua tekau mā whā",
+      "rua tekau mā rima", "rua tekau mā ono", "rua tekau mā whitu", "rua tekau mā waru",
+      "rua tekau mā iwa", "toru tekau", "toru tekau mā tahi", "toru tekau mā rua",
+      "toru tekau mā toru", "toru tekau mā whā", "toru tekau mā rima", "toru tekau mā ono",
+      "toru tekau mā whitu", "toru tekau mā waru", "toru tekau mā iwa", "whā tekau"
+    ];
+
+    const operations = {
+      "+": "tāpiri",
+      "-": "tango",
+      "*": "whakarau",
+      "/": "whakawehe"
+    };
+
+    let currentDifficulty = "medium";
+
+    function getMaoriNumber(n) {
+      return numberWords[n] || n;
+    }
+
+    function generateQuiz(difficulty) {
+      currentDifficulty = difficulty;
+      const form = document.getElementById("quiz-form");
+      form.innerHTML = "";
+      let questions = [];
+
+      while (questions.length < 5) {
+        let a = Math.floor(Math.random() * 21);
+        let b = Math.floor(Math.random() * 21);
+        let op = "+";
+        let answer = a + b;
+
+        if (difficulty === "easy") {
+          if (answer > 15) continue;
+        } else if (difficulty === "hard") {
+          const ops = ["+", "-", "*", "/"];
+          op = ops[Math.floor(Math.random() * ops.length)];
+          if (op === "+") {
+            answer = a + b;
+          } else if (op === "-") {
+            if (a < b) [a, b] = [b, a];
+            answer = a - b;
+          } else if (op === "*") {
+            a = Math.floor(Math.random() * 11);
+            b = Math.floor(Math.random() * 11);
+            answer = a * b;
+          } else if (op === "/") {
+            b = Math.floor(Math.random() * 10) + 1;
+            answer = Math.floor(Math.random() * 10);
+            a = b * answer;
+          }
+        }
+
+        questions.push({ a, b, op, answer });
+      }
+
+      questions.forEach((q, i) => {
+        const maoriQuestion = `<strong>${getMaoriNumber(q.a)}</strong> <span class='operation'>${operations[q.op]}</span> <strong>${getMaoriNumber(q.b)}</strong> <span class='ka-puta'>ka puta</span>`;
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <div>
+            <label>${i + 1}. ${maoriQuestion}:</label>
+            <input type="text" id="q${i}" data-a="${q.a}" data-b="${q.b}" data-op="${q.op}" data-answer="${q.answer}">
+          </div>
+          <div id="feedback${i}" class="feedback-line"></div>
+        `;
+        form.appendChild(div);
+      });
+
+      const submitBtn = document.createElement("button");
+      submitBtn.textContent = "māka";
+      submitBtn.type = "button";
+      submitBtn.onclick = checkAnswers;
+      form.appendChild(submitBtn);
+    }
+
+    function checkAnswers() {
+      for (let i = 0; i < 5; i++) {
+        const input = document.getElementById("q" + i);
+        const feedback = document.getElementById("feedback" + i);
+        const a = parseInt(input.getAttribute("data-a"));
+        const b = parseInt(input.getAttribute("data-b"));
+        const op = input.getAttribute("data-op");
+        const correctAnswer = parseFloat(input.getAttribute("data-answer"));
+        let userAnswer = input.value.trim().toLowerCase();
+
+        if (!isNaN(userAnswer)) {
+          userAnswer = parseFloat(userAnswer);
+        } else {
+          userAnswer = numberWords.indexOf(userAnswer);
+        }
+
+        const isCorrect = userAnswer === correctAnswer;
+        const colorClass = isCorrect ? "correct" : "incorrect";
+        const equalsClass = isCorrect ? "equals-green" : "equals-red";
+
+        const mathEquation = `<strong>${a}</strong> <span class='operation'>${op}</span> <strong>${b}</strong> <span class='${equalsClass}'>=</span> <strong>${correctAnswer}</strong>`;
+        const maoriEquation = `<strong>${getMaoriNumber(a)}</strong> <span class='operation'>${operations[op]}</span> <strong>${getMaoriNumber(b)}</strong> <span class='ka-puta'>ka puta</span> <strong>${getMaoriNumber(correctAnswer)}</strong>`;
+
+        feedback.innerHTML = (isCorrect ? "✅ Tika! " : "❌ Hē ") + mathEquation + " — " + maoriEquation;
+        feedback.className = colorClass;
+      }
+    }
+
+    generateQuiz(currentDifficulty);
+  </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const today = new Date();
+  
+  function formatDateMāori(dateObj) {
+    const months = [
+      "Kohi-tātea", "Hui-tanguru", "Poutū-te-rangi", "Paenga-whāwhā",
+      "Haratua", "Pipiri", "Hōngongoi", "Here-turi-kōkā",
+      "Mahuru", "Whiringa-ā-nuku", "Whiringa-ā-rangi", "Hakihea"
+    ];
+    const day = dateObj.getDate();
+    const month = months[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+    return `${day} o ${month} ${year}`;
+  }
+
+  function formatDateEnglish(dateObj) {
+    const day = dateObj.getDate();
+    const month = dateObj.toLocaleString('en-NZ', { month: 'long' });
+    const year = dateObj.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  const formattedMāori = formatDateMāori(today);
+  const formattedEnglish = formatDateEnglish(today);
+  document.getElementById("report-date").textContent = `${formattedMāori} (${formattedEnglish})`;
+});
+</script>
+</body>
+</html>

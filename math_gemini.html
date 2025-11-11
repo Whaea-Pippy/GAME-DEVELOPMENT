@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Math Resources</title>
+    <style>
+        /* CSS for a full-screen, no-scroll, responsive layout */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* This is key to preventing scrolling */
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex; /* Using flexbox on the body */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .resource-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            height: calc(33.33vh - 20px); /* Distributes height equally on small screens */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+
+        /* Media query for larger screens (e.g., tablets, desktops) */
+        @media (min-width: 768px) {
+            #main-container {
+                flex-direction: row;
+                flex-wrap: nowrap;
+            }
+            .resource-card {
+                height: 90vh; /* Takes up most of the viewport height */
+                width: calc(33.33vw - 40px); /* Distributes width on large screens */
+                margin: 20px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+
+        <div class="resource-card">
+            <h2>Graphing Calculator 📈</h2>
+            <p>Visualize functions and equations dynamically. Use it to explore slopes, intercepts, and transformations.</p>
+            <div style="width: 100%; height: 100%; background-color: #eee; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                <p style="color: #666;">(Interactive Graphing Tool Placeholder)</p>
+            </div>
+        </div>
+
+        <div class="resource-card">
+            <h2>Geometry Explorer 📐</h2>
+            <p>Manipulate shapes to understand properties like area, perimeter, and angles. See how changes affect the measurements.</p>
+            <div style="width: 100%; height: 100%; background-color: #eee; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                <p style="color: #666;">(Interactive Geometry Placeholder)</p>
+            </div>
+        </div>
+
+        <div class="resource-card">
+            <h2>Prime Number Generator ✨</h2>
+            <p>Enter a number and quickly get a list of all primes up to that value. Great for number theory lessons.</p>
+            <div style="margin-top: 15px; text-align: center; width: 100%;">
+                <input type="number" id="primeInput" placeholder="Enter a number" style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 10px;">
+                <button onclick="generatePrimes()" style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer;">Generate</button>
+            </div>
+            <div id="primeResults" style="margin-top: 15px; padding: 10px; background-color: #f9f9f9; border-radius: 5px; width: 100%; min-height: 50px; text-align: left; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+        function generatePrimes() {
+            const num = parseInt(document.getElementById('primeInput').value, 10);
+            const resultsDiv = document.getElementById('primeResults');
+            resultsDiv.textContent = ''; // Clear previous results
+
+            if (isNaN(num) || num < 2) {
+                resultsDiv.textContent = 'Please enter a number greater than 1.';
+                return;
+            }
+
+            const primes = [];
+            const isPrime = new Array(num + 1).fill(true);
+            isPrime[0] = false;
+            isPrime[1] = false;
+
+            for (let i = 2; i * i <= num; i++) {
+                if (isPrime[i]) {
+                    for (let j = i * i; j <= num; j += i) {
+                        isPrime[j] = false;
+                    }
+                }
+            }
+
+            for (let i = 2; i <= num; i++) {
+                if (isPrime[i]) {
+                    primes.push(i);
+                }
+            }
+
+            resultsDiv.textContent = primes.join(', ') || 'No primes found.';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hanga Rerenga Wā</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 1.5em;
+            background-color: #fff0f5;
+            padding: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        select {
+            font-size: 1em;
+            margin: 10px 0;
+        }
+        #output {
+            margin-top: 30px;
+            font-size: 2em;
+        }
+        .kākāriki { color: #008000; } /* Tense */
+        .kikorangi { color: #0000FF; } /* Pronoun */
+        .karaka { color: #FFA500; } /* Descriptive/Feeling */
+        .whero { color: #FF0000; } /* Verb */
+        .indigo { color: #1f3fb5; } /* Time noun */
+        .parauri { color: #8B4513; } /* Time reference */
+        .waiporoporo { color: #800080; } /* Object */
+        .pango { color: #000000; } /* Structural/context */
+    </style>
+</head>
+<body>
+    <h1>Hanga Rerenga Wā</h1>
+    <label for="timeType">Kōwhiria te momo wā:</label>
+    <select id="timeType" onchange="updateTimeValues()">
+        <option value="season">Ngā Wā o te Tau (Seasons)</option>
+        <option value="month">Ngā Marama o te Tau (Months)</option>
+        <option value="day">Ngā Rā o te Wiki (Days)</option>
+    </select>
+    <br>
+    <label for="timeValue">Kōwhiria te wā:</label>
+    <select id="timeValue" onchange="updateDescriptions()"></select>
+    <br>
+    <label for="description">Kōwhiria te rerenga:</label>
+    <select id="description" onchange="buildSentence()"></select>
+    <div id="output"></div>
+
+    <script>
+        const data = {
+            season: {
+                "Raumati": [
+                    { maori: "He wera te raumati.", english: "Summer is hot." },
+                    { maori: "He wā pai mō te kaukau.", english: "It is a good time for swimming." },
+                    { maori: "He roa ngā rā i te raumati.", english: "The days are long in summer." }
+                ],
+                "Ngahuru": [
+                    { maori: "Ka taka ngā rau i te ngahuru.", english: "The leaves fall in autumn." },
+                    { maori: "He wā mō te kohikohi hua rākau.", english: "It is a time for harvesting fruit." },
+                    { maori: "He ātaahua ngā tae o te ngahuru.", english: "The autumn colours are beautiful." }
+                ],
+                "Kōanga": [
+                    { maori: "Ka tipu ngā putiputi i te kōanga.", english: "The flowers will grow in spring." },
+                    { maori: "He wā hou mō te tipu.", english: "It is a fresh time for growth." },
+                    { maori: "Ka pua ngā rākau i te kōanga.", english: "The trees will blossom in spring." }
+                ],
+                "Hōtoke": [
+                    { maori: "He makariri te hōtoke.", english: "Winter is cold." },
+                    { maori: "Ka heke te hukarere i te hōtoke.", english: "Snow will fall in winter." },
+                    { maori: "He wā pai mō te pānui pukapuka.", english: "It is a good time for reading books." }
+                ]
+            },
+            month: {
+                "Kohitātea (Hānuere)": [{ maori: "Ka timata te tau hou i Kohitātea (Hānuere).", english: "The new year will begin in January." }],
+                "Huitanguru (Pēpuere)": [{ maori: "He marama poto a Huitanguru (Pēpuere).", english: "February is a short month." }],
+                "Poutūterangi (Māehe)": [{ maori: "Ka tīmata te kōanga i Poutūterangi (Māehe).", english: "Spring will begin in March." }],
+                "Paengawhāwhā (Āperira)": [{ maori: "Ka heke te ua i Paengawhāwhā (Āperira).", english: "The rain will fall in April." }],
+                "Haratua (Mei)": [{ maori: "Ka tipu ngā putiputi i Haratua (Mei).", english: "The flowers will grow in May." }],
+                "Pipiri (Hune)": [{ maori: "Ka mātao te rangi i Pipiri (Hune).", english: "The weather will be cold in June." }],
+                "Hōngongoi (Hūrae)": [{ maori: "He wā hararei a Hōngongoi (Hūrae).", english: "July is a holiday time." }],
+                "Hereturikōkā (Ākuhata)": [{ maori: "Ka hoki ngā tamariki ki te kura i Hereturikōkā (Ākuhata).", english: "Children will return to school in August." }],
+                "Mahuru (Hepetema)": [{ maori: "Ka tīmata te ngahuru i Mahuru (Hepetema).", english: "Autumn will begin in September." }],
+                "Whiringa-ā-nuku (Oketopa)": [{ maori: "Ka taka ngā rau i Whiringa-ā-nuku (Oketopa).", english: "Leaves will fall in October." }],
+                "Whiringa-ā-rangi (Noema)": [{ maori: "Ka hauhau te rangi i Whiringa-ā-rangi (Noema).", english: "The weather will be windy in November." }],
+                "Hakihea (Tīhema)": [{ maori: "He marama o te Kirihimete a Hakihea (Tīhema).", english: "December is the month of Christmas." }]
+            },
+            day: {
+                "Rāhina": [{ maori: "Ka tīmata te wiki i te Rāhina.", english: "The week will begin on Monday." }],
+                "Rātū": [{ maori: "Ka ako mātou i te reo Māori i te Rātū.", english: "We will learn Māori on Tuesday." }],
+                "Rāapa": [{ maori: "Ka pānui pukapuka au i te Rāapa.", english: "I read will books on Wednesday." }],
+                "Rāpare": [{ maori: "Ka mahi toi rātou i te Rāpare.", english: "They will do art on Thursday." }],
+                "Rāmere": [{ maori: "He rā whakamutunga mō te kura te Rāmere.", english: "Friday is the last day of school." }],
+                "Rāhoroi": [{ maori: "Ka horoi kākahu mātou i te Rāhoroi.", english: "We will wash clothes on Saturday." }],
+                "Rātapu": [{ maori: "He wā whakatā te Rātapu.", english: "Sunday is a time to rest." }]
+            }
+        };
+
+        function updateTimeValues() {
+            const timeType = document.getElementById("timeType").value;
+            const timeValueSelect = document.getElementById("timeValue");
+            timeValueSelect.innerHTML = "";
+            for (const timeValue in data[timeType]) {
+                const option = document.createElement("option");
+                option.value = timeValue;
+                option.textContent = timeValue;
+                timeValueSelect.appendChild(option);
+            }
+            updateDescriptions();
+        }
+
+        function updateDescriptions() {
+            const timeType = document.getElementById("timeType").value;
+            const timeValue = document.getElementById("timeValue").value;
+            const descriptionSelect = document.getElementById("description");
+            descriptionSelect.innerHTML = "";
+            data[timeType][timeValue].forEach((sentence, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = sentence.maori;
+                descriptionSelect.appendChild(option);
+            });
+            buildSentence();
+        }
+
+        function buildSentence() {
+            const timeType = document.getElementById("timeType").value;
+            const timeValue = document.getElementById("timeValue").value;
+            const sentenceIndex = document.getElementById("description").value;
+            const sentence = data[timeType][timeValue][sentenceIndex];
+            const maoriStyled = styleSentence(sentence.maori);
+            const englishStyled = styleSentence(sentence.english);
+            document.getElementById("output").innerHTML = `<div>${maoriStyled}</div><div>${englishStyled}</div>`;
+        }
+
+        function styleSentence(sentence) {
+            return sentence.split(" ").map(styleWord).join(" ");
+        }
+
+        function styleWord(word) {
+            const clean = word.replace(/[.,()]/g,"").toLowerCase();
+            const tense = ["he","ka","is","are","will"];
+            const pronouns = ["ia","mātou","rātou","au","we","she","i","they","it"];
+            const verbs = ["tipu","taka","kohikohi","pānui","hoki","heke","timata","tīmata","mātao","hauhau","pua","ako","mahi","horoi","whakatā","heke","fall","falls","grow","growth","harvest","harvesting","read","reading","return","begin","starts","blossom","learn","do","wash","rest","cold","makariri","windy"];
+            const descriptive = ["ātaahua","pai","roa","wera","harikoa","pōuri","hou","poto","beautiful","good","long","hot","happy","sad","fresh","short","new"];
+            const timeNouns = ["wā","marama","wiki","rā","time","month","week","day"];
+const timeRefs = [
+  // Seasons - Te Reo Māori
+  "raumati", "ngahuru", "kōanga", "hōtoke",
+  // Seasons - English
+  "summer", "autumn", "spring", "winter",
+  
+  // Months - Te Reo Māori
+  "kohitātea", "hānuere",
+  "huitanguru", "pēpuere",
+  "poutūterangi", "māehe",
+  "paengawhāwhā", "āperira",
+  "haratua", "mei",
+  "pipiri", "hune",
+  "hōngongoi", "hūrae",
+  "hereturikōkā", "ākuhata",
+  "mahuru", "hepetema",
+  "whiringa-ā-nuku", "oketopa",
+  "whiringa-ā-rangi", "noema",
+  "hakihea", "tīhema",
+  
+  // Months - English
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+
+  // Days - Te Reo Māori
+  "rāhina", "rātū", "rāapa", "rāpare", "rāmere", "rāhoroi", "rātapu",
+  // Days - English
+  "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
+];
+            const objects = ["pukapuka","putiputi","hua","rākau","kākahu","kirihimete","rau","hukarere","rangi","tamariki","kura","reo māori","toi","kaukau","ngā rā","ngā rākau","ua","book","books","flower","flowers","fruit","tree","trees","clothes","christmas","leaves","snow","weather","children","school","māori","art","swimming","days","rain"];
+            const structural = ["te","i","mō","o","in","for","ki","a","ngā"];
+            const phrases = {"tau hou":"karaka","new year":"karaka","ngā rā":"waiporoporo","ngā rākau":"waiporoporo"};
+
+            for(const phrase in phrases){if(word.toLowerCase().includes(phrase)) return `<span class="${phrases[phrase]}">${word}</span>`;}
+            if(tense.includes(clean)) return `<span class="kākāriki">${word}</span>`;
+            if(pronouns.includes(clean)) return `<span class="kikorangi">${word}</span>`;
+            if(verbs.includes(clean)) return `<span class="whero">${word}</span>`;
+            if(descriptive.includes(clean)) return `<span class="karaka">${word}</span>`;
+            if(timeNouns.includes(clean)) return `<span class="indigo">${word}</span>`;
+            if(timeRefs.includes(clean)) return `<span class="parauri">${word}</span>`;
+            if(objects.includes(clean)) return `<span class="waiporoporo">${word}</span>`;
+            if(structural.includes(clean)) return `<span class="pango">${word}</span>`;
+            return word;
+        }
+
+        updateTimeValues();
+    </script>
+</body>
+</html>

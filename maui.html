@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Māui me te Rā – Matching Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #FFF4E5; /* pale orange */
+    padding: 20px;
+    text-align: center;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  #timer {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #CC1717;
+  }
+
+  .section {
+    margin: 30px 0;
+    padding: 20px;
+    border: 3px solid #E0A3CC;
+    border-radius: 12px;
+    background-color: #fffdf9;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    justify-items: center;
+    margin-top: 20px;
+  }
+
+  .card {
+    width: 90%; /* reduced to stop horizontal overlap */
+    padding: 14px;
+    background: #ffffff;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .card.matched {
+    font-weight: bold;
+    color: white;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+  }
+</style>
+</head>
+<body>
+
+<h1>Māui me te Rā – Matching Activity</h1>
+<div id="timer">Time: 0s</div>
+
+<div id="game-container"></div>
+
+<script>
+const sections = [
+  {
+    title: "Wāhanga Tuatahi – First Section",
+    pairs: [
+      { mi: "I mua, i tere te Rā.", en: "Long ago, the Sun was fast." },
+      { mi: "Kāore ngā tangata i te mahi pai.", en: "People couldn’t work well." },
+      { mi: "Nā reira", en: "So / Therefore" },
+      { mi: "ka whakatau a Māui", en: "Māui decided" },
+      { mi: "ki te whakaaro", en: "to think" },
+      { mi: "me pēhea", en: "how" },
+      { mi: "te whakaroa i te rā", en: "to slow the sun" }
+    ]
+  },
+  {
+    title: "Wāhanga Tuarua – Second Section",
+    pairs: [
+      { mi: "Ka karanga ia ki ōna teina.", en: "He called his brothers." },
+      { mi: "“Me hopu tātou i te Rā!”", en: "“Let’s catch the Sun!”" },
+      { mi: "I whakarongo ngā teina ki tō rātou tuakana.", en: "The younger siblings listened to their older sibling." },
+      { mi: "Ka whakaae rātou.", en: "They agreed." },
+      { mi: "Ka hanga rātou i te taura.", en: "They made ropes." },
+      { mi: "Ka haere rātou ki te wāhi o te Rā.", en: "They went to the Sun’s place." },
+      { mi: "Ka huna rātou i muri i ngā kōhatu.", en: "They hid behind rocks." }
+    ]
+  },
+  {
+    title: "Wāhanga Tuatoru – Third Section",
+    pairs: [
+      { mi: "Ka puta te Rā.", en: "The Sun came out." },
+      { mi: "Ka rere te Rā.", en: "The Sun rushed." },
+      { mi: "Ka karanga a Māui: “Inaianei!”", en: "Māui shouted: “Now!”" },
+      { mi: "Ka hopu rātou i te Rā.", en: "They caught the Sun." },
+      { mi: "Ka toia!", en: "They pulled!" },
+      { mi: "Ka kī te Rā: “Kāti!”", en: "The Sun said: “Stop!”" }
+    ]
+  },
+  {
+    title: "Wāhanga Tuawhā – Fourth Section",
+    pairs: [
+      { mi: "Ka kī a Māui: “Me haere pōturi koe.”", en: "Māui said: “Go slowly.”" },
+      { mi: "Ka whakaae te Rā.", en: "The Sun agreed." },
+      { mi: "Nā Māui i whakarerekē te ao.", en: "Māui changed the world." }
+    ]
+  }
+];
+
+const palette = ['#F9CBEA', '#EFB5EF', '#D8A0F4', '#AB8DE7', '#7F9CD4', '#49B5EB', '#3DBCD6', '#3DB6B6', '#1DE6E6', '#5BC892', '#8EDE65', '#F0F074', '#E0C2A3', '#FA9A9A', '#EBD5C9', '#DCD8D8', '#BDB6B6', '#9F9595', '#A5765F', '#CC1717', '#BB7128', '#B6B63D', '#60E61D', '#1DE682', '#1DC4E6', '#5BA4C8', '#7F49EB', '#B665DE', '#C674F0', '#E78DE7', '#E0A3CC'];
+
+let chosen = [];
+let colorIndex = 0;
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function createSection(section) {
+  const container = document.createElement("div");
+  container.className = "section";
+  
+  const title = document.createElement("h2");
+  title.textContent = section.title;
+  container.appendChild(title);
+
+  let cards = [];
+  section.pairs.forEach((pair, i) => {
+    cards.push({ text: pair.mi, pairId: i, type: 'mi' });
+    cards.push({ text: pair.en, pairId: i, type: 'en' });
+  });
+
+  cards = shuffle(cards);
+
+  const grid = document.createElement("div");
+  grid.className = "grid";
+
+  cards.forEach(card => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.textContent = card.text;
+    div.dataset.pairId = card.pairId;
+    div.dataset.type = card.type;
+
+    div.addEventListener("click", () => handleCardClick(div, grid, section));
+
+    grid.appendChild(div);
+  });
+
+  container.appendChild(grid);
+  return container;
+}
+
+function handleCardClick(card, grid, section) {
+  if (card.classList.contains("matched") || chosen.includes(card)) return;
+
+  card.style.borderColor = "#888";
+  chosen.push(card);
+
+  if (chosen.length === 2) {
+    if (chosen[0].dataset.pairId === chosen[1].dataset.pairId &&
+        chosen[0].dataset.type !== chosen[1].dataset.type) {
+
+      const color = palette[colorIndex % palette.length];
+      chosen.forEach(c => {
+        c.classList.add("matched");
+        c.style.backgroundColor = color;
+        c.style.borderColor = color;
+      });
+      colorIndex++;
+
+      // Reorder the grid in **story order**
+      const cardsInGrid = Array.from(grid.children);
+      const newOrder = [];
+      section.pairs.forEach((pair, i) => {
+        const miCard = cardsInGrid.find(c => c.textContent === pair.mi);
+        const enCard = cardsInGrid.find(c => c.textContent === pair.en);
+        if (miCard.classList.contains("matched")) newOrder.push(miCard);
+        if (enCard.classList.contains("matched")) newOrder.push(enCard);
+      });
+
+      // Remove and prepend matched cards in story order
+      newOrder.forEach(c => grid.appendChild(c));
+
+    } else {
+      setTimeout(() => {
+        chosen.forEach(c => c.style.borderColor = "#ddd");
+      }, 800);
+    }
+    chosen = [];
+  }
+}
+
+function startGame() {
+  const container = document.getElementById("game-container");
+  sections.forEach(section => {
+    container.appendChild(createSection(section));
+  });
+}
+
+let seconds = 0;
+setInterval(() => {
+  seconds++;
+  document.getElementById("timer").textContent = `Time: ${seconds}s`;
+}, 1000);
+
+startGame();
+</script>
+
+</body>
+</html>

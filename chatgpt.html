@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Shapes — Te Reo Practice</title>
+<style>
+html, body { margin:0; padding:0; height:100%; width:100%; font-family:system-ui,sans-serif; background:linear-gradient(180deg,#fffaf2,#f2fbff);}
+* { box-sizing:border-box; }
+
+.app { display:flex; flex-direction:column; align-items:center; height:100%; width:100%; padding:1rem; }
+header { text-align:center; margin-bottom:1rem; }
+header h1 { margin:0; font-size:clamp(20px,4vw,32px); }
+header .sub { font-size:clamp(12px,2vw,16px); color:#64748b; margin-top:2px; }
+header .byline { font-size:12px; color:#999; margin-top:2px; }
+
+.card {
+  display:flex;
+  flex-direction:row;
+  gap:16px;
+  width:100%;
+  max-width:1100px;
+  flex:1 1 auto;
+}
+@media(max-width:900px){ .card { flex-direction:column; } }
+
+/* LHS Shapes */
+.shapes-wrap {
+  flex:2 1 60%;
+  background:linear-gradient(180deg,#fff,#fbfdff);
+  border-radius:16px;
+  padding:12px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.shapes-grid {
+  display:grid;
+  grid-template-columns:repeat(3, minmax(80px,1fr));
+  gap:12px;
+  justify-items:center;
+  align-content:center;
+  max-height:320px;
+}
+.shape {
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-radius:16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+  background:white;
+  cursor:grab;
+  user-select:none;
+  transition:transform .12s, box-shadow .12s;
+}
+.shape:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.shape.selected {
+    border: 3px solid #ff6b81;
+    transform: scale(1.05);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+}
+.shape:active { cursor:grabbing; }
+.shape .label { margin-top:6px; font-weight:700; text-align:center; }
+
+/* RHS Panel */
+.panel {
+  flex:1 1 35%;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.score {
+  font-weight:800;
+  background:linear-gradient(90deg,#5ad0ff,#b8ecff);
+  padding:6px 12px;
+  border-radius:12px;
+  text-align:center;
+}
+.slot {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  border:2px dashed rgba(0,0,0,0.1);
+  border-radius:12px;
+  background:linear-gradient(180deg,transparent,rgba(250,250,252,0.6));
+  min-height:60px;
+  cursor:pointer;
+  transition:background .15s ease-in-out;
+}
+.slot:hover {
+  background: rgba(250,250,252,0.8);
+}
+.slot.correct {
+  border-color: #3b82f6;
+  background: linear-gradient(180deg, #e0f2fe, #dbeafe);
+}
+.slot .hint { font-weight:700; color:#64748b; }
+.slot .mini { width:56px; height:48px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+
+/* Buttons */
+button { padding:8px 12px; border:none; border-radius:10px; cursor:pointer; font-weight:700; }
+.btn-primary { background: linear-gradient(90deg,#ff6b81,#ff9ab2); color:white; }
+.btn-secondary { background:#e2e8f0; color:#334155; }
+
+/* Toast */
+.toast { position:fixed; left:50%; transform:translateX(-50%); bottom:6vh; background:white; padding:10px 14px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.12); display:none; }
+
+/* Modal */
+.modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.badge { pointer-events:auto; padding:22px; border-radius:18px; background:linear-gradient(180deg,#fff,#fffbfe); text-align:center; transform:translateY(20px) scale(.96); opacity:0; transition:all .36s cubic-bezier(.2,.9,.2,1); }
+.badge.show { transform:translateY(0) scale(1); opacity:1; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Shapes — Te Reo Practice</h1>
+    <div class="sub">Drag shapes or click to place them on the right</div>
+    <div class="byline">by ChatGPT</div>
+  </header>
+
+  <div class="card">
+    <div class="shapes-wrap">
+      <div class="shapes-grid" id="shapesGrid"></div>
+    </div>
+
+    <div class="panel" id="slotList">
+      <div class="score" id="scoreBadge">0/0</div>
+      <button class="btn-primary" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Nice!</div>
+
+  <div class="modal" id="modal">
+    <div class="badge" id="badge">
+      <h2>Well done! 🌟</h2>
+      <p id="badgeMsg">You matched them all — kia kaha!</p>
+      <button class="btn-secondary" id="closeBadge">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Shapes data
+const SHAPES=[
+{id:'circle', labelEN:'Circle', labelREO:'Porowhita', color:'#ffd66b', svg:(s)=>`<svg viewBox="0 0 100 100" width="${s}" height="${s}"><circle cx="50" cy="50" r="36" fill="#ffd66b"/></svg>`},
+{id:'square', labelEN:'Square', labelREO:'Tapawhā', color:'#8bd3c7', svg:(s)=>`<svg viewBox="0 0 100 100" width="${s}" height="${s}"><rect x="18" y="18" width="64" height="64" rx="10" fill="#8bd3c7"/></svg>`},
+{id:'triangle', labelEN:'Triangle', labelREO:'Tapatoru', color:'#a59cff', svg:(s)=>`<svg viewBox="0 0 100 100" width="${s}" height="${s}"><polygon points="50,18 82,78 18,78" fill="#a59cff"/></svg>`},
+{id:'star', labelEN:'Star', labelREO:'Whetū', color:'#ffb4d6', svg:(s)=>`<svg viewBox="0 0 100 100" width="${s}" height="${s}"><polygon points="50,8 61,38 94,38 67,58 78,90 50,70 22,90 33,58 6,38 39,38" fill="#ffb4d6"/></svg>`},
+{id:'heart', labelEN:'Heart', labelREO:'Ngākau', color:'#ff8aa1', svg:(s)=>`<svg viewBox="0 0 100 100" width="${s}" height="${s}"><path d="M50 78s-26-16-34-25c-8-9-6-24 6-30 11-6 22 2 28 8 6-6 17-14 28-8 12 6 14 21 6 30-8 9-34 25-34 25z" fill="#ff8aa1"/></svg>`},
+{id:'rectangle', labelEN:'Rectangle', labelREO:'Tapawhā roa', color:'#b7d9ff', svg:(s)=>`<svg viewBox="0 0 100 100" width="${s}" height="${s}"><rect x="12" y="28" width="76" height="44" rx="8" fill="#b7d9ff"/></svg>`}
+];
+
+let placements={};
+let selectedShape=null;
+
+const shapesGrid=document.getElementById('shapesGrid');
+const slotList=document.getElementById('slotList');
+const scoreBadge=document.getElementById('scoreBadge');
+const toast=document.getElementById('toast');
+const modal=document.getElementById('modal');
+const badge=document.getElementById('badge');
+const resetBtn = document.getElementById('resetBtn');
+
+// Helper
+function shuffled(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+
+// Create shape card
+function createShapeCard(shape){
+  const el=document.createElement('button');
+  el.className='shape';
+  el.dataset.shape=shape.id;
+  el.innerHTML=`<div>${shape.svg(120)}</div><div class="label">${shape.labelEN}</div>`;
+
+  // Click select
+  el.addEventListener('click', () => {
+    // Deselect previous shape
+    if (selectedShape) {
+      document.querySelector(`.shape[data-shape="${selectedShape}"]`).classList.remove('selected');
+    }
+    // Select this shape
+    selectedShape = shape.id;
+    el.classList.add('selected');
+    flashToast(shape.labelREO);
+  });
+  // Drag
+  el.setAttribute('draggable','true');
+  el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', shape.id); });
+  return el;
+}
+
+// Create slot
+function createSlot(shape){
+  const div=document.createElement('div');
+  div.className='slot';
+  div.dataset.slot=shape.id;
+  div.innerHTML=`<div class="hint">${shape.labelREO}</div><div class="mini"></div>`;
+
+  div.addEventListener('dragover', e=>{ e.preventDefault(); });
+  div.addEventListener('drop', e=>{ e.preventDefault(); placeShape(e.dataTransfer.getData('text/plain'), div.dataset.slot); });
+  
+  // Click to place
+  div.addEventListener('click', () => {
+    if(selectedShape){
+      placeShape(selectedShape, div.dataset.slot);
+      document.querySelector(`.shape[data-shape="${selectedShape}"]`).classList.remove('selected');
+      selectedShape = null;
+    }
+  });
+  return div;
+}
+
+function placeShape(shapeId, slotId){
+  const shape=SHAPES.find(s=>s.id===shapeId);
+  const slot=document.querySelector(`.slot[data-slot='${slotId}']`);
+  if(!shape||!slot) return;
+  slot.querySelector('.mini').innerHTML=shape.svg(56);
+  placements[slotId]=shapeId;
+  updateScore();
+  
+  // Check if placement is correct and add a class
+  if (shapeId === slotId) {
+    slot.classList.add('correct');
+  } else {
+    slot.classList.remove('correct');
+  }
+  
+  checkComplete();
+}
+
+function updateScore(){
+  let correct=0; SHAPES.forEach(s=>{ if(placements[s.id]===s.id) correct++; });
+  scoreBadge.textContent=`${correct}/${SHAPES.length}`;
+}
+
+function flashToast(text){
+  toast.textContent=text; toast.style.display='block';
+  setTimeout(()=>toast.style.display='none',1400);
+}
+
+function checkComplete(){
+  if(SHAPES.every(s=>placements[s.id]===s.id)){ showBadge('You matched them all — kia kaha!'); }
+}
+
+function showBadge(msg){ document.getElementById('badgeMsg').textContent=msg; modal.style.pointerEvents='auto'; badge.classList.add('show'); }
+function hideBadge(){ badge.classList.remove('show'); modal.style.pointerEvents='none'; }
+
+function populateShapes(){
+  shapesGrid.innerHTML=''; shuffled(SHAPES).forEach(s=>shapesGrid.appendChild(createShapeCard(s)));
+}
+function populateSlots(){
+  slotList.querySelectorAll('.slot').forEach(s=>s.remove());
+  shuffled(SHAPES).forEach(s=>slotList.appendChild(createSlot(s)));
+}
+
+document.getElementById('closeBadge').addEventListener('click', hideBadge);
+resetBtn.addEventListener('click', resetAll);
+
+function resetAll(){ placements={}; selectedShape=null; populateShapes(); populateSlots(); updateScore(); }
+
+// Init
+window.addEventListener('load', resetAll);
+</script>
+</body>
+</html>

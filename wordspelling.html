@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kupu Tuhituhi — Māori Spelling</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbfbff;
+    --panel:#fff;
+    --accent:#0ea5a4;
+    --good:#22c55e;
+    --mid:#eab308;
+    --bad:#d1d5db;
+    --ink:#111827;
+  }
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Poppins,system-ui,-apple-system,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    box-sizing:border-box;
+  }
+  .app{
+    width:100%;
+    max-width:760px;
+    background:var(--panel);
+    border-radius:14px;
+    box-shadow:0 8px 30px rgba(15,15,15,.06);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:center;
+  }
+  header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  header h1{margin:0;font-size:20px}
+  .controls{display:flex;gap:8px;align-items:center}
+  #wordBox{
+    width:100%;
+    min-height:120px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  #wordVisible{
+    font-size:48px;
+    font-weight:800;
+    letter-spacing:0.6px;
+    color:var(--accent);
+  }
+  #engTranslate{font-size:18px;color:#374151}
+  #grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+  .row{display:flex;gap:8px;justify-content:center;width:100%}
+  .tile{
+    min-width:56px; min-height:64px;
+    border-radius:8px;
+    border:2px solid #e6e7eb;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:22px;text-transform:lowercase;background:#fff;
+    box-sizing:border-box;
+  }
+  .tile.filled{background:#f3f4f6}
+  .tile.correct{background:var(--good);color:#fff;border:none}
+  .tile.present{background:var(--mid);color:#fff;border:none}
+  .tile.absent{background:var(--bad);color:#fff;border:none}
+  #keyboard{width:100%;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .kbd-row{display:flex;gap:8px;justify-content:center;width:100%}
+  .key{
+    min-width:54px; min-height:50px;padding:10px 12px;border-radius:8px;border:0;background:#e5e7eb;
+    font-weight:700;cursor:pointer;user-select:none;text-transform:lowercase;
+  }
+  .key.wide{min-width:92px}
+  .key.correct{background:var(--good);color:#fff}
+  .key.present{background:var(--mid);color:#fff}
+  .key.absent{background:var(--bad);color:#fff}
+  .bottom-row{display:flex;gap:8px;align-items:center;justify-content:center;width:100%}
+  .btn{padding:10px 14px;border-radius:8px;border:0;background:linear-gradient(45deg,#f97316,#0ea5a4);color:#fff;font-weight:700;cursor:pointer}
+  .meta{display:flex;gap:10px;align-items:center}
+  .small{font-size:14px;color:#475569}
+  #message{font-weight:800;color:var(--ink);min-height:28px}
+  @media (max-width:640px){
+    #wordVisible{font-size:36px}
+    .tile{min-width:48px;min-height:56px;font-size:18px}
+    .key{min-width:44px;min-height:44px;padding:8px 10px}
+    .key.wide{min-width:72px}
+  }
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Kupu Tuhituhi — Māori Spelling">
+    <header>
+      <h1>Kupu Tuhituhi</h1>
+      <div class="controls">
+        <button id="newWordBtn" class="btn">New Word</button>
+      </div>      
+    </header>
+
+    <div id="wordBox" aria-live="polite">
+      <div id="wordVisible" aria-hidden="true"></div>
+      <div id="engTranslate" aria-hidden="true"></div>
+    </div>
+
+    <div id="message" role="status"></div>
+    <div id="grid" aria-hidden="false"></div>
+    <div id="keyboard" aria-hidden="false"></div>
+
+    <div class="bottom-row">
+      <button id="hintBtn" class="btn" style="background:#64748b">Hint</button>
+      <button id="submitBtn" class="btn" style="background:#2563eb">Submit</button>
+      <div style="flex:1" aria-hidden="true"></div>
+      <div class="meta small">Score: <span id="score">0</span></div>
+    </div>
+
+    <canvas id="confetti" style="position:fixed;left:0;top:0;pointer-events:none;z-index:9999"></canvas>
+  </div>
+
+<script>
+const vocab = [
+  {maori:'āke ake', english:'forever and ever'},
+  {maori:'ā muri ake', english:'after'},
+  {maori:'āmaimai', english:'nervous'},
+  {maori:'āna', english:'his / hers'},
+  {maori:'āporo', english:'apple'},
+  {maori:'ārani', english:'orange'},
+  {maori:'ākuanei', english:'soon'},
+  {maori:'āwangawanga', english:'anxious'},
+  {maori:'ahau', english:'I / me'},
+  {maori:'ako', english:'to learn / teach'},
+  {maori:'Amine', english:'amen'},
+  {maori:'amene', english:'amen'},
+  {maori:'Ariki', english:'Lord'},
+  {maori:'ariā', english:'idea, concept'},
+  {maori:'ariā matua', english:'main ideas'},
+  {maori:'aroha', english:'love'},
+  {maori:'ata', english:'morning'},
+  {maori:'ata ātaahua', english:'beautiful morning'},
+  {maori:'atawhai', english:'grace / kindness'},
+  {maori:'atua', english:'god / spiritual being'},
+  {maori:'Atua', english:'God'},
+  {maori:'au', english:'I / me'},
+  {maori:'auaha', english:'creative'},
+  {maori:'e … ana', english:'continuous'},
+  {maori:'Hāhi', english:'church'},
+  {maori:'Hāto Kēneti', english:'Saint Kentigern (St Kent’s)'},
+  {maori:'haere', english:'to go'},
+  {maori:'Hakihea', english:'December'},
+  {maori:'hararei', english:'holidays'},
+  {maori:'harikoa', english:'joyful'},
+  {maori:'Haratua', english:'May'},
+  {maori:'hau', english:'wind'},
+  {maori:'hēki', english:'egg'},
+  {maori:'Here-turi-kōkā', english:'August'},
+  {maori:'hiakai', english:'hungry'},
+  {maori:'hipi', english:'sheep'},
+  {maori:'hoiho', english:'horse'},
+  {maori:'hongongoi', english:'July'},
+  {maori:'Hōngongoi', english:'July'},
+  {maori:'hōhā', english:'annoyed'},
+  {maori:'hōtiti', english:'sausage'},
+  {maori:'Hōtoke', english:'winter'},
+  {maori:'hua rākau', english:'fruit'},
+  {maori:'huangō', english:'asthma'},
+  {maori:'huka', english:'snow / ice'},
+  {maori:'huka', english:'sugar'},
+  {maori:'hunga whakarongo', english:'audience'},
+  {maori:'Hui-tanguru', english:'February'},
+  {maori:'i', english:'past'},
+  {maori:'ia', english:'he / she'},
+  {maori:'ihu Karaiti', english:'Jesus Christ'},
+  {maori:'ika', english:'fish'},
+  {maori:'iti', english:'small'},
+  {maori:'ka', english:'future'},
+  {maori:'kai', english:'food / meal'},
+  {maori:'kaihoe', english:'paddler'},
+  {maori:'kaihoe papa rererangi wai', english:'paddle boarder'},
+  {maori:'kāhu', english:'hawk'},
+  {maori:'kāinga', english:'home / village'},
+  {maori:'kākā', english:'parrot'},
+  {maori:'kapo', english:'capture (audience attention)'},
+  {maori:'karakia', english:'prayer'},
+  {maori:'kāroti', english:'carrot'},
+  {maori:'kau', english:'swim'},
+  {maori:'kauhau', english:'formal speech'},
+  {maori:'kei te', english:'present tense'},
+  {maori:'kererū', english:'wood pigeon'},
+  {maori:'kia', english:'so that / in order to'},
+  {maori:'kia ora', english:'hello / hi'},
+  {maori:'kīanga whakarite', english:'simile'},
+  {maori:'kīanga whakatangata', english:'personification'},
+  {maori:'kīwaha', english:'idiom'},
+  {maori:'kiatau', english:'fellowship / unity'},
+  {maori:'kiore', english:'rat'},
+  {maori:'Kirihimete', english:'Christmas'},
+  {maori:'koa', english:'happy'},
+  {maori:'koe', english:'you (singular)'},
+  {maori:'Kohi-tātea', english:'January'},
+  {maori:'konā', english:'there (by you)'},
+  {maori:'konei', english:'here (by me)'},
+  {maori:'kōanga', english:'spring'},
+  {maori:'kōrero ōkawa', english:'formal speaking'},
+  {maori:'kōrero ōpaki', english:'informal speaking'},
+  {maori:'kōrero pono', english:'fact'},
+  {maori:'kōrerorero', english:'dialogue, conversation'},
+  {maori:'korōria', english:'glory'},
+  {maori:'korā', english:'over there'},
+  {maori:'kōrua', english:'you two'},
+  {maori:'koutou', english:'you (plural)'},
+  {maori:'kua', english:'perfect / completed'},
+  {maori:'kura', english:'school'},
+  {maori:'kurī', english:'dog'},
+  {maori:'mahi', english:'work'},
+  {maori:'Mahuru', english:'September'},
+  {maori:'mākona', english:'satisfied'},
+  {maori:'makariri', english:'cold'},
+  {maori:'manu', english:'bird'},
+  {maori:'manahau', english:'cheerful'},
+  {maori:'mango', english:'shark'},
+  {maori:'maunga', english:'mountain'},
+  {maori:'maungārongo', english:'peace'},
+  {maori:'māharahara', english:'worried'},
+  {maori:'māia', english:'brave'},
+  {maori:'mākinakina', english:'chilly / cold wind'},
+  {maori:'mārie', english:'calm'},
+  {maori:'marae', english:'courtyard / meeting place'},
+  {maori:'marama', english:'moon'},
+  {maori:'mataku', english:'scared / afraid'},
+  {maori:'matapaki', english:'discussion'},
+  {maori:'matewai', english:'thirsty'},
+  {maori:'mātakitaki', english:'to watch / observe'},
+  {maori:'mātou', english:'we (excl.)'},
+  {maori:'māua', english:'we two (excl.)'},
+  {maori:'me', english:'and (link nouns/people)'},
+  {maori:'me', english:'should'},
+  {maori:'menemene', english:'smile'},
+  {maori:'merā', english:'they two'},
+  {maori:'mīti', english:'meat'},
+  {maori:'mita o te reo', english:'rhythm, intonation, pronunciation'},
+  {maori:'miraka', english:'milk'},
+  {maori:'moana', english:'sea / ocean'},
+  {maori:'mōku', english:'for me'},
+  {maori:'mōu', english:'for you'},
+  {maori:'mua', english:'before / in front'},
+  {maori:'muri', english:'behind'},
+  {maori:'na te mea', english:'because'},
+  {maori:'ngeru', english:'cat'},
+  {maori:'Ngahuru', english:'autumn'},
+  {maori:'ngā', english:'plural / the'},
+  {maori:'ngenge', english:'tired'},
+  {maori:'noa', english:'ordinary / free from tapu'},
+  {maori:'nō reira', english:'therefore, so'},
+  {maori:'nuka reo', english:'language features'},
+  {maori:'ohorere', english:'surprised'},
+  {maori:'ora', english:'life / well-being'},
+  {maori:'otirā', english:'but, however (formal/poetic)'},
+  {maori:'pae', english:'area'},
+  {maori:'pāka', english:'park'},
+  {maori:'pai', english:'good'},
+  {maori:'Paenga-whāwhā', english:'April'},
+  {maori:'pāpaka', english:'crab'},
+  {maori:'parāoa', english:'bread'},
+  {maori:'parāoa / orca', english:'whale / orca'},
+  {maori:'parirau tuarā', english:'dorsal fin'},
+  {maori:'pata', english:'butter'},
+  {maori:'pēpi', english:'baby'},
+  {maori:'pepeha', english:'aphorisms'},
+  {maori:'pīni', english:'beans'},
+  {maori:'Pipiri', english:'June'},
+  {maori:'pīpī', english:'chick'},
+  {maori:'poaka', english:'pig'},
+  {maori:'pōuri', english:'sad'},
+  {maori:'poti', english:'boat'},
+  {maori:'poti mā', english:'white boat'},
+  {maori:'Poutū-te-rangi', english:'March'},
+  {maori:'puehu', english:'dust'},
+  {maori:'puāwai', english:'flower / blossom'},
+  {maori:'pūngāwerewere', english:'spider'},
+  {maori:'pūwaha', english:'estuary'},
+  {maori:'rā', english:'sun / day'},
+  {maori:'rā e whiti ana', english:'shining sun'},
+  {maori:'Rāapa', english:'Wednesday'},
+  {maori:'rāhua', english:'they two'},
+  {maori:'Rāhoroi', english:'Saturday'},
+  {maori:'Rāhina', english:'Monday'},
+  {maori:'Rāmere', english:'Friday'},
+  {maori:'rangi', english:'sky / day'},
+  {maori:'Rāpare', english:'Thursday'},
+  {maori:'rātou', english:'they (plural)'},
+  {maori:'Rātapu', english:'Sunday'},
+  {maori:'Rātū', english:'Tuesday'},
+  {maori:'Raumati', english:'summer'},
+  {maori:'raro', english:'below'},
+  {maori:'rawe', english:'great / excellent'},
+  {maori:'reira', english:'that / there'},
+  {maori:'rere', english:'fluent, flowing'},
+  {maori:'rererangi wai', english:'paddleboard'},
+  {maori:'rēmana', english:'lemon'},
+  {maori:'rētihi', english:'lettuce'},
+  {maori:'riri', english:'angry'},
+  {maori:'rīwai', english:'potato'},
+  {maori:'roto', english:'inside'},
+  {maori:'runga', english:'above'},
+  {maori:'tāku', english:'my'},
+  {maori:'tamariki', english:'children'},
+  {maori:'tangata', english:'person / people'},
+  {maori:'tango hū', english:'to take off shoes'},
+  {maori:'tata', english:'near / close'},
+  {maori:'tātou', english:'we (incl.)'},
+  {maori:'tau', english:'settle / descend'},
+  {maori:'tāua', english:'we two (incl.)'},
+  {maori:'tai', english:'sea / tide'},
+  {maori:'tēnā', english:'that / those'},
+  {maori:'tēnei', english:'this (by me)'},
+  {maori:'tērā', english:'that (over there)'},
+  {maori:'tiakarete', english:'chocolate'},
+  {maori:'tīeke', english:'saddleback'},
+  {maori:'tīmatanga', english:'beginning / start'},
+  {maori:'tīrairaka', english:'fantail'},
+  {maori:'tikanga', english:'customs / cultural practices'},
+  {maori:'tio', english:'frost'},
+  {maori:'tohorā', english:'whale'},
+  {maori:'tonga', english:'south'},
+  {maori:'toro', english:'to visit'},
+  {maori:'tōna taha', english:'beside'},
+  {maori:'tōna wā', english:'at that time'},
+  {maori:'tuna', english:'eel'},
+  {maori:'uta', english:'inland / shore'},
+  {maori:'waea', english:'phone'},
+  {maori:'waho', english:'outside'},
+  {maori:'wai', english:'water'},
+  {maori:'wai mārie', english:'calm water'},
+  {maori:'waenganui', english:'between'},
+  {maori:'wairua', english:'spirit'},
+  {maori:'Wairua Tapu', english:'Holy Spirit'},
+  {maori:'waka', english:'canoe / vehicle'},
+  {maori:'wāhi', english:'place'},
+  {maori:'wera', english:'hot'},
+  {maori:'whakaaro', english:'opinion'},
+  {maori:'whakaaro pai', english:'good thoughts'},
+  {maori:'whakapakepake', english:'persuade, motivate'},
+  {maori:'whakapuaki', english:'express, articulate'},
+  {maori:'whakaputa', english:'delivery'},
+  {maori:'whakaraupapa', english:'sequence logically'},
+  {maori:'whakatau', english:'conclusion, resolution'},
+  {maori:'whakataukī', english:'proverbs'},
+  {maori:'whakaū', english:'reinforce'},
+  {maori:'whakawhanake', english:'develop'},
+  {maori:'whakamā', english:'embarrassed'},
+  {maori:'whakamīharo', english:'amazed'},
+  {maori:'whare', english:'house / building'},
+  {maori:'wharenui', english:'meeting house'},
+  {maori:'wheako whaiaro', english:'personal experience'},
+  {maori:'whekī', english:'octopus'},
+  {maori:'whiwhingatahitanga', english:'fellowship / unity'},
+  {maori:'Whiringa-ā-nuku', english:'October'},
+  {maori:'Whiringa-ā-rangi', english:'November'}
+];
+const letters = ['a','ā','e','ē','i','ī','o','ō','u','ū','h','k','m','n','p','r','t','w','ng','wh',' '];
+
+const wordVisible = document.getElementById('wordVisible');
+const engTranslate = document.getElementById('engTranslate');
+const gridEl = document.getElementById('grid');
+const keyboardEl = document.getElementById('keyboard');
+const messageEl = document.getElementById('message');
+const hintBtn = document.getElementById('hintBtn');
+const submitBtn = document.getElementById('submitBtn');
+const restartBtn = document.getElementById('restart');
+const scoreEl = document.getElementById('score');
+const confettiCanvas = document.getElementById('confetti');
+const ctx = confettiCanvas.getContext('2d');
+
+let current=null, tiles=[], tileValues=[], cursor=0, score=0;
+let showSeconds=2;
+let confettiActive=false, confettiParticles=[];
+
+function splitWord(word){
+  const w = word.toLowerCase();
+  const res = [];
+  for(let i=0;i<w.length;i++){
+    const two = w[i] + (w[i+1]||'');
+    if(letters.includes(two)){ res.push(two); i++; } else { res.push(w[i]); }
+  }
+  return res;
+}
+
+function pickWord(){
+  const isPhone = window.innerWidth < 600;
+  const maxLetters = isPhone ? 6 : 20;
+  const possibleWords = vocab.filter(w=>splitWord(w.maori).length<=maxLetters);
+  return possibleWords[Math.floor(Math.random()*possibleWords.length)];
+}
+
+function buildTiles(wordArr){
+  gridEl.innerHTML=''; tiles=[]; tileValues=new Array(wordArr.length).fill(''); cursor=0;
+  const row = document.createElement('div'); row.className='row'; row.style.justifyContent='center';
+  wordArr.forEach((_,i)=>{
+    const t=document.createElement('div'); t.className='tile'; t.dataset.index=i;
+    t.setAttribute('aria-label',`tile ${i+1}`); row.appendChild(t); tiles.push(t);
+  });
+  gridEl.appendChild(row);
+}
+
+const kbLetters = ['a','ā','e','ē','i','ī','o','ō','u','ū','h','k','m','n','p','r','t','w','ng','wh',' '];
+function buildKeyboard(){
+  keyboardEl.innerHTML='';
+  const rows = [kbLetters.slice(0,7), kbLetters.slice(7,14), kbLetters.slice(14)];
+  rows.forEach(rowLetters=>{
+    const rowDiv=document.createElement('div'); rowDiv.className='kbd-row';
+    rowLetters.forEach(l=>{
+      const btn=document.createElement('button'); btn.className='key'; btn.textContent=l;
+      btn.addEventListener('click',()=>{handleKey(l)}); rowDiv.appendChild(btn);
+    });
+    keyboardEl.appendChild(rowDiv);
+  });
+  const ctrl=document.createElement('div'); ctrl.className='kbd-row';
+  const enter=document.createElement('button'); enter.className='key wide'; enter.textContent='Enter';
+  enter.addEventListener('click',()=>{handleKey('Enter')});
+  const back=document.createElement('button'); back.className='key wide'; back.textContent='Back';
+  back.addEventListener('click',()=>{handleKey('Backspace')});
+  ctrl.appendChild(enter); ctrl.appendChild(back); keyboardEl.appendChild(ctrl);
+}
+
+function handleKey(k){
+  if(!current || current.locked) return;
+  const wordLen = splitWord(current.maori).length;
+  if(k==='Enter'){ if(tileValues.every(v=>v !== '')) submitGuess(); return; }
+  if(k==='Backspace'){ let pos=tileValues.map((v,i)=>v? i:-1).filter(i=>i!==-1).pop();
+    if(pos===undefined) return; tileValues[pos]=''; tiles[pos].textContent=''; tiles[pos].classList.remove('filled','correct','present','absent'); cursor=pos; return; }
+  if(cursor>=wordLen) return;
+  tileValues[cursor]=k; tiles[cursor].textContent=k; tiles[cursor].classList.add('filled');
+  cursor=tileValues.findIndex(v=>v===''); if(cursor===-1) cursor=wordLen;
+}
+
+function submitGuess(){
+  const guessArr=tileValues.slice(); const solutionArr=splitWord(current.maori); const solCopy=solutionArr.slice();
+  tiles.forEach(t=>t.classList.remove('correct','present','absent'));
+  guessArr.forEach((g,i)=>{ if(g===solutionArr[i]){ tiles[i].classList.add('correct'); markKeyStyle(g,'correct'); solCopy[i]=null; } });
+  guessArr.forEach((g,i)=>{ if(tiles[i].classList.contains('correct')) return;
+    if(solCopy.includes(g)){ tiles[i].classList.add('present'); markKeyStyle(g,'present'); solCopy[solCopy.indexOf(g)]=null; }
+    else{ tiles[i].classList.add('absent'); markKeyStyle(g,'absent'); }
+  });
+  if(guessArr.join('')===solutionArr.join('')){ messageEl.textContent='🎉 Tino pai! — Correct'; score++; scoreEl.textContent=score; launchConfetti(); }
+  else{ messageEl.textContent=`✖ Aroha mai — the word was "${current.maori}"`; }
+  disableInput(); engTranslate.innerText=current.english; wordVisible.innerText='';
+}
+
+function markKeyStyle(letter,cls){
+  const keyBtn=Array.from(document.querySelectorAll('.key')).find(k=>k.textContent===letter);
+  if(!keyBtn) return;
+  if(!keyBtn.classList.contains('correct') && !keyBtn.classList.contains('present')) keyBtn.classList.add(cls);
+}
+
+function disableInput(){ if(current) current.locked=true; }
+function enableInput(){ if(current) current.locked=false; }
+
+function runRound(){
+  document.querySelectorAll('.key').forEach(k=>k.classList.remove('correct','present','absent'));
+  messageEl.textContent=''; engTranslate.textContent='';
+  current=pickWord(); wordVisible.innerText=current.maori; engTranslate.innerText=current.english;
+  const wordArr=splitWord(current.maori); buildTiles(wordArr);
+  setTimeout(()=>{ wordVisible.innerText=''; engTranslate.innerText=''; enableInput(); }, showSeconds*1000);
+}
+
+// --- Detect desktop/laptop for physical keyboard ---
+const isDesktop=!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+document.addEventListener('keydown', (e)=>{
+  if(!isDesktop) return;
+  if(!current || current.locked) return;
+  const key=e.key.toLowerCase();
+  if(key==='enter') handleKey('Enter');
+  else if(key==='backspace') handleKey('Backspace');
+  else if(key.length===1 && (letters.includes(key) || /[a-zāēīōū]/.test(key))) handleKey(key);
+});
+
+hintBtn.addEventListener('click',()=>{ if(current) engTranslate.innerText=current.english; });
+submitBtn.addEventListener('click',()=>{ if(!current || current.locked) return; if(tileValues.length && tileValues.every(v=>v !== '')) submitGuess(); else messageEl.textContent='Fill all tiles first.'; });
+
+document.getElementById('newWordBtn').addEventListener('click', ()=>{
+  messageEl.textContent = '';
+  runRound(); // keeps the current score
+});
+
+function resizeCanvas(){ confettiCanvas.width=window.innerWidth; confettiCanvas.height=window.innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+function launchConfetti(){ confettiActive=true; confettiParticles=[]; for(let i=0;i<120;i++){ confettiParticles.push({x:Math.random()*confettiCanvas.width,y:Math.random()*confettiCanvas.height-confettiCanvas.height,r:Math.random()*6+2,d:Math.random()*20+10,color:`hsl(${Math.random()*360},100%,50%)`,tilt:Math.floor(Math.random()*10)-10,tiltAngle:0,tiltAngleIncrement:Math.random()*0.07+0.05}); } requestAnimationFrame(updateConfetti); }
+function clearCanvas(){ ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); }
+function updateConfetti(){ if(!confettiActive) return; resizeCanvas(); clearCanvas(); confettiParticles.forEach(p=>{ p.tiltAngle+=p.tiltAngleIncrement; p.y+=(Math.cos(p.d)+3+p.r/2)/2; p.x+=Math.sin(p.tiltAngle); ctx.beginPath(); ctx.lineWidth=p.r/2; ctx.strokeStyle=p.color; ctx.moveTo(p.x+p.tilt,p.y); ctx.lineTo(p.x+p.tilt+p.tilt/2,p.y+p.tilt+p.r/2); ctx.stroke(); }); requestAnimationFrame(updateConfetti); }
+
+buildKeyboard(); runRound();
+</script>
+</body>
+</html>

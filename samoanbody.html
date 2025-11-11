@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaega o le Tino – Suʻe Upu</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7fa;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  margin: 0;
+  flex-direction: column;
+  align-items: center;
+}
+.container {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  max-width: 90vw;
+}
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 200px;
+}
+.question-box {
+  border-radius: 8px;
+  padding: 8px;
+  transition: box-shadow 0.3s ease, border 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.question-box.highlight {
+  box-shadow: 0 0 8px 4px #ffe16a;
+  border: 2px solid #ffe16a;
+}
+select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  width: 100%;
+  font-size: 16px;
+}
+svg {
+  width: 300px;
+  max-width: 40vw;
+  height: auto;
+}
+.part-fill {
+  fill-opacity: .55;
+  stroke: #333;
+  stroke-width: 1;
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+.part-fill.highlight-part {
+  stroke: gold !important;
+  stroke-width: 4 !important;
+}
+.status {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+}
+#completion-message {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #4CAF50;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: bold;
+}
+#score {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+#next-question {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#next-question:hover {
+  background: #45a049;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .questions {
+    width: 100%;
+    max-width: 300px;
+  }
+  .question-box {
+    padding: 12px;
+  }
+  select {
+    padding: 12px;
+    font-size: 18px;
+  }
+  svg {
+    max-width: 80vw;
+    margin: 20px 0;
+  }
+  #right-questions {
+    display: none;
+  }
+  #left-questions .question-box {
+    display: none;
+  }
+  #left-questions .question-box.active {
+    display: flex;
+  }
+  #next-question {
+    display: block;
+  }
+}
+</style>
+</head>
+<body>
+<div id="score">Score: 0/20</div>
+<div class="container">
+  <!-- Left column -->
+  <div class="questions" id="left-questions"></div>
+
+  <!-- Body diagram -->
+  <svg viewBox="0 0 260 520" aria-label="Body diagram">
+    <!-- Head & neck -->
+    <circle id="ulu-part" class="part-fill" cx="130" cy="70" r="48"/>
+    <rect id="auvae-part" class="part-fill" x="115" y="110" width="30" height="26" rx="6"/>
+    <!-- Ears -->
+    <ellipse id="talingaL-part" class="part-fill" cx="78" cy="75" rx="10" ry="18"/>
+    <ellipse id="talingaR-part" class="part-fill" cx="182" cy="75" rx="10" ry="18"/>
+    <!-- Eyebrows -->
+    <path id="taualugaL-part" class="part-fill" d="M105 57 Q115 50 125 55" />
+    <path id="taualugaR-part" class="part-fill" d="M135 55 Q145 50 155 57" />
+    <!-- Eyes -->
+    <circle id="mataL-part" class="part-fill" cx="118" cy="66" r="6"/>
+    <circle id="mataR-part" class="part-fill" cx="142" cy="66" r="6"/>
+    <!-- Nose -->
+    <path id="isu-part" class="part-fill" d="M130 68 L135 82 L125 82 Z"/>
+    <!-- Mouth, lips, teeth, chin -->
+    <rect id="gutu-part" class="part-fill" x="113" y="90" width="34" height="12" rx="3"/>
+    <path id="lomaGutupu-part" class="part-fill" d="M115 96 Q130 104 147 96" fill="none"/>
+    <rect id="ifi-part" class="part-fill" x="118" y="92" width="24" height="7" rx="1"/>
+    <rect id="auvaeGutupu-part" class="part-fill" x="118" y="102" width="24" height="8" rx="4"/>
+    <!-- Torso & limbs -->
+    <rect id="tauau-part" class="part-fill" x="80" y="135" width="100" height="18" rx="8"/>
+    <rect id="tutupa-part" class="part-fill" x="85" y="155" width="90" height="42" rx="10"/>
+    <rect id="papa-part" class="part-fill" x="85" y="199" width="90" height="50" rx="10"/>
+    <rect id="hope-part" class="part-fill" x="88" y="251" width="84" height="16" rx="6"/>
+    <rect id="tuaL-part" class="part-fill" x="65" y="150" width="20" height="80" rx="8"/>
+    <rect id="tuaR-part" class="part-fill" x="175" y="150" width="20" height="80" rx="8"/>
+    <circle id="limaL-part" class="part-fill" cx="75" cy="240" r="12"/>
+    <circle id="limaR-part" class="part-fill" cx="185" cy="240" r="12"/>
+    <rect id="tamatamaL-part" class="part-fill" x="62" y="252" width="26" height="10" rx="3"/>
+    <rect id="tamatamaR-part" class="part-fill" x="172" y="252" width="26" height="10" rx="3"/>
+    <rect id="vaeL-part" class="part-fill" x="98" y="268" width="20" height="120" rx="8"/>
+    <rect id="vaeR-part" class="part-fill" x="142" y="268" width="20" height="120" rx="8"/>
+    <circle id="tuliL-part" class="part-fill" cx="108" cy="338" r="8"/>
+    <circle id="tuliR-part" class="part-fill" cx="152" cy="338" r="8"/>
+    <rect id="tuaMataL-part" class="part-fill" x="90" y="388" width="36" height="16" rx="4"/>
+    <rect id="tuaMataR-part" class="part-fill" x="134" y="388" width="36" height="16" rx="4"/>
+  </svg>
+
+  <!-- Right column -->
+  <div class="questions" id="right-questions"></div>
+</div>
+
+<div id="completion-message">Tino Lelei!</div>
+<button id="next-question">Next Question</button>
+
+<script>
+const items = [
+  {key:"ulu", ma:"Ulu", en:"Head", parts:["ulu-part"]},
+  {key:"auvae", ma:"Auvae", en:"Neck", parts:["auvae-part"]},
+  {key:"talinga", ma:"Talinga", en:"Ears", parts:["talingaL-part","talingaR-part"]},
+  {key:"taualuga", ma:"Taualuga", en:"Eyebrows", parts:["taualugaL-part","taualugaR-part"]},
+  {key:"mata", ma:"Mata", en:"Eyes", parts:["mataL-part","mataR-part"]},
+  {key:"isu", ma:"Isu", en:"Nose", parts:["isu-part"]},
+  {key:"gutu", ma:"Gutu", en:"Mouth", parts:["gutu-part"]},
+  {key:"lomaGutupu", ma:"Loma Gutu", en:"Lips", parts:["lomaGutupu-part"]},
+  {key:"ifi", ma:"Ifi", en:"Teeth", parts:["ifi-part"]},
+  {key:"auvaeGutupu", ma:"Auvae Gutu", en:"Chin", parts:["auvaeGutupu-part"]},
+  {key:"tauau", ma:"Tauau", en:"Shoulders", parts:["tauau-part"]},
+  {key:"tutupa", ma:"Tutupa", en:"Chest", parts:["tutupa-part"]},
+  {key:"papa", ma:"Papa", en:"Stomach", parts:["papa-part"]},
+  {key:"hope", ma:"Hope", en:"Hips", parts:["hope-part"]},
+  {key:"tua", ma:"Tua", en:"Arms", parts:["tuaL-part","tuaR-part"]},
+  {key:"lima", ma:"Lima", en:"Hands", parts:["limaL-part","limaR-part"]},
+  {key:"tamatama", ma:"Tamatama", en:"Fingers", parts:["tamatamaL-part","tamatamaR-part"]},
+  {key:"tuli", ma:"Tuli", en:"Knees", parts:["tuliL-part","tuliR-part"]},
+  {key:"vae", ma:"Vae", en:"Legs", parts:["vaeL-part","vaeR-part"]},
+  {key:"tuaMata", ma:"Tua Mata", en:"By foot", parts:["tuaMataL-part","tuaMataR-part"]}
+];
+
+const palette = [
+  "#a3d8ff","#fdd28a","#ffc0cb","#b19cd9","#90ee90",
+  "#ffe066","#ff9999","#99e6ff","#c2f0c2","#ffccf2",
+  "#ffd1a9","#bfe6ff","#ffd6e7","#c6ffd1","#d1c6ff",
+  "#f6ffa6","#ffb3b3","#b3ffd9","#d9b3ff","#ffdcb3"
+];
+
+const allSamoan = items.map(x => x.ma);
+let currentQuestionIndex = 0;
+let score = 0;
+const totalQuestions = items.length;
+
+function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+function shade(hex, p) {
+  const f = parseInt(hex.slice(1), 16), t = p < 0 ? 0 : 255, pct = Math.abs(p) / 100;
+  const n = x => Math.round((t - x) * pct + x);
+  return "#" + (0x1000000 + (n(f >> 16) << 16) + (n(f >> 8 & 0x00FF) << 8) + n(f & 0x0000FF)).toString(16).slice(1);
+}
+
+function updateScore() {
+  document.getElementById('score').textContent = `Score: ${score}/${totalQuestions}`;
+}
+
+function checkCompletion() {
+  const allSelects = document.querySelectorAll('select');
+  const allCorrect = Array.from(allSelects).every(sel => sel.dataset.correct === 'true');
+  if (allCorrect) {
+    document.getElementById('completion-message').style.display = 'block';
+  }
+}
+
+function showNextQuestion() {
+  const questionBoxes = document.querySelectorAll('#left-questions .question-box');
+  questionBoxes.forEach((box, index) => {
+    box.classList.toggle('active', index === currentQuestionIndex);
+  });
+  if (currentQuestionIndex >= totalQuestions - 1) {
+    document.getElementById('next-question').style.display = 'none';
+  }
+}
+
+items.forEach((it, i) => {
+  const side = window.innerWidth > 768 ? (i % 2 === 0 ? "left" : "right") : "left";
+  const panel = document.getElementById(side + "-questions");
+
+  const wrap = document.createElement("div");
+  wrap.className = "question-box";
+  wrap.style.backgroundColor = palette[i % palette.length];
+  if (side === "left" && i === 0) wrap.classList.add('active');
+
+  const sel = document.createElement("select");
+  const placeholder = document.createElement("option");
+  placeholder.value = ""; placeholder.text = "--select--";
+  sel.appendChild(placeholder);
+
+  const opts = shuffle([it.ma, ...shuffle(allSamoan.filter(w => w !== it.ma)).slice(0, 3)]);
+  opts.forEach(o => {
+    const op = document.createElement("option");
+    op.value = o;
+    op.textContent = o;
+    sel.appendChild(op);
+  });
+
+  const status = document.createElement("span");
+  status.className = "status";
+  wrap.appendChild(status);
+  wrap.appendChild(sel);
+  panel.appendChild(wrap);
+
+  const parts = it.parts;
+  const addGlow = () => parts.forEach(pid => document.getElementById(pid)?.classList.add("highlight-part"));
+  const removeGlow = () => parts.forEach(pid => document.getElementById(pid)?.classList.remove("highlight-part"));
+  wrap.addEventListener("mouseenter", () => { wrap.classList.add("highlight"); addGlow(); });
+  wrap.addEventListener("mouseleave", () => { wrap.classList.remove("highlight"); removeGlow(); });
+  sel.addEventListener("focusin", () => { wrap.classList.add("highlight"); addGlow(); });
+  sel.addEventListener("blur", () => { wrap.classList.remove("highlight"); removeGlow(); });
+
+  sel.addEventListener("change", () => {
+    if (sel.value === it.ma) {
+      sel.value = it.ma;
+      sel.innerHTML = `<option value="${it.ma}" selected>${it.ma} (${it.en})</option>`;
+      status.textContent = "✓";
+      status.style.color = "green";
+      sel.dataset.correct = "true";
+      if (!sel.dataset.scored) {
+        score++;
+        sel.dataset.scored = "true";
+        updateScore();
+      }
+    } else if (sel.value) {
+      status.textContent = "✗";
+      status.style.color = "red";
+      sel.dataset.correct = "false";
+    } else {
+      status.textContent = "";
+      sel.dataset.correct = "false";
+    }
+    checkCompletion();
+    if (window.innerWidth <= 768) {
+      document.getElementById('next-question').style.display = 'block';
+    }
+  });
+
+  parts.forEach(pid => {
+    const el = document.getElementById(pid);
+    if (!el) return;
+    if (el.tagName !== "line") el.setAttribute("fill", palette[i % palette.length]);
+    el.setAttribute("stroke", shade(palette[i % palette.length], -25));
+  });
+});
+
+document.getElementById('next-question').addEventListener('click', () => {
+  currentQuestionIndex++;
+  showNextQuestion();
+});
+
+if (window.innerWidth <= 768) {
+  showNextQuestion();
+}
+
+updateScore();
+</script>
+</body>
+</html>

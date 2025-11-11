@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>E hia / Kia hia / Tokohia – Hanga Rerenga</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0fff0;
+    padding: 20px;
+    font-size: 1.3em;
+  }
+  .input-row {
+    margin: 10px 0;
+  }
+  label {
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  select {
+    padding: 5px;
+    font-size: 1em;
+    font-family: inherit;
+  }
+  .green select, .green label { color: green; }
+  .blue select, .blue label { color: blue; }
+  .purple select, .purple label { color: purple; }
+  .red select, .red label { color: red; }
+  .output {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  .green { color: green; }
+  .blue { color: blue; }
+  .purple { color: purple; }
+  .red { color: red; }
+</style>
+</head>
+<body>
+
+<h2>E hia / Kia hia / Tokohia – Hanga Rerenga</h2>
+
+<div class="input-row green">
+  <label for="structure">Structure:</label>
+  <select id="structure">
+    <option value="E hia|How many">E hia</option>
+    <option value="Kia hia|How many (should/do you want)">Kia hia</option>
+    <option value="Tokohia|How many people">Tokohia</option>
+  </select>
+</div>
+
+<div class="input-row purple">
+  <label for="noun">Noun:</label>
+  <select id="noun">
+    <option value="ngā pene|pens|A thing">ngā pene</option>
+    <option value="ngā kapu|cups|A thing">ngā kapu</option>
+    <option value="ngā āporo|apples|A thing">ngā āporo</option>
+    <option value="ngā keke|cakes|A thing">ngā keke</option>
+    <option value="ngā pukapuka|books|A thing">ngā pukapuka</option>
+    <option value="ngā motokā|cars|O thing">ngā motokā</option>
+    <option value="ngā tamariki|children|person">ngā tamariki</option>
+    <option value="ngā ākonga|students|person">ngā ākonga</option>
+    <option value="ngā kaiako|teachers|person">ngā kaiako</option>
+  </select>
+</div>
+
+<div class="input-row blue">
+  <label for="subject">Subject/Agent:</label>
+  <select id="subject">
+    <option value="māku|for me|A thing|māku|for me">māku</option>
+    <option value="māu|for you|A thing|māu|for you">māu</option>
+    <option value="māna|for him/her|A thing|māna|for him/her">māna</option>
+    <option value="mā tāua|for you and me|A thing|mā tāua|for you and me">mā tāua</option>
+    <option value="mā māua|for us (not you)|A thing|mā māua|for us (not you)">mā māua</option>
+    <option value="mā tātou|for all of us (including you)|A thing|mā tātou|for all of us (including you)">mā tātou</option>
+    <option value="mā mātou|for us (excluding you)|A thing|mā mātou|for us (excluding you)">mā mātou</option>
+    <option value="mā kōrua|for you two|A thing|mā kōrua|for you two">mā kōrua</option>
+    <option value="mā koutou|for you all|A thing|mā koutou|for you all">mā koutou</option>
+    <option value="mā rāua|for those two|A thing|mā rāua|for those two">mā rāua</option>
+    <option value="mā rātou|for them|A thing|mā rātou|for them">mā rātou</option>
+    <option value="mōu|for you|O thing|mōku|for me">mōu</option>
+    <option value="mōna|for him/her|O thing|mōna|for him/her">mōna</option>
+    <option value="mō mātou|for us|O thing|mō mātou|for us">mō mātou</option>
+    <option value="mō rātou|for them|O thing|mō rātou|for them">mō rātou</option>
+    <option value="kei a koe|do you have|A thing|kei a au|I have">kei a koe</option>
+    <option value="kei a ia|does he/she have|A thing|kei a ia|he/she has">kei a ia</option>
+    <option value="i te akomanga|in the classroom|person|i te akomanga|in the classroom">i te akomanga</option>
+    <option value="i te papa tākaro|on the field|person|i te papa tākaro|on the field">i te papa tākaro</option>
+    <option value="i te poti|in the boat|person|i te poti|in the boat">i te poti</option>
+  </select>
+</div>
+
+<div class="input-row red">
+  <label for="number">Number:</label>
+  <select id="number">
+    <option value="kotahi|one">kotahi</option>
+    <option value="rua|two">rua</option>
+    <option value="toru|three">toru</option>
+    <option value="whā|four">whā</option>
+    <option value="rima|five">rima</option>
+    <option value="ono|six">ono</option>
+    <option value="whitu|seven">whitu</option>
+    <option value="waru|eight">waru</option>
+    <option value="iwa|nine">iwa</option>
+    <option value="tekau|ten">tekau</option>
+  </select>
+</div>
+
+<div class="output" id="questionM"></div>
+<div class="output" id="questionE"></div>
+<div class="output" id="answerM"></div>
+<div class="output" id="answerE"></div>
+
+<script>
+function updateNounOptions() {
+  const structure = document.getElementById("structure").value.split("|")[0];
+  const nounSelect = document.getElementById("noun");
+  for (let option of nounSelect.options) {
+    const type = option.value.split("|")[2];
+    option.hidden = (structure === "Tokohia" && type !== "person") ||
+                    (structure !== "Tokohia" && type === "person");
+  }
+  if (nounSelect.selectedOptions[0].hidden) {
+    for (let opt of nounSelect.options) {
+      if (!opt.hidden) { nounSelect.value = opt.value; break; }
+    }
+  }
+}
+
+function updateSubjectOptions() {
+  const nounType = document.getElementById("noun").value.split("|")[2];
+  const subjectSelect = document.getElementById("subject");
+  for (let option of subjectSelect.options) {
+    const type = option.value.split("|")[2];
+    option.hidden = (nounType === "person" && type !== "person") ||
+                    (nounType === "A thing" && type !== "A thing") ||
+                    (nounType === "O thing" && type !== "O thing");
+  }
+  if (subjectSelect.selectedOptions[0].hidden) {
+    for (let opt of subjectSelect.options) {
+      if (!opt.hidden) { subjectSelect.value = opt.value; break; }
+    }
+  }
+}
+
+function makeMaoriAnswer(number, noun, subject) {
+  const type = noun.split("|")[2];
+  const nounM = noun.split("|")[0];
+  const subjectM = subject.split("|")[3];
+  if (number === "kotahi") {
+    return `<span class="red">Kotahi</span> te <span class="purple">${nounM.replace("ngā ", "")}</span> <span class="blue">${subjectM}</span>.`;
+  }
+  if (number === "tekau") {
+    return `<span class="red">Tekau</span> <span class="purple">${nounM}</span> <span class="blue">${subjectM}</span>.`;
+  }
+  const prefix = type === "person" ? `Toko<span class="red">${number}</span>` : `E <span class="red">${number}</span>`;
+  return `${prefix} <span class="purple">${nounM}</span> <span class="blue">${subjectM}</span>.`;
+}
+
+function makeEnglishAnswer(number, noun, subject) {
+  const nounE = noun.split("|")[1];
+  const subjectE = subject.split("|")[4];
+  const nounFormatted = (number === "one" || number === "kotahi") ? nounE.replace(/s$/, "") : nounE;
+  const numberFormatted = number.charAt(0).toUpperCase() + number.slice(1);
+  return `<span class="red">${numberFormatted}</span> <span class="purple">${nounFormatted}</span> <span class="blue">${subjectE}</span>.`;
+}
+
+function updateSentences() {
+  updateNounOptions();
+  updateSubjectOptions();
+  const [structureM, structureE] = document.getElementById("structure").value.split("|");
+  const noun = document.getElementById("noun").value;
+  const subject = document.getElementById("subject").value;
+  const [numberM, numberE] = document.getElementById("number").value.split("|");
+
+  const nounM = noun.split("|")[0];
+  const nounE = noun.split("|")[1];
+  const subjectM = subject.split("|")[0];
+  const subjectE = subject.split("|")[1];
+
+  const questionM = `<span class="green">${structureM}</span> <span class="purple">${nounM}</span> <span class="blue">${subjectM}</span>?`;
+  const questionE = `<span class="green">${structureE}</span> <span class="purple">${nounE}</span> <span class="blue">${subjectE}</span>?`;
+
+  const answerM = makeMaoriAnswer(numberM, noun, subject);
+  const answerE = makeEnglishAnswer(numberE, noun, subject);
+
+  document.getElementById("questionM").innerHTML = "Māori (Question): " + questionM;
+  document.getElementById("questionE").innerHTML = "English (Question): " + questionE;
+  document.getElementById("answerM").innerHTML = "Māori (Answer): " + answerM;
+  document.getElementById("answerE").innerHTML = "English (Answer): " + answerE;
+}
+
+document.querySelectorAll("select").forEach(sel => {
+  sel.addEventListener("change", updateSentences);
+});
+
+updateSentences();
+</script>
+
+</body>
+</html>

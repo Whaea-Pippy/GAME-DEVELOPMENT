@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hanga Rerenga TENSE 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 1.5em;
+      padding: 20px;
+      background-color: #fff9c4; /* soft yellow */
+      color: violet;
+    }
+    h1 {
+      color: #c71585; /* darker pink */
+      text-align: center;
+      font-family: 'Georgia', serif;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px auto;
+      width: 90%;
+      max-width: 600px;
+    }
+    label {
+      flex: 1.2;
+      color: #c71585; /* match heading */
+    }
+    select {
+      flex: 2;
+      font-size: 1em;
+    }
+    button {
+      display: block;
+      margin: 15px auto;
+      width: 90%;
+      max-width: 600px;
+      padding: 10px;
+      background-color: #006400;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+    #output {
+      margin-top: 30px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.95em; /* 30% larger than 1.5em */
+    }
+    .tense { color: green; }
+    .pronoun { color: blue; }
+    .verb { color: red; }
+    .feeling { color: darkorange; }
+  </style>
+</head>
+<body>
+  <h1>Hanga Rerenga TENSE 2</h1>
+
+  <div class="input-row">
+    <label for="tense">Tense Marker:</label>
+    <select id="tense">
+      <option value="Kei te">Kei te (Present)</option>
+      <option value="I">I (Past)</option>
+      <option value="Ka">Ka (Future)</option>
+      <option value="Kua">Kua (Perfect)</option>
+      <option value="E">E...ana (Continuous)</option>
+    </select>
+  </div>
+
+  <div class="input-row">
+    <label for="verb">Verb or Feeling:</label>
+    <select id="verb">
+      <option value="karanga">karanga (call)</option>
+      <option value="hīkoi">hīkoi (walk)</option>
+      <option value="taraiwa">taraiwa (drive)</option>
+      <option value="waiata">waiata (sing)</option>
+      <option value="hopu">hopu (catch)</option>
+      <option value="mataku">mataku (scared)</option>
+      <option value="ngākau reka">ngākau reka (excited)</option>
+      <option value="whakamā">whakamā (shy)</option>
+      <option value="pārekareka">pārekareka (delighted)</option>
+      <option value="hōhā">hōhā (bored)</option>
+    </select>
+  </div>
+
+  <div class="input-row">
+    <label for="pronoun">Pronoun:</label>
+    <select id="pronoun">
+      <option value="ahau">ahau (I)</option>
+      <option value="ia">ia (he/she)</option>
+      <option value="koe">koe (you)</option>
+      <option value="tāua">tāua (you and I)</option>
+      <option value="māua">māua (we two, not you)</option>
+      <option value="tātou">tātou (we all)</option>
+      <option value="mātou">mātou (we all, not you)</option>
+      <option value="kōrua">kōrua (you two)</option>
+      <option value="koutou">koutou (you all)</option>
+      <option value="rāua">rāua (those two)</option>
+      <option value="rātou">rātou (they all)</option>
+    </select>
+  </div>
+
+  <button onclick="generateSentence()">Generate Sentence</button>
+
+  <div id="output"></div>
+
+  <script>
+    function generateSentence() {
+      const tense = document.getElementById("tense").value;
+      const verb = document.getElementById("verb").value;
+      const pronoun = document.getElementById("pronoun").value;
+
+      const feelings = ["mataku", "ngākau reka", "whakamā", "pārekareka", "hōhā"];
+      const verbClass = feelings.includes(verb) ? "feeling" : "verb";
+
+      const teReoSentence = (tense === "E")
+        ? `<span class='tense'>E</span> <span class='${verbClass}'>${verb}</span> <span class='tense'>ana</span> <span class='pronoun'>${pronoun}</span>.`
+        : `<span class='tense'>${tense}</span> <span class='${verbClass}'>${verb}</span> <span class='pronoun'>${pronoun}</span>.`;
+
+      const englishPronouns = {
+        "ahau": "I",
+        "koe": "You",
+        "ia": "He/She",
+        "tāua": "You and I",
+        "māua": "We two (not you)",
+        "tātou": "We all",
+        "mātou": "We all (not you)",
+        "kōrua": "You two",
+        "koutou": "You all",
+        "rāua": "Those two",
+        "rātou": "They all"
+      };
+
+      const englishVerbs = {
+        "karanga": ["called", "was calling", "call", "called", "calling"],
+        "hīkoi": ["walked", "was walking", "walk", "walked", "walking"],
+        "taraiwa": ["drove", "was driving", "drive", "driven", "driving"],
+        "waiata": ["sang", "was singing", "sing", "sung", "singing"],
+        "hopu": ["caught", "was catching", "catch", "caught", "catching"],
+        "mataku": ["was scared", "was being scared", "be scared", "been scared", "being scared"],
+        "ngākau reka": ["was excited", "was being excited", "be excited", "been excited", "being excited"],
+        "whakamā": ["was shy", "was being shy", "be shy", "been shy", "being shy"],
+        "pārekareka": ["was delighted", "was being delighted", "be delighted", "been delighted", "being delighted"],
+        "hōhā": ["was bored", "was being bored", "be bored", "been bored", "being bored"]
+      };
+
+      const subject = englishPronouns[pronoun];
+      const verbForms = englishVerbs[verb];
+
+      function getAuxiliary(subj) {
+        if (subj === "I") return "am";
+        if (subj === "He/She") return "is";
+        return "are";
+      }
+
+      function isPlural(subj) {
+        return [
+          "You and I", "We two (not you)", "We all", "We all (not you)",
+          "You two", "You all", "Those two", "They all"
+        ].includes(subj);
+      }
+
+      let englishSentence = "";
+      if (tense === "Kei te" || tense === "E") {
+        englishSentence = `<span class='pronoun'>${subject}</span> <span class='tense'>${getAuxiliary(subject)}</span> <span class='${verbClass}'>${verbForms[4]}</span>.`;
+      } else if (tense === "I") {
+        const wasWere = isPlural(subject) ? "were" : "was";
+        const verbOnly = verbForms[4]; // e.g., "walking"
+        englishSentence = `<span class='pronoun'>${subject}</span> <span class='tense'>${wasWere}</span> <span class='${verbClass}'>${verbOnly}</span>.`;
+      } else if (tense === "Ka") {
+        englishSentence = `<span class='pronoun'>${subject}</span> <span class='tense'>will</span> <span class='${verbClass}'>${verbForms[2]}</span>.`;
+      } else if (tense === "Kua") {
+        englishSentence = `<span class='pronoun'>${subject}</span> <span class='tense'>have</span> <span class='${verbClass}'>${verbForms[3]}</span>.`;
+      }
+
+      englishSentence = englishSentence.charAt(0).toUpperCase() + englishSentence.slice(1);
+
+      document.getElementById("output").innerHTML = `
+        <p>${teReoSentence}</p>
+        <p>${englishSentence}</p>
+      `;
+    }
+  </script>
+</body>
+</html>

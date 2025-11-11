@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Escape Room — Year 10 | Aotearoa</title>
+  <style>
+    :root {
+      --bg: #fdfdfd;
+      --card: #ffffff;
+      --accent: #3b82f6;
+      --accent-dark: #1e40af;
+      --success: #10b981;
+      --danger: #ef4444;
+      --muted: #6b7280;
+      --text: #1e293b;
+      --max-width: 950px;
+      --pad: 1.25rem;
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: linear-gradient(135deg, #dbeafe, #f3f4f6);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--pad);
+      font-size: clamp(16px, 2.5vw, 18px);
+    }
+    .wrap { width: 100%; max-width: var(--max-width); margin: 0 auto; }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; gap: 0.8rem; align-items: center; }
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .logo svg { width: 36px; height: 36px; fill: #fff; }
+    h1 {
+      font-size: clamp(1.5rem, 3vw, 1.9rem);
+      margin: 0;
+      color: var(--text);
+    }
+    p.lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+
+    .card {
+      background: var(--card);
+      padding: var(--pad);
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .status { display: flex; gap: 0.8rem; align-items: center; }
+    .chip {
+      background: #e5e7eb;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+      color: var(--text);
+    }
+    .timer { font-size: 1rem; }
+
+    .room { display: none; }
+    .room.active { display: block; }
+
+    .quiz {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 700px) { .quiz { grid-template-columns: 1fr 300px; } }
+
+    .puzzle {
+      padding: 1.25rem;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    input[type=text], input[type=number] {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 1rem;
+    }
+    button {
+      cursor: pointer;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      border: 0;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .muted { color: var(--muted); }
+
+    .hint {
+      background: #eef2ff;
+      padding: 0.6rem;
+      border-radius: 8px;
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .solved { background: #ecfdf5; border-left: 4px solid var(--success); }
+    .locked { opacity: 0.85; background: #f3f4f6; }
+
+    .clue {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .progress {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .progress > i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #9333ea);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zm0 7v10l10-5V7l-10 5z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Math Escape Room — Year 10</h1>
+          <p class="lead">Solve puzzles, earn points, escape the rooms! ✨</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="topbar">
+        <div class="status">
+          <div class="chip">Room <span id="roomIndex">1</span>/4</div>
+          <div class="chip timer">⏱ <span id="timer">12:00</span></div>
+          <div class="chip">Points: <span id="points">0</span></div>
+        </div>
+      </div>
+
+      <div class="progress"><i id="progressFill"></i></div>
+
+      <!-- Room 1 -->
+      <section id="room1" class="room active">
+        <h2 class="clue">Room 1 — Algebra Lock 🔐</h2>
+        <div class="quiz">
+          <div class="puzzle">
+            <p>Solve the system and enter the code as x,y:</p>
+            <p class="muted small">Equation A: 2x + y = 10<br>Equation B: x - y = 2</p>
+            <label for="r1ans">Enter code (e.g. 4,2)</label>
+            <input id="r1ans" type="text" placeholder="x,y" />
+            <button id="r1check">Submit</button>
+            <div id="r1msg" class="muted small"></div>
+          </div>
+          <aside class="puzzle">
+            <h3>Clue</h3>
+            <p class="muted">Try adding the equations to eliminate y.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Room 2 -->
+      <section id="room2" class="room">
+        <h2 class="clue">Room 2 — Geometry Gate 📐</h2>
+        <div class="quiz">
+          <div class="puzzle">
+            <p>A rectangle has perimeter 20 cm. One side is 6 cm. What is the other side?</p>
+            <label for="r2ans">Enter side length</label>
+            <input id="r2ans" type="number" />
+            <button id="r2check">Submit</button>
+            <div id="r2msg" class="muted small"></div>
+          </div>
+          <aside class="puzzle">
+            <h3>Clue</h3>
+            <p class="muted">Perimeter = 2 × (L + W).</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Room 3 -->
+      <section id="room3" class="room">
+        <h2 class="clue">Room 3 — Percentage Puzzle 💰</h2>
+        <div class="quiz">
+          <div class="puzzle">
+            <p>A phone was $200. It went on sale for 25% off. What is the sale price?</p>
+            <label for="r3ans">Enter sale price $</label>
+            <input id="r3ans" type="number" />
+            <button id="r3check">Submit</button>
+            <div id="r3msg" class="muted small"></div>
+          </div>
+          <aside class="puzzle">
+            <h3>Clue</h3>
+            <p class="muted">Sale = 200 × 0.75.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Room 4 -->
+      <section id="room4" class="room">
+        <h2 class="clue">Final Room — Reasoning Door 🗝</h2>
+        <div class="quiz">
+          <div class="puzzle">
+            <p>If f(x) = x² + 3, find f(5). Then subtract 20.</p>
+            <label for="r4ans">Enter final number</label>
+            <input id="r4ans" type="number" />
+            <button id="r4check">Submit</button>
+            <div id="r4msg" class="muted small"></div>
+          </div>
+          <aside class="puzzle">
+            <h3>Clue</h3>
+            <p class="muted">f(5) = 25 + 3, then subtract 20.</p>
+          </aside>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const rooms = ["room1","room2","room3","room4"];
+    let index = 0, points = 0;
+
+    function showRoom(i){
+      rooms.forEach((id,j)=>{
+        document.getElementById(id).classList.toggle("active", i===j);
+      });
+      document.getElementById("roomIndex").textContent = i+1;
+      document.getElementById("progressFill").style.width = ((i)/rooms.length)*100+"%";
+    }
+
+    function correct(msgEl){
+      msgEl.textContent = "✅ Correct! Moving on...";
+      msgEl.style.color = "green";
+      points+=10;
+      document.getElementById("points").textContent=points;
+      index++;
+      if(index<rooms.length){setTimeout(()=>showRoom(index),1000);}
+      else {setTimeout(()=>alert("🎉 Escape Complete! Score: "+points+" pts"),800);}
+    }
+
+    document.getElementById("r1check").onclick=()=>{
+      const ans=document.getElementById("r1ans").value.trim();
+      const msg=document.getElementById("r1msg");
+      if(ans==="4,2"){correct(msg);} else msg.textContent="❌ Try again.";
+    };
+
+    document.getElementById("r2check").onclick=()=>{
+      const ans=+document.getElementById("r2ans").value;
+      const msg=document.getElementById("r2msg");
+      if(ans===4){correct(msg);} else msg.textContent="❌ Not quite.";
+    };
+
+    document.getElementById("r3check").onclick=()=>{
+      const ans=+document.getElementById("r3ans").value;
+      const msg=document.getElementById("r3msg");
+      if(ans===150){correct(msg);} else msg.textContent="❌ Check discount.";
+    };
+
+    document.getElementById("r4check").onclick=()=>{
+      const ans=+document.getElementById("r4ans").value;
+      const msg=document.getElementById("r4msg");
+      if(ans===8){correct(msg);} else msg.textContent="❌ Try substitution.";
+    };
+
+    showRoom(0);
+  </script>
+</body>
+</html>

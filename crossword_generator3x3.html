@@ -1,0 +1,300 @@
+<style>
+    #crossword-generator-container {
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .main-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        margin: 20px 0;
+    }
+    .progress-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    #progress-bar-container {
+        width: 30px;
+        height: 300px;
+        border: 2px solid #333;
+        background-color: #e0e0e0;
+        display: flex;
+        flex-direction: column-reverse; /* To fill from bottom to top */
+    }
+    #progress-bar {
+        width: 100%;
+        height: 0%;
+        background-color: #4caf50;
+        transition: height 0.1s linear;
+    }
+    #attempt-counter {
+        font-size: 1.2em;
+        font-family: monospace;
+    }
+    .crossword-grid {
+        display: grid;
+        border: 3px solid black;
+    }
+    .cell {
+        border: 1px solid black;
+        width: 60px; /* Increased size */
+        height: 60px; /* Increased size */
+        text-align: center;
+        position: relative;
+    }
+    .cell input {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        border: none;
+        font-size: 30px; /* Increased font size */
+        background-color: white;
+        box-sizing: border-box;
+        text-transform: uppercase;
+        pointer-events: none; /* Disable manual input */
+    }
+    .cell.black {
+        background-color: black;
+    }
+    .clue-number {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        font-size: 12px;
+    }
+    .json-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 500px;
+    }
+    #json-output {
+        width: 100%;
+        height: 300px;
+        white-space: pre;
+        font-family: monospace;
+    }
+    .back-link {
+        margin-top: 20px;
+        font-size: 1.2em;
+    }
+</style>
+
+<section class="stage">
+<div id="crossword-generator-container">
+    <h1>3x3 Crossword Puzzle Generator</h1>
+    <div class="main-container">
+        <div class="progress-container">
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="attempt-counter">0 / 5000</div>
+        </div>
+        <div class="crossword-grid" id="crossword-grid"></div>
+        <div class="json-container">
+            <button id="generate-json">Generate JSON</button>
+            <button id="copy-to-clipboard">Copy to Clipboard</button>
+            <textarea id="json-output" readonly></textarea>
+        </div>
+    </div>
+    <button id="generate-crossword">Generate Crossword</button>
+    <a href="index_crossword.html" class="back-link">Back to Crossword Index</a>
+</div>
+</section>
+
+<script src="crossword_words_letters3.js"></script>
+<script>
+    (() => {
+        const container = document.getElementById('crossword-generator-container');
+        if (!container) return;
+
+        const gridElement = container.querySelector('#crossword-grid');
+        const generateJsonButton = container.querySelector('#generate-json');
+        const copyToClipboardButton = container.querySelector('#copy-to-clipboard');
+        const generateCrosswordButton = container.querySelector('#generate-crossword');
+        const jsonOutput = container.querySelector('#json-output');
+        const progressBar = container.querySelector('#progress-bar');
+        const attemptCounter = container.querySelector('#attempt-counter');
+
+        let grid = [];
+        let currentSolution = null;
+        const size = 3;
+        const maxAttempts = 5000;
+
+        if (typeof words3 === 'undefined' || words3.length === 0) {
+            console.error("Word bank is not loaded or is empty.");
+            return;
+        }
+
+        const threeLetterWords = words3.filter(w => w.word.length === 3);
+        if (threeLetterWords.length === 0) {
+            console.error("No 3-letter words found in the word bank.");
+            return;
+        }
+        const wordList = threeLetterWords.map(w => w.word.toUpperCase());
+
+        function getClueForWord(wordString) {
+            const wordObj = threeLetterWords.find(w => w.word.toUpperCase() === wordString.toUpperCase());
+            return wordObj ? wordObj.clue : "";
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function getRandomWord() {
+            return wordList[Math.floor(Math.random() * wordList.length)];
+        }
+
+        function isValidWord(word) {
+            return wordList.includes(word);
+        }
+
+        async function generateAndFillCrossword() {
+            generateCrosswordButton.disabled = true;
+            currentSolution = null;
+            let attempts = 0;
+
+            createGrid();
+            jsonOutput.value = '';
+
+            for (attempts = 1; attempts <= maxAttempts; attempts++) {
+                const across1 = getRandomWord();
+                const across2 = getRandomWord();
+                const across3 = getRandomWord();
+
+                const down1 = across1[0] + across2[0] + across3[0];
+                const down2 = across1[1] + across2[1] + across3[1];
+                const down3 = across1[2] + across2[2] + across3[2];
+
+                const allWords = [across1, across2, across3, down1, down2, down3];
+                const uniqueWords = new Set(allWords);
+
+                if (uniqueWords.size === allWords.length && isValidWord(down1) && isValidWord(down2) && isValidWord(down3)) {
+                    currentSolution = {
+                        across: [across1, across2, across3],
+                        down: [down1, down2, down3]
+                    };
+
+                    const progress = (attempts / maxAttempts) * 100;
+                    progressBar.style.height = `${progress}%`;
+                    attemptCounter.textContent = `${attempts} / ${maxAttempts}`;
+
+                    break;
+                }
+
+                if (attempts % 10 === 0) {
+                    const progress = (attempts / maxAttempts) * 100;
+                    progressBar.style.height = `${progress}%`;
+                    attemptCounter.textContent = `${attempts} / ${maxAttempts}`;
+                    await sleep(1);
+                }
+            }
+
+            if (currentSolution) {
+                for (let r = 0; r < size; r++) {
+                    for (let c = 0; c < size; c++) {
+                        const letter = currentSolution.across[r][c];
+                        grid[r][c] = { letter: letter, black: false };
+                        container.querySelector(`#cell-${r}-${c}`).value = letter;
+                    }
+                }
+                generateJson();
+            } else {
+                progressBar.style.height = '100%';
+                progressBar.style.backgroundColor = '#f44336';
+                attemptCounter.textContent = `Failed / ${maxAttempts}`;
+                alert("Could not generate a valid crossword after 5000 attempts. Please try again.");
+            }
+            generateCrosswordButton.disabled = false;
+        }
+
+        function createGrid() {
+            grid = Array(size).fill(null).map(() => Array(size).fill({ letter: '', black: false }));
+            gridElement.innerHTML = '';
+            gridElement.style.gridTemplateColumns = `repeat(${size}, 60px)`;
+            gridElement.style.gridTemplateRows = `repeat(${size}, 60px)`;
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    const input = document.createElement('input');
+                    input.maxLength = 1;
+                    input.id = `cell-${r}-${c}`;
+                    cell.appendChild(input);
+                    gridElement.appendChild(cell);
+                }
+            }
+            progressBar.style.height = '0%';
+            progressBar.style.backgroundColor = '#4caf50';
+            attemptCounter.textContent = `0 / ${maxAttempts}`;
+        }
+
+        function generateJson() {
+            if (!currentSolution) {
+                alert("Please generate a crossword first.");
+                return;
+            }
+
+            const finalWords = [
+                { word: currentSolution.across[0], clue: getClueForWord(currentSolution.across[0]), row: 0, col: 0, direction: "across" },
+                { word: currentSolution.across[1], clue: getClueForWord(currentSolution.across[1]), row: 1, col: 0, direction: "across" },
+                { word: currentSolution.across[2], clue: getClueForWord(currentSolution.across[2]), row: 2, col: 0, direction: "across" },
+                { word: currentSolution.down[0], clue: getClueForWord(currentSolution.down[0]), row: 0, col: 0, direction: "down" },
+                { word: currentSolution.down[1], clue: getClueForWord(currentSolution.down[1]), row: 0, col: 1, direction: "down" },
+                { word: currentSolution.down[2], clue: getClueForWord(currentSolution.down[2]), row: 0, col: 2, direction: "down" }
+            ];
+
+            // Clean up any old clue numbers
+            container.querySelectorAll('.clue-number').forEach(num => num.remove());
+
+            // Add clue numbers visually
+            const numbers = { '0-0': 1, '1-0': 2, '2-0': 3, '0-1': 4, '0-2': 5 };
+            for (const pos in numbers) {
+                const [r, c] = pos.split('-');
+                const cellElement = container.querySelector(`#cell-${r}-${c}`).parentElement;
+                const clueNumberDiv = document.createElement('div');
+                clueNumberDiv.classList.add('clue-number');
+                clueNumberDiv.textContent = numbers[pos];
+                cellElement.appendChild(clueNumberDiv);
+            }
+
+            const output = {
+                level: 11, // change dynamically if needed
+                size: size,
+                words: finalWords
+            };
+
+            let outputString = `level: 11,\nsize: ${size},\nwords: [\n`;
+            finalWords.forEach(word => {
+                outputString += `    { word: "${word.word}", clue: "${word.clue.replace(/"/g, '\'')}", row: ${word.row}, col: ${word.col}, direction: "${word.direction}" },\n`;
+            });
+            outputString += `]`;
+
+            // Output our new string
+            jsonOutput.value = outputString;
+        }
+
+        function copyToClipboard() {
+            jsonOutput.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+
+        generateCrosswordButton.addEventListener('click', generateAndFillCrossword);
+        generateJsonButton.addEventListener('click', generateJson);
+        copyToClipboardButton.addEventListener('click', copyToClipboard);
+
+        createGrid();
+    })();
+</script>

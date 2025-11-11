@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroque Composer Quiz</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/images/music2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+}
+h2 { text-align: center; }
+#score { margin-bottom: 10px; font-weight: bold; }
+#progress-container { width: 100%; display: flex; gap: 2px; margin-bottom: 20px; }
+.progress-segment { flex: 1; height: 20px; background: rgba(255,255,255,0.3); border-radius: 3px; transition: background 0.3s; }
+#question { 
+  margin: 20px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-height: 40px;
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 8px;
+}
+.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+
+/* FIX: Make composer buttons semi-transparent */
+.answers button {
+  padding: 15px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.5); /* Lighter, semi-transparent border */
+  background: rgba(0, 0, 0, 0.2); /* Semi-transparent dark background */
+  transition: 0.3s;
+  color: #fff; /* White text for contrast */
+}
+
+.answers button:hover {
+    background: rgba(0, 0, 0, 0.4); /* Darken on hover */
+}
+
+.answers button.correct {
+    background-color: lightgreen;
+    color: #000; /* Black text on correct answer */
+}
+
+.answers button.wrong {
+    background-color: lightcoral;
+    color: #000; /* Black text on wrong answer */
+}
+
+#feedback { font-size: 1.1rem; min-height: 24px; margin-bottom: 10px; }
+#next-btn { padding: 10px 20px; font-size: 1rem; border-radius: 8px; cursor: pointer; display: none; }
+</style>
+</head>
+<body>
+<br>
+<h2>Baroque Composer Quiz</h2>
+<div id="score">Score: 0 / 0</div>
+<div id="progress-container"></div>
+<div id="question"></div>
+<div class="answers" id="answers"></div>
+<div id="feedback"></div>
+<button id="next-btn">Next Question</button>
+
+<script>
+// Composer facts (original)
+const baroquebach = [["Johann Sebastian Bach","Born in Germany (1685–1750), one of the greatest Baroque composers."],["Family Background","Came from a long line of musicians — music ran in the Bach family!"],["Early Life","Orphaned young and raised by his brother who was also a musician."],["Instruments","Played organ, violin, and harpsichord brilliantly."],["Church Work","Worked as a church musician and wrote many cantatas for worship."],["Famous Work 1","‘Brandenburg Concertos’ — lively instrumental pieces for orchestra."],["Famous Work 2","‘Toccata and Fugue in D minor’ — dramatic organ masterpiece."],["Music Style","Known for rich harmony and complex counterpoint (interwoven melodies)."],["Character","Serious, hardworking, and deeply religious."],["Teaching","Wrote music to teach his students, including ‘The Well-Tempered Clavier.’"],["Legacy","His music influenced composers like Mozart and Beethoven."],["Fun Fact","Had 20 children — some became famous composers too!"]];
+const baroquehandel = [["George Frideric Handel","Born in Germany (1685–1759), later became a British citizen."],["Early Life","His father wanted him to study law, but Handel loved music."],["Instruments","Played organ, harpsichord, and violin."],["Career Move","Moved to London and became famous for operas and oratorios."],["Famous Work 1","‘Messiah’ — includes the famous ‘Hallelujah Chorus.’"],["Famous Work 2","‘Water Music’ — written for King George I to be played on a barge!"],["Style","Grand, dramatic, and emotional — perfect for royal occasions."],["Royal Connection","Handel worked for kings and was buried in Westminster Abbey."],["Character","Determined, confident, and very independent."],["Legacy","His music still plays every Christmas and Easter worldwide."],["Fun Fact","He went blind near the end of his life but kept composing."],["Nationality","German-born, Italian-trained, English-adopted composer."]];
+const baroquevivaldi = [["Antonio Vivaldi","Born in Venice, Italy (1678–1741), nicknamed ‘The Red Priest.’"],["Nickname","Called ‘The Red Priest’ because of his red hair and priest training."],["Instruments","A brilliant violinist and composer."],["Famous Work 1","‘The Four Seasons’ — four violin concertos showing different times of year."],["Famous Work 2","‘Gloria’ — joyful choral work often sung in churches."],["Teaching","Taught at a girls’ orphanage where the students performed his music."],["Style","Energetic rhythms and bright, cheerful melodies."],["Influence","Inspired later composers like Bach, who admired his concertos."],["Character","Passionate about music and loved innovation."],["Popularity","His fame faded after his death but returned in the 20th century."],["Legacy","Now one of the most performed Baroque composers."],["Fun Fact","He wrote over 500 concertos — that’s a lot of music!"]];
+const baroquepurcell = [["Henry Purcell","Born in London (1659–1695), England’s most famous Baroque composer."],["Family Background","Came from a musical family who worked for the royal court."],["Early Life","Became a choirboy at the Chapel Royal and studied music from a young age."],["Career","Worked as organist at Westminster Abbey and composer for the King."],["Famous Work 1","‘Dido and Aeneas’ — one of the first English operas."],["Famous Work 2","‘Music for the Funeral of Queen Mary.’"],["Style","Combined English, French, and Italian influences into his own sound."],["Vocal Music","Wrote beautiful songs and music for plays and theatre."],["Character","Brilliant, respected, and died young at age 36."],["Legacy","Inspired later English composers like Benjamin Britten."],["Fun Fact","His music was played at Queen Elizabeth II’s coronation in 1953!"],["Influence","Helped shape English Baroque and opera traditions."]];
+
+const composers = {
+  Bach: { name:"Johann Sebastian Bach", facts: baroquebach.map(f=>f[1]) },
+  Handel: { name:"George Frideric Handel", facts: baroquehandel.map(f=>f[1]) },
+  Vivaldi: { name:"Antonio Vivaldi", facts: baroquevivaldi.map(f=>f[1]) },
+  Purcell: { name:"Henry Purcell", facts: baroquepurcell.map(f=>f[1]) }
+};
+
+let questions = [];
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+// Build 10 random questions
+function generateQuestions(){
+  let allFacts=[];
+  for(const key in composers){composers[key].facts.forEach(f=>allFacts.push({fact:f, answer:key}));}
+  allFacts = allFacts.sort(()=>Math.random()-0.5);
+  questions = allFacts.slice(0,10);
+}
+
+// Build progress bar
+function buildProgressBar(){
+  const container=document.getElementById('progress-container');
+  container.innerHTML='';
+  for(let i=0;i<10;i++){
+    const seg=document.createElement('div');
+    seg.className='progress-segment';
+    container.appendChild(seg);
+  }
+}
+
+// Render a question
+function renderQuestion(){
+  answered=false;
+  document.getElementById('next-btn').style.display='none';
+  if(currentQuestion>=questions.length){
+    document.getElementById('question').textContent=`Quiz finished! Final Score: ${score} / ${questions.length}`;
+    document.getElementById('answers').innerHTML='';
+    document.getElementById('feedback').textContent='';
+    return;
+  }
+  const q=questions[currentQuestion];
+  document.getElementById('question').textContent=q.fact;
+  const answersDiv=document.getElementById('answers');
+  answersDiv.innerHTML='';
+  let keys=Object.keys(composers).sort(()=>Math.random()-0.5);
+  keys.forEach(k=>{
+    const btn=document.createElement('button');
+    btn.textContent=composers[k].name;
+    btn.onclick=()=>checkAnswer(btn,q.answer);
+    answersDiv.appendChild(btn);
+  });
+  document.getElementById('feedback').textContent='';
+}
+
+// Check answer
+function checkAnswer(button, correctKey){
+  if(answered) return;
+  answered=true;
+  const buttons=document.querySelectorAll('.answers button');
+  buttons.forEach(b=>b.disabled=true);
+  if(button.textContent===composers[correctKey].name){
+    button.classList.add('correct');
+    score++;
+    updateScore();
+    updateProgressBar(currentQuestion,true);
+    document.getElementById('feedback').textContent='Correct!';
+  }else{
+    button.classList.add('wrong');
+    buttons.forEach(b=>{if(b.textContent===composers[correctKey].name)b.classList.add('correct');});
+    updateProgressBar(currentQuestion,false);
+    document.getElementById('feedback').textContent=`Wrong! Correct: ${composers[correctKey].name}`;
+  }
+  document.getElementById('next-btn').style.display='inline-block';
+}
+
+// Update score
+function updateScore(){document.getElementById('score').textContent=`Score: ${score} / ${questions.length}`;}
+
+// Update progress bar segment
+function updateProgressBar(index, correct){
+  const seg=document.getElementsByClassName('progress-segment')[index];
+  seg.style.backgroundColor = correct?'lightgreen':'lightcoral';
+}
+
+// Next question
+document.getElementById('next-btn').addEventListener('click',()=>{
+  currentQuestion++;
+  renderQuestion();
+});
+
+// Init
+generateQuestions();
+buildProgressBar();
+renderQuestion();
+</script>
+
+</body>
+</html>

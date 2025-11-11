@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<!--13th September 2025 - added auto reset when stuck & fixed issue of words not getting on the board-->
+<!--10th September 2025 WebApp by Gemini on Firebase-->
+<!--Created by Priscilla Allan with help from Grok, ChatGPT, and a little Gemini-->
+<!--I am learning HTML, Java script & how to harness FREE ai-coding help-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>IB History Revision & Vocab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        :root{ --tile-bg: rgba(255,255,255,0.2); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f74ff7 0%, #f53da8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fff;
+            padding: 20px;
+            touch-action: pan-y;
+            overflow-y: auto;
+            transition: background 600ms ease;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.09);
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 980px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .tile {
+    position: relative;
+    background-color: var(--tile-bg);
+    color: black;
+    font-size: clamp(0.9rem, 3.5vw, 1.6rem);
+    font-weight: 700;
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.25s, top 0.35s ease-out;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+        .score {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            background: rgba(0,0,0,0.28);
+            padding: 8px 16px;
+            border-radius: 9999px;
+        }
+        .instructions-btn {
+            background: rgba(0,0,0,0.28);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s;
+            border: none;
+        }
+        .instructions-btn:hover {
+            transform: translateY(-3px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-content h2, .modal-content h3 {
+            font-weight: 700;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e5e7eb;
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 700;
+            border: none;
+        }
+        .progress-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .progress-square {
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+        .level-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .level-indicator {
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.12);
+        }
+        .main-content {
+            display: flex;
+            width: 100%;
+            gap: 18px;
+            flex-direction: column;
+        }
+        @media(min-width:768px) {
+            .main-content {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+        .game-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .word-builder {
+            display: flex;
+            justify-content: center;
+            min-height: 48px;
+            gap: 6px;
+            margin-bottom: 12px;
+            background-color: rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
+            padding: 8px;
+            width: 100%;
+            text-transform: uppercase;
+        }
+        .built-letter {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    animation: popIn 0.18s ease;
+}
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0 }
+            100% { transform: scale(1); opacity: 1 }
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 520px;
+            aspect-ratio: 6 / 5;
+            margin-bottom: 12px;
+            position: relative;
+        }
+ // .TILE WAS REPEATED HERE - WAS OVERWRITTEN THEN REMOVED
+        .tile.hidden-tile {
+            opacity: 0;
+        }
+        .tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.16);
+        }
+        .selected {
+            transform: scale(1.06);
+            outline: 3px solid white;
+            outline-offset: -4px;
+        }
+        .message-box {
+            background-color: rgba(0,0,0,0.32);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            width: 100%;
+        }
+        .win-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .win-star {
+            width: 60%;
+            height: 60%;
+            background-color: rgba(255,255,255,0.2);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .win-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+            margin-top: 16px;
+        }
+        .win-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .win-button {
+            background-color: rgba(0,0,0,0.28);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 700;
+            transition: transform 0.15s;
+            border: none;
+        }
+        .win-button:hover {
+            transform: translateY(-3px);
+        }
+        .word-list-section {
+            width: 320px;
+            min-width: 240px;
+            max-width: 340px;
+            background-color: rgba(0,0,0,0.14);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .word-list-heading {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .word-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .word-item {
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .word-item-text {
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+        .word-item-count {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .tick {
+            font-size: 1.2rem;
+            margin-left: 6px;
+        }
+        .star-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8.4px;
+            margin-top: 12px;
+            width: 100%;
+            max-width: 240px;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .star {
+            width: 32px;
+            height: 32px;
+            background-color: #ffffff;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            cursor: pointer;
+            transition: transform 0.18s, background-color 0.18s;
+            transform: scale(2);
+        }
+        .star.used {
+            background-color: #9ca3af;
+            transform: scale(1);
+            cursor: default;
+        }
+        .controls-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        button {
+            background-color: rgba(0,0,0,0.28);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 9999px;
+            font-weight: 700;
+            transition: transform 0.15s;
+            border: none;
+        }
+        button:hover {
+            transform: translateY(-3px);
+        }
+.audit-trail-section {
+width: 100%;
+background-color: rgba(0,0,0,0.14);
+border-radius: 12px;
+padding: 12px;
+display: flex;
+flex-direction: column;
+align-items: stretch;
+margin: 18px auto 0; /* Center horizontally and add top margin */
+}
+.audit-trail-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 8px;
+}
+        .bg-level-1 { background: linear-gradient(135deg, #EFDDF8 0%, #9ca3af 100%); }
+        .bg-level-2 { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .bg-level-3 { background: linear-gradient(135deg, #06b6d4 0%, #7dd3fc 100%); }
+        .bg-level-4 { background: linear-gradient(135deg, #22c55e 0%, #86efac 100%); }
+        .bg-level-5 { background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%); }
+        .bg-level-6 { background: linear-gradient(135deg, #facc15 0%, #fef08a 100%); }
+        .bg-level-7 { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .bg-level-8 { background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); }
+        .bg-level-9 { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); }
+        .bg-level-10 { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+        .bg-level-11 { background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); }
+        .bg-level-12 { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .bg-level-13 { background: linear-gradient(135deg, #db2777 0%, #ec4899 100%); }
+        .bg-level-14 { background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%); }
+        .bg-level-15 { background: linear-gradient(135deg, #7e22ce 0%, #a78bfa 100%); }
+        .bg-level-16 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 100%); }
+        .bg-level-17 { background: linear-gradient(135deg, #ff7f00 0%, #ffff00 100%); }
+        .bg-level-18 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 50%, #ffff00 100%); }
+        .bg-level-19 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 33%, #ffff00 66%, #00ff00 100%); }
+        .bg-level-20 { background: linear-gradient(135deg, #ff0000 0%, #ff7f00 20%, #ffff00 40%, #00ff00 60%, #0000ff 80%, #4b0082 100%); }
+        /* --- Desktop Interaction Fix --- */
+/* Prevents the browser from trying to text-select or drag the game grid */
+#grid-container {
+  user-select: none; /* Standard property to disable text selection */
+  -webkit-user-drag: none; /* Specific property for Safari/Chrome to disable dragging */
+}
+        @media (max-width: 767px) {
+    /* ----- Header Redesign ----- */
+    .header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+    .title {
+        width: 100%;
+        text-align: center;
+        order: -1; /* Hoist title to the top */
+        font-size: 1.8rem; /* ~20% smaller */
+        margin-bottom: 0;
+    }
+    .instructions-btn, .score {
+        font-size: 1rem; /* ~20% smaller */
+        padding: 6px 12px;
+    }
+
+    /* ----- Scrolling Fix ----- */
+    /* Prevent page from scrolling when user drags on the game grid */
+    #grid-container {
+        touch-action: none;
+    }
+
+    /* ----- Word List & Stars Layout ----- */
+    .word-list-section {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    .word-list-heading {
+        text-align: center;
+        margin-bottom: 0;
+    }
+    #word-list {
+        width: 100%;
+    }
+    #star-container {
+        max-width: 240px;
+        gap: 8px;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    /* ----- Learning Log ----- */
+    /* Hide the list of copied words on mobile to save space */
+    #learning-log-list {
+        display: none;
+    }
+    /* Add some space at the very bottom of the page on mobile */
+    .audit-trail-section {
+        margin-bottom: 20px;
+    }
+
+    /* ----- Existing Mobile Styles (from previous step) ----- */
+    .progress-bar {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    .progress-square {
+        width: calc(10% - 4px); /* Fit 10 per row */
+        font-size: 0.75rem;
+    }
+    .grid { /* This is the JS-driven grid, not the layout grid */
+        aspect-ratio: 1 / 1;
+        max-width: 100%;
+        gap: 6px;
+    }
+  //  .tile {
+  //      border-radius: 8px;
+  //  }
+    .star {
+      width: 24px;
+      height: 24px;
+    }
+    .word-item-text {
+      font-size: 0.95rem;
+    }
+}
+/* 11th september adding the meaning of bonus words for Kristen-->
+/* Bonus Word Overlay Styling */
+.bonus-word-overlay {
+    display: none; /* Hidden by default */
+    position: fixed; /* Covers the entire screen, regardless of scroll */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(238, 155, 213, 0.75);
+    z-index: 2000; /* Ensures it is on top of everything */
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+}
+
+.bonus-word-overlay.visible {
+    display: flex; /* Makes it visible and centers the content */
+}
+
+.bonus-word-content {
+    /* This is the rainbow circle */
+    background: linear-gradient(135deg, #eaa4a4 0%, #f5a04c 20%, #f1f1a4 40%, #c6f0c6 60%, #bbbbdb 80%, #c8a7e0 100%);
+    border-radius: 50%;
+    color: black; /* Text color is now black */
+    width: 90vw;
+    height: 90vw;
+    max-width: 500px;
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.bonus-word-tereo {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    /* No text-shadow for better readability on a colourful background */
+}
+
+.bonus-word-translation {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.bonus-word-continue {
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    font-weight: 400;
+    margin-top: 20px;
+    opacity: 0.8;
+}
+/* end of Kristen Upgrade styling */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="instructions-btn" id="instructions-btn">Instructions</button>
+            <h1 class="title">History Vocab</h1>
+            <div class="score" id="score-display">Score: 0</div>
+        </div>
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="level-controls">
+            <div class="controls-row">
+                <button id="prev-level">◀ Prev</button>
+                <div class="level-indicator" id="level-indicator">Level 1 / 20</div>
+                <button id="next-level">Next ▶</button>
+            </div>
+        </div>
+        <div class="main-content">
+<!-- This is lines 599-613 after the fix -->
+<div id="game-container" class="game-section">
+    <div id="word-builder" class="word-builder"></div>
+    <div id="grid-container" class="grid"></div>
+    <div id="message-box" class="message-box opacity-0 transition-opacity duration-300"></div>
+    <div id="win-screen" class="hidden"></div>
+</div>
+
+            <!-- kristen start -->
+<!-- Bonus Word Overlay -->
+<div class="bonus-word-overlay" id="bonus-word-overlay">
+    <div class="bonus-word-content">
+        <div id="bonus-word-tereo" class="bonus-word-tereo"></div>
+        <div id="bonus-word-translation" class="bonus-word-translation"></div>
+        <div class="bonus-word-continue">(click anywhere to continue)</div>
+    </div>
+</div>
+<!-- kristen end -->
+            <div class="word-list-section">
+                <div class="word-list-heading">Words to find</div>
+                <div id="word-list" class="word-list"></div>
+                <div class="star-container" id="star-container"></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="instructions-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">Close</button>
+            <h2>How to IB History Vocab</h2>
+            <p>Find and connect letters to form the hidden words.</p>
+            <p>Words SNAKE up, down, left, right, or diagonally.</p>
+            <p> SELECT letters in order to form words.</p>
+            <h3>Scoring</h3>
+            <p>+1 point for each letter in the main word list.</p>
+            <p>+5 points for each letter in bonus words.</p>
+            <p>Bonus words can come from any level or the bonus word bank, not just the current level.</p>
+            <h3>Stars</h3>
+            <p>Stars can be clicked when you get stuck to reset the board.</p>
+            <h3>Progress Bar</h3>
+            <p>The progress bar at the top shows your progress through the levels.</p>
+            <h3>Tips</h3>
+            <p>Look carefully — bonus words can sneak through the purple filler letters!</p>
+            <p>If there is too many bonus words on the board it resets automatically</p>
+            <p>The later levels get more colourful and challenging.</p>
+            <h2>Copy the learning log</h2>
+            <h3>Copy then paste as an EMBED into your google site</h3>
+        </div>
+    </div>
+</div>
+<div class="audit-trail-section">
+    <button id="copy-trail" class="win-button" onclick="copyToClipboard()">
+        Rapu Kupu: Learning Log 2025         [CC BY-NC]        Click to COPY
+    </button>
+    <div id="learning-log-list" class="word-list"></div>
+</div>
+    <script>
+const messageBox = document.getElementById('message-box');
+    document.addEventListener('DOMContentLoaded', () => {
+        const gridContainer = document.getElementById('grid-container');
+        const messageBox = document.getElementById('message-box');
+        const winScreen = document.getElementById('win-screen');
+        const gameContainer = document.getElementById('game-container');
+        const wordListEl = document.getElementById('word-list');
+        const wordBuilderEl = document.getElementById('word-builder');
+        const starContainer = document.getElementById('star-container');
+        const prevLevelBtn = document.getElementById('prev-level');
+        const nextLevelBtn = document.getElementById('next-level');
+        const levelIndicator = document.getElementById('level-indicator');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreDisplay = document.getElementById('score-display');
+        const instructionsBtn = document.getElementById('instructions-btn');
+        const instructionsModal = document.getElementById('instructions-modal');
+        const modalClose = document.getElementById('modal-close');
+        const learningLogList = document.getElementById('learning-log-list');
+        const copyTrailBtn = document.getElementById('copy-trail');
+        // Kristen upgrade start
+        const bonusWordOverlay = document.getElementById('bonus-word-overlay');
+        const bonusWordTereo = document.getElementById('bonus-word-tereo');
+        const bonusWordTranslation = document.getElementById('bonus-word-translation');
+        // Kristen upgrade end
+
+        const GRID_SIZE = 6;
+        const FIND_COUNT_PER_WORD = 1;
+        const TOTAL_STARS = 15;
+
+        let purpleResetTimeout = null; // 13th September
+        let gameBoard = [];
+        let selectedTiles = [];
+        let foundWordCounts = {};
+        let wordPlacementCounts = {};
+        let wordsToFind = [];
+        let wordInfo = {};
+        let isDragging = false;
+        let lastTile = null;
+        let stars = [];
+        let starsUsedCount = 0;
+        let completedLevels = new Set();
+        // let score = 0; 14th September Score Saving
+        let score = parseInt(localStorage.getItem('gameScore')) || 0;
+        let foundWordsTrail = [];
+        let normalizedTranslations = {};
+        let selectionStartTime = null; // To track time taken for word selection
+
+        const letters = ['a', 'e', 'h', 'i', 'k', 'm', 'n', 'o', 'p', 'r', 't', 'u', 'w'];
+
+        const BONUS_WORDS = [
+  // Core Historical Concepts
+  { w: 'history', t: 'the study of the past' },
+  { w: 'chronology', t: 'the order of events in time' },
+  { w: 'cause', t: 'a reason why something happens' },
+  { w: 'consequence', t: 'the result of an event' },
+  { w: 'continuity', t: 'things that stay the same over time' },
+  { w: 'change', t: 'things that become different over time' },
+  { w: 'turning point', t: 'a moment when history shifts direction' },
+  { w: 'revolution', t: 'a major political or social change' },
+  { w: 'reform', t: 'a change or improvement in policy' },
+  { w: 'conflict', t: 'a struggle or clash between groups' },
+
+  // Historical Methods
+  { w: 'source', t: 'a piece of evidence from the past' },
+  { w: 'primary source', t: 'evidence created at the time' },
+  { w: 'secondary source', t: 'evidence written after the event' },
+  { w: 'interpretation', t: 'a historian’s explanation of the past' },
+  { w: 'perspective', t: 'a viewpoint on a historical event' },
+  { w: 'bias', t: 'an unfair or one-sided view' },
+  { w: 'reliability', t: 'how trustworthy a source is' },
+  { w: 'validity', t: 'how accurate and relevant evidence is' },
+  { w: 'provenance', t: 'the origin of a source' },
+  { w: 'historiography', t: 'the study of how history is written' },
+
+  // Political Systems & Ideas
+  { w: 'democracy', t: 'government by the people' },
+  { w: 'dictatorship', t: 'rule by one leader with total power' },
+  { w: 'authoritarian', t: 'strict control by the government' },
+  { w: 'totalitarian', t: 'government controls all aspects of life' },
+  { w: 'fascism', t: 'nationalist, authoritarian ideology' },
+  { w: 'communism', t: 'system with shared ownership' },
+  { w: 'capitalism', t: 'economic system based on private ownership' },
+  { w: 'socialism', t: 'system of collective welfare and equality' },
+  { w: 'nationalism', t: 'loyalty and pride in one’s nation' },
+  { w: 'imperialism', t: 'control of other countries for power' },
+
+  // Wars and Conflict
+  { w: 'civil war', t: 'a war within one country' },
+  { w: 'world war', t: 'a war involving many nations' },
+  { w: 'cold war', t: 'political tension without direct fighting' },
+  { w: 'proxy war', t: 'a conflict fought indirectly through allies' },
+  { w: 'guerrilla warfare', t: 'irregular fighting by small groups' },
+  { w: 'total war', t: 'when all society is mobilized for war' },
+  { w: 'treaty', t: 'a formal agreement between nations' },
+  { w: 'armistice', t: 'an agreement to stop fighting' },
+  { w: 'appeasement', t: 'giving in to avoid conflict' },
+  { w: 'collective security', t: 'nations working together for safety' },
+
+  // Leaders & Movements
+  { w: 'monarch', t: 'a king or queen' },
+  { w: 'czar', t: 'emperor of Russia' },
+  { w: 'dictator', t: 'a ruler with total power' },
+  { w: 'revolutionary', t: 'a person seeking radical change' },
+  { w: 'reformer', t: 'a leader who makes gradual change' },
+  { w: 'activist', t: 'a person campaigning for change' },
+  { w: 'propaganda', t: 'information used to persuade people' },
+  { w: 'censorship', t: 'control of information by the state' },
+  { w: 'cult of personality', t: 'idolizing a leader as heroic' },
+  { w: 'charisma', t: 'personal charm and leadership appeal' },
+
+  // International Relations
+  { w: 'diplomacy', t: 'managing relations between countries' },
+  { w: 'alliance', t: 'agreement between nations for support' },
+  { w: 'bloc', t: 'a group of nations with shared aims' },
+  { w: 'sanctions', t: 'penalties placed on a country' },
+  { w: 'embargo', t: 'ban on trade with a country' },
+  { w: 'colonialism', t: 'control of territories for resources' },
+  { w: 'decolonization', t: 'end of colonial rule' },
+  { w: 'mandate', t: 'territory administered by another power' },
+  { w: 'sovereignty', t: 'a nation’s right to rule itself' },
+  { w: 'hegemony', t: 'dominance by one state or group' },
+
+  // Economy & Society
+  { w: 'industrialization', t: 'growth of factories and industry' },
+  { w: 'urbanization', t: 'movement of people to cities' },
+  { w: 'agriculture', t: 'farming and food production' },
+  { w: 'depression', t: 'a severe economic downturn' },
+  { w: 'inflation', t: 'rise in prices and fall in money value' },
+  { w: 'recession', t: 'a period of economic decline' },
+  { w: 'trade', t: 'exchange of goods and services' },
+  { w: 'tariff', t: 'a tax on imports or exports' },
+  { w: 'globalization', t: 'increased worldwide connections' },
+  { w: 'modernization', t: 'adoption of new methods and ideas' },
+
+  // Human Rights & Society
+  { w: 'constitution', t: 'basic laws of a nation' },
+  { w: 'civil rights', t: 'freedoms guaranteed to citizens' },
+  { w: 'suffrage', t: 'the right to vote' },
+  { w: 'emancipation', t: 'the freeing of slaves or oppressed' },
+  { w: 'segregation', t: 'separating groups by race or class' },
+  { w: 'genocide', t: 'the deliberate killing of a group' },
+  { w: 'persecution', t: 'mistreatment of a group of people' },
+  { w: 'refugee', t: 'a person fleeing conflict or danger' },
+  { w: 'minority', t: 'a smaller or less powerful group' },
+  { w: 'ideology', t: 'a system of political beliefs' },
+
+  // Historical Skills for IB
+  { w: 'analysis', t: 'examining causes and effects' },
+  { w: 'evaluation', t: 'judging importance or reliability' },
+  { w: 'synthesis', t: 'combining ideas into an argument' },
+  { w: 'argument', t: 'a reasoned case based on evidence' },
+  { w: 'evidence', t: 'facts or sources supporting a claim' },
+  { w: 'thesis', t: 'the main claim of an essay' },
+  { w: 'counterargument', t: 'an opposing view to challenge' },
+  { w: 'persuasion', t: 'convincing others with reasoning' },
+  { w: 'comparison', t: 'examining similarities and differences' },
+  { w: 'significance', t: 'the importance of an event in history' }
+];
+const LEVELS = [
+    {
+        name: 'Foundations',
+        bg: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)',
+        wordColors: ['#e5e7eb', '#d1d5db', '#9ca3af', '#6b7280', '#4b5563'],
+        words: [
+            { w: 'cause', t: 'reason why something happens', c: 'bg-[#6b7280] text-white' },
+            { w: 'effect', t: 'result of an action', c: 'bg-[#d1d5db] text-black' },
+            { w: 'continuity', t: 'things that stay the same', c: 'bg-[#EACBF9] text-black' },
+            { w: 'change', t: 'things that become different', c: 'bg-[#4b5563] text-white' },
+            { w: 'turning point', t: 'moment history shifts', c: 'bg-[#e5e7eb] text-black' }
+        ]
+    },
+    {
+        name: 'Sources & Methods',
+        bg: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+        wordColors: ['#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1e40af'],
+        words: [
+            { w: 'primary source', t: 'created at the time', c: 'bg-[#93c5fd] text-black' },
+            { w: 'secondary source', t: 'after the event', c: 'bg-[#60a5fa] text-white' },
+            { w: 'bias', t: 'unfair view', c: 'bg-[#3b82f6] text-white' },
+            { w: 'reliability', t: 'trustworthiness', c: 'bg-[#2563eb] text-white' },
+            { w: 'interpretation', t: 'historian explanation', c: 'bg-[#1e40af] text-white' }
+        ]
+    },
+    {
+        name: 'Political Systems',
+        bg: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
+        wordColors: ['#ffedd5', '#fed7aa', '#fb923c', '#ea580c', '#c2410c'],
+        words: [
+            { w: 'monarchy', t: 'king or queen rule', c: 'bg-[#ffedd5] text-black' },
+            { w: 'republic', t: 'elected leader system', c: 'bg-[#fb923c] text-black' },
+            { w: 'dictatorship', t: 'absolute ruler', c: 'bg-[#fed7aa] text-black' },
+            { w: 'parliament', t: 'legislative body', c: 'bg-[#c2410c] text-white' },
+            { w: 'fascism', t: 'authoritarian ideology', c: 'bg-[#ea580c] text-black' }
+        ]
+    },
+    {
+        name: 'Wars & Conflicts',
+        bg: 'linear-gradient(135deg, #06b6d4 0%, #7dd3fc 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'civil war', t: 'internal conflict', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'world war', t: 'global conflict', c: 'bg-[#1e40af] text-white' },
+            { w: 'uprising', t: 'rebellion', c: 'bg-[#3b82f6] text-white' },
+            { w: 'treaty', t: 'formal agreement', c: 'bg-[#fef08a] text-black' },
+            { w: 'armistice', t: 'ceasefire', c: 'bg-[#facc15] text-black' }
+        ]
+    },
+    {
+        name: 'Leaders & Figures',
+        bg: 'linear-gradient(135deg, #22c55e 0%, #86efac 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'Napoleon', t: 'French military leader', c: 'bg-[#fef08a] text-black' },
+            { w: 'Gandhi', t: 'Indian independence leader', c: 'bg-[#1e40af] text-white' },
+            { w: 'Churchill', t: 'British Prime Minister', c: 'bg-[#3b82f6] text-white' },
+            { w: 'Lenin', t: 'Russian revolutionary', c: 'bg-[#facc15] text-black' },
+            { w: 'Hitler', t: 'German dictator', c: 'bg-[#1e3a8a] text-white' }
+        ]
+    },
+    {
+        name: 'Economics',
+        bg: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        wordColors: ['#fce7f3', '#f9a8d4', '#ec4899', '#db2777', '#be185d'],
+        words: [
+            { w: 'trade', t: 'exchange of goods', c: 'bg-[#db2777] text-white' },
+            { w: 'tax', t: 'payment to government', c: 'bg-[#ec4899] text-white' },
+            { w: 'inflation', t: 'rising prices', c: 'bg-[#f9a8d4] text-black' },
+            { w: 'depression', t: 'economic downturn', c: 'bg-[#fce7f3] text-black' },
+            { w: 'industry', t: 'production of goods', c: 'bg-[#be185d] text-white' }
+        ]
+    },
+    {
+        name: 'Social Movements',
+        bg: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
+        wordColors: ['#ffedd5', '#fed7aa', '#fb923c', '#ea580c', '#c2410c'],
+        words: [
+            { w: 'feminism', t: 'women\'s rights movement', c: 'bg-[#c2410c] text-white' },
+            { w: 'civil rights', t: 'equal rights for citizens', c: 'bg-[#fed7aa] text-black' },
+            { w: 'abolition', t: 'end of slavery', c: 'bg-[#ffedd5] text-black' },
+            { w: 'protest', t: 'public demonstration', c: 'bg-[#fb923c] text-black' },
+            { w: 'reform', t: 'change to improve society', c: 'bg-[#ea580c] text-white' }
+        ]
+    },
+    {
+        name: 'Treaties & Agreements',
+        bg: 'linear-gradient(135deg, #16a34a 0%, #4ade80 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'Versailles', t: 'WWI peace treaty', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'Munich', t: 'appeasement agreement', c: 'bg-[#1e40af] text-white' },
+            { w: 'Geneva', t: 'international agreements', c: 'bg-[#3b82f6] text-white' },
+            { w: 'Armistice', t: 'ceasefire agreement', c: 'bg-[#fef08a] text-black' },
+            { w: 'Pact', t: 'formal agreement', c: 'bg-[#facc15] text-black' }
+        ]
+    },
+    {
+        name: 'Decolonization',
+        bg: 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
+        wordColors: ['#e9d5ff', '#d8b4fe', '#c084fc', '#a855f7', '#9333ea'],
+        words: [
+            { w: 'independence', t: 'freedom from control', c: 'bg-[#9333ea] text-white' },
+            { w: 'self-government', t: 'local control', c: 'bg-[#d8b4fe] text-black' },
+            { w: 'partition', t: 'division of territory', c: 'bg-[#a855f7] text-white' },
+            { w: 'revolution', t: 'violent change', c: 'bg-[#c084fc] text-black' },
+            { w: 'colonial rule', t: 'control by foreign power', c: 'bg-[#e9d5ff] text-black' }
+        ]
+    },
+    {
+        name: 'Human Rights',
+        bg: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        wordColors: ['#fce7f3', '#f9a8d4', '#ec4899', '#db2777', '#be185d'],
+        words: [
+            { w: 'equality', t: 'same rights for all', c: 'bg-[#db2777] text-white' },
+            { w: 'justice', t: 'fair treatment', c: 'bg-[#ec4899] text-white' },
+            { w: 'freedom', t: 'ability to act independently', c: 'bg-[#f9a8d4] text-black' },
+            { w: 'civil rights', t: 'legal protections', c: 'bg-[#fce7f3] text-black' },
+            { w: 'genocide', t: 'systematic killing', c: 'bg-[#be185d] text-white' }
+        ]
+    },
+    {
+        name: 'Technology & War',
+        bg: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'tank', t: 'armored vehicle', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'airplane', t: 'air weapon', c: 'bg-[#1e40af] text-white' },
+            { w: 'submarine', t: 'underwater vessel', c: 'bg-[#3b82f6] text-white' },
+            { w: 'radar', t: 'detection device', c: 'bg-[#fef08a] text-black' },
+            { w: 'atomic bomb', t: 'nuclear weapon', c: 'bg-[#facc15] text-black' }
+        ]
+    },
+    {
+        name: 'Cold War',
+        bg: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'USA', t: 'United States of America', c: 'bg-[#fef08a] text-black' },
+            { w: 'USSR', t: 'Soviet Union', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'NATO', t: 'defense alliance', c: 'bg-[#3b82f6] text-white' },
+            { w: 'Warsaw Pact', t: 'Soviet alliance', c: 'bg-[#facc15] text-black' },
+            { w: 'proxy war', t: 'conflict via others', c: 'bg-[#1e40af] text-white' }
+        ]
+    },
+    {
+        name: 'Revolutions',
+        bg: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+        wordColors: ['#fed7aa', '#fdba74', '#fb923c', '#f97316', '#ea580c'],
+        words: [
+            { w: 'industrial', t: 'technology revolution', c: 'bg-[#ea580c] text-white' },
+            { w: 'cultural', t: 'societal change', c: 'bg-[#fdba74] text-black' },
+            { w: 'scientific', t: 'science advancement', c: 'bg-[#fed7aa] text-black' },
+            { w: 'political', t: 'governmental change', c: 'bg-[#f97316] text-black' },
+            { w: 'social', t: 'society reform', c: 'bg-[#fb923c] text-black' }
+        ]
+    },
+    {
+        name: 'Colonialism II',
+        bg: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
+        wordColors: ['#ffedd5', '#fed7aa', '#fb923c', '#ea580c', '#c2410c'],
+        words: [
+            { w: 'imperialism', t: 'empire building', c: 'bg-[#c2410c] text-white' },
+            { w: 'settler', t: 'colonist', c: 'bg-[#fed7aa] text-black' },
+            { w: 'expansion', t: 'territory growth', c: 'bg-[#ffedd5] text-black' },
+            { w: 'exploit', t: 'use unfairly', c: 'bg-[#fb923c] text-black' },
+            { w: 'native', t: 'indigenous people', c: 'bg-[#ea580c] text-black' }
+        ]
+    },
+    {
+        name: 'Civil Rights II',
+        bg: 'linear-gradient(135deg, #06b6d4 0%, #7dd3fc 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'segregation', t: 'racial separation', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'suffrage', t: 'vote rights', c: 'bg-[#1e40af] text-white' },
+            { w: 'protest', t: 'public demonstration', c: 'bg-[#3b82f6] text-white' },
+            { w: 'abolition', t: 'end slavery', c: 'bg-[#fef08a] text-black' },
+            { w: 'equality', t: 'equal rights', c: 'bg-[#facc15] text-black' }
+        ]
+    },
+    {
+        name: 'Ideologies II',
+        bg: 'linear-gradient(135deg, #22c55e 0%, #86efac 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'liberalism', t: 'freedom ideology', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'conservatism', t: 'tradition ideology', c: 'bg-[#1e40af] text-white' },
+            { w: 'socialism', t: 'community ideology', c: 'bg-[#3b82f6] text-white' },
+            { w: 'communism', t: 'state-controlled ideology', c: 'bg-[#fef08a] text-black' },
+            { w: 'nationalism', t: 'country pride', c: 'bg-[#facc15] text-black' }
+        ]
+    },
+    {
+        name: 'Treaty of Versailles II',
+        bg: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+        wordColors: ['#1e3a8a', '#1e40af', '#3b82f6', '#fef08a', '#facc15'],
+        words: [
+            { w: 'armistice', t: 'ceasefire', c: 'bg-[#facc15] text-black' },
+            { w: 'reparations', t: 'war payments', c: 'bg-[#1e3a8a] text-white' },
+            { w: 'demilitarization', t: 'reduce army', c: 'bg-[#1e40af] text-white' },
+            { w: 'territory', t: 'land transfer', c: 'bg-[#3b82f6] text-white' },
+            { w: 'league', t: 'international body', c: 'bg-[#fef08a] text-black' }
+        ]
+    },
+    {
+        name: 'Modern Conflicts',
+        bg: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+        wordColors: ['#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1e40af'],
+        words: [
+            { w: 'terrorism', t: 'violent extremism', c: 'bg-[#3b82f6] text-white' },
+            { w: 'guerrilla', t: 'small-scale fighters', c: 'bg-[#60a5fa] text-white' },
+            { w: 'insurgency', t: 'rebellion movement', c: 'bg-[#93c5fd] text-black' },
+            { w: 'peacekeeping', t: 'maintain stability', c: 'bg-[#2563eb] text-white' },
+            { w: 'sanctions', t: 'penalties on countries', c: 'bg-[#1e40af] text-white' }
+        ]
+    },
+    {
+        name: 'Global Leaders',
+        bg: 'linear-gradient(135deg, #f472b6 0%, #f43f5e 100%)',
+        wordColors: ['#fce7f3', '#f9a8d4', '#ec4899', '#db2777', '#be185d'],
+        words: [
+            { w: 'president', t: 'head of state', c: 'bg-[#fce7f3] text-black' },
+            { w: 'prime minister', t: 'government leader', c: 'bg-[#f9a8d4] text-black' },
+            { w: 'general', t: 'military leader', c: 'bg-[#ec4899] text-white' },
+            { w: 'activist', t: 'social reformer', c: 'bg-[#db2777] text-white' },
+            { w: 'diplomat', t: 'international representative', c: 'bg-[#be185d] text-white' }
+        ]
+    }
+];
+
+
+        let currentLevel = 0;
+
+        const LEVEL_COMPLETION_MESSAGES = [
+            "Ka pai! – Good job!",
+            "Tino pai! – Very good!",
+            "Ka rawe! – Awesome!",
+            "Pai rawa! – Excellent!",
+            "Ka pai tō mahi! – Good work!",
+            "He pai rawa atu! – Really excellent!",
+            "Ka mau te wehi! – Amazing!",
+            "He whakamīharo tō mahi! – Your work is fantastic!",
+            "Ka toa! – You are a champion!",
+            "He toa koe! – You are a hero!",
+            "Kia kaha! – Stay strong!",
+            "Kia manawanui! – Be steadfast!",
+            "Ka whakamīharo! – Fantastic!",
+            "Ka ū! – You did it!",
+            "Ngā mihi! – Congratulations!",
+            "Ngā mihi nui! – Big congratulations!",
+            "Ka rawe rawa! – Absolutely awesome!",
+            "He tino kaha tō mahi! – Your work is very strong!",
+            "He tino whakamīharo! – Truly amazing!",
+            "Ngā manaakitanga! – Highest praise!"
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createTile(row, col, letter, colorClass) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            if (colorClass) tile.classList.add(...colorClass.split(' '));
+            tile.dataset.row = row;
+            tile.dataset.col = col;
+            tile.dataset.letter = letter;
+            tile.innerHTML = `<span>${letter.toUpperCase()}</span>`;
+            return tile;
+        }
+
+        function createStar(index) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.dataset.index = index;
+            star.style.backgroundColor = starsUsedCount <= index ? '#ffffff' : '#9ca3af';
+            star.style.transform = starsUsedCount <= index ? 'scale(2)' : 'scale(1)';
+            if (starsUsedCount <= index) {
+                star.addEventListener('click', () => handleStarClick(index));
+            } else {
+                star.classList.add('used');
+            }
+            starContainer.appendChild(star);
+            return star;
+        }
+
+        function initStars() {
+            starContainer.innerHTML = '';
+            stars = [];
+            for (let i = 0; i < TOTAL_STARS; i++) {
+                const star = createStar(i);
+                stars.push({ element: star, used: starsUsedCount > i });
+            }
+        }
+
+        function initProgressBar() {
+            progressBar.innerHTML = '';
+            for (let i = 0; i < LEVELS.length; i++) {
+                const square = document.createElement('div');
+                square.classList.add('progress-square');
+                square.textContent = i + 1;
+                if (completedLevels.has(i)) {
+                    square.classList.add(`bg-level-${i + 1}`);
+                    square.style.color = '#ffffff';
+                }
+                progressBar.appendChild(square);
+            }
+        }
+
+    // function updateScoreDisplay() {
+    //   scoreDisplay.textContent = `Score: ${score}`;
+    //    }
+    function updateScoreDisplay() {
+    scoreDisplay.textContent = `Score: ${score}`;
+    localStorage.setItem('gameScore', score);
+}
+// modified to save score
+
+        function displayWordList() {
+            wordListEl.innerHTML = '';
+            wordsToFind.forEach(word => {
+                const count = foundWordCounts[word] || 0;
+                const info = wordInfo[word];
+                const wordItem = document.createElement('div');
+                wordItem.classList.add('word-item');
+                if (info && info.color) wordItem.classList.add(...info.color.split(' '));
+
+                const left = document.createElement('div');
+                left.style.display = 'flex';
+                left.style.flexDirection = 'column';
+                left.style.alignItems = 'flex-start';
+
+                const wordText = document.createElement('span');
+                wordText.classList.add('word-item-text');
+                wordText.textContent = word.toUpperCase();
+
+                const translation = document.createElement('small');
+                translation.style.fontWeight = '600';
+                translation.style.marginTop = '4px';
+                translation.style.opacity = count > 0 ? '1' : '0.0';
+                translation.textContent = count > 0 ? `(${info ? info.translation : ''})` : '';
+
+                left.appendChild(wordText);
+                left.appendChild(translation);
+
+                const wordCount = document.createElement('span');
+                wordCount.classList.add('word-item-count');
+                wordCount.innerHTML = count > 0 ? '<span class="tick">✓</span>' : '';
+
+                wordItem.appendChild(left);
+                wordItem.appendChild(wordCount);
+
+                wordListEl.appendChild(wordItem);
+            });
+        }
+
+        function displayLearningLog() {
+            learningLogList.innerHTML = '';
+            foundWordsTrail.forEach(item => {
+                const wordItem = document.createElement('div');
+                wordItem.classList.add('word-item');
+                wordItem.innerHTML = `
+                    <span>${item.time}</span> - 
+                    <span>${item.level}</span> - 
+                    <span>${item.type}</span> - 
+                    <span>${item.word}</span> - 
+                    <span>${item.translation}</span> - 
+                    <span>${item.timeTaken}s</span> - 
+                    <span>${item.pointsGained}</span> - 
+                    <span>${item.pointsTotal}</span>`;
+                learningLogList.appendChild(wordItem);
+            });
+        }
+
+        function placeWord(wordObj, board) {
+            const word = wordObj.w;
+         //  const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+           const directions = [[0,1],[0,-1],[1,0],[-1,0]];
+            let placed = false;
+            let attempts = 0;
+            const maxAttempts = 100;
+            const startTime = performance.now();
+
+            while (!placed && attempts < maxAttempts && performance.now() - startTime < 1000) {
+                const startR = Math.floor(Math.random() * GRID_SIZE);
+                const startC = Math.floor(Math.random() * GRID_SIZE);
+                const path = [{r:startR,c:startC}];
+                const visited = new Set([`${startR},${startC}`]);
+
+                const findPath = (r,c,wordIndex,depth=0) => {
+                    if (wordIndex === word.length) return true;
+                    if (depth > word.length * 2) return false;
+                    shuffle(directions);
+                    for (const [dr,dc] of directions) {
+                        const newR = r + dr; 
+                        const newC = c + dc;
+                        const key = `${newR},${newC}`;
+                        if (newR>=0 && newR<GRID_SIZE && newC>=0 && newC<GRID_SIZE && !visited.has(key)) {
+                            const cell = board[newR][newC];
+                            if (cell === null || cell === undefined || cell.word === null) {
+                                visited.add(key); 
+                                path.push({r:newR,c:newC});
+                                if (findPath(newR,newC,wordIndex+1,depth+1)) return true;
+                                path.pop(); 
+                                visited.delete(key);
+                            }
+                        }
+                    }
+                    return false;
+                };
+
+                const startCell = board[startR][startC];
+                if (startCell === null || startCell === undefined || startCell.word === null) {
+                    if (findPath(startR,startC,1)) {
+                        if (path.length === word.length) {
+                            for (let i=0;i<word.length;i++){
+                                const {r,c} = path[i];
+                                board[r][c] = { letter: word[i], word: word, color: wordObj.c };
+                            }
+                            placed = true;
+                            wordPlacementCounts[word] = (wordPlacementCounts[word] || 0) + 1;
+                        }
+                    }
+                }
+                attempts++;
+            }
+            return placed;
+        }
+
+        function validateBoard(board) {
+            const wordsOnGrid = new Set();
+            const directions = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+            function checkPath(r, c, word, wordIndex, path, visited, depth=0) {
+                if (wordIndex === word.length) return true;
+                if (depth > word.length * 2) return false;
+                for (const [dr, dc] of directions) {
+                    const newR = r + dr; const newC = c + dc;
+                    const key = `${newR},${newC}`;
+                    if (newR >= 0 && newR < GRID_SIZE && newC >= 0 && newC < GRID_SIZE && !visited.has(key)) {
+                        if (board[newR][newC] && board[newR][newC].letter === word[wordIndex]) {
+                            visited.add(key); path.push({r:newR,c:newC});
+                            if (checkPath(newR, newC, word, wordIndex + 1, path, visited, depth+1)) return true;
+                            path.pop(); visited.delete(key);
+                        }
+                    }
+                }
+                return false;
+            }
+
+            for (const word of wordsToFind) {
+                let found = false;
+                for (let r = 0; r < GRID_SIZE && !found; r++) {
+                    for (let c = 0; c < GRID_SIZE && !found; c++) {
+                        if (board[r][c] && board[r][c].letter === word[0]) {
+                            const path = [{r,c}];
+                            const visited = new Set([`${r},${c}`]);
+                            if (checkPath(r, c, word, 1, path, visited) && path.length === word.length) {
+                                wordsOnGrid.add(word);
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            return wordsOnGrid.size === wordsToFind.length;
+        }
+
+        function getAllWords() {
+            return LEVELS.flatMap(level => level.words.map(w => w.w));
+        }
+
+        function getBonusWords() {
+            return BONUS_WORDS.map(w => ({ w: w.w, c: null }));
+        }
+
+        function initTranslations() {
+            normalizedTranslations = {};
+            LEVELS.forEach(level => {
+                level.words.forEach(wObj => {
+                    const normalized = wObj.w.replace(/[\s-]/g, '').toLowerCase();
+                    normalizedTranslations[normalized] = wObj.t;
+                });
+            });
+            BONUS_WORDS.forEach(bObj => {
+                const normalized = bObj.w.replace(/[\s-]/g, '').toLowerCase();
+                normalizedTranslations[normalized] = bObj.t;
+            });
+        }
+
+        function getTranslation(word) {
+            return normalizedTranslations[word.toLowerCase()] || 'bonus word';
+        }
+
+        function refreshBoard() {
+    const MAX_ATTEMPTS = 50;
+    let attempts = 0;
+    let boardIsValid = false;
+    let mainWords = wordsToFind.map(w => wordInfo[w].obj);
+    mainWords.sort((a, b) => b.w.length - a.length); // Start with the longest words
+
+    let finalBoard = null; // Will hold the board only if it's a 100% success
+    let lastAttemptBoard = null; // Will hold the board from the most recent attempt
+
+    // --- Start of change ---
+    // Phase 1: Tirelessly attempt to place ONLY the required words for the level.
+    while (!boardIsValid && attempts < MAX_ATTEMPTS) {
+        const localBoard = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+        let allPlaced = true;
+
+        for (const wobj of mainWords) {
+            if (!placeWord(wobj, localBoard)) {
+                allPlaced = false;
+                break; // If any word fails, scrap this attempt and start over.
+            }
+        }
+        
+        lastAttemptBoard = localBoard; // We save every attempt, even failures.
+
+        // If all words were placed perfectly, we have our final board.
+        if (allPlaced && validateBoard(localBoard)) {
+            boardIsValid = true;
+            finalBoard = localBoard; // Success! A perfect board.
+        }
+        attempts++;
+    }
+
+    // Phase 2: Decide which board to use.
+    if (boardIsValid) {
+        // If we found a perfect board, use it.
+        gameBoard = finalBoard;
+    } else {
+        // If not, use the very last attempt we saved instead of a blank one.
+        gameBoard = lastAttemptBoard;
+        showMessage('Could not place all words. Using last attempt.', 3000);
+    }
+    // --- End of change ---
+
+    // Phase 3: Now that main words are secured, fill the empty spaces.
+    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 10);
+    otherWords.sort((a, b) => b.length - a.length);
+    const purpleShades = [
+        'bg-[#c084fc] text-black', 'bg-[#a855f7] text-white',
+        'bg-[#9333ea] text-white', 'bg-[#7e22ce] text-white',
+        'bg-[#6b21a8] text-white'
+    ];
+    for (let i = 0; i < otherWords.length; i++) {
+        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
+        placeWord(wordObj, gameBoard); // placeWord already respects existing letters.
+    }
+
+    // Finally, fill any remaining empty spots with random purple vowels.
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+    let vowelIndex = 0;
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (gameBoard[r][c] === null) {
+                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
+                vowelIndex = (vowelIndex + 1) % vowels.length;
+            }
+        }
+    }
+
+    // Phase 4: Render the final board.
+    renderBoard();
+    displayWordList();
+}
+// END OF THE CHANGE IN REFRESH BOARD
+
+
+        function initBoard() {
+            foundWordCounts = {};
+            wordPlacementCounts = {};
+            const level = LEVELS[currentLevel];
+            wordsToFind = level.words.map(o => o.w);
+            wordInfo = {};
+            level.words.forEach(o => {
+                wordInfo[o.w] = { translation: o.t, color: o.c, obj: o };
+                foundWordCounts[o.w] = 0;
+                wordPlacementCounts[o.w] = 0;
+            });
+
+            document.body.style.background = level.bg;
+            levelIndicator.textContent = `Level ${currentLevel + 1} / ${LEVELS.length} — ${level.name}`;
+            initStars();
+            initProgressBar();
+            updateScoreDisplay();
+            refreshBoard();
+        }
+
+        function renderBoard() {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                if (!gameBoard[r]) gameBoard[r] = Array(GRID_SIZE).fill(null);
+                for (let c = 0; c < GRID_SIZE; c++) if (!gameBoard[r][c]) {
+                    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+                    gameBoard[r][c] = { letter: vowels[Math.floor(Math.random() * vowels.length)], word: null, color: 'bg-[#d8b4fe] text-black' };
+                }
+            }
+            gridContainer.innerHTML = '';
+            gameBoard.forEach((row, r) => {
+                row.forEach((cell, c) => {
+                    const tile = createTile(r, c, cell.letter, cell.color);
+                    tile.addEventListener('click', () => handleTileClick(r, c));
+                    gridContainer.appendChild(tile);
+                    cell.element = tile;
+                });
+            });
+        }
+
+        function getSelectedWord() {
+            return selectedTiles.map(t => gameBoard[t.row][t.col].letter).join('');
+        }
+
+        function isValidAdjacency(newTile) {
+            if (selectedTiles.length === 0) return true;
+            const last = selectedTiles[selectedTiles.length - 1];
+            const dx = Math.abs(newTile.row - last.row);
+            const dy = Math.abs(newTile.col - last.col);
+            return (dx <= 1 && dy <= 1 && (dx > 0 || dy > 0));
+        }
+
+        function showMessage(text, duration = 1400) {
+            messageBox.textContent = text;
+            messageBox.style.opacity = '1';
+            setTimeout(() => { messageBox.style.opacity = '0'; }, duration);
+        }
+// counting purple tiles so the board will reset when stuck        
+function countPurpleTilesOnBoard() {
+    let purpleCount = 0;
+    const purpleClasses = [
+        'bg-[#c084fc]', 'bg-[#a855f7]', 'bg-[#9333ea]', 
+        'bg-[#7e22ce]', 'bg-[#6b21a8]', 'bg-[#d8b4fe]'
+    ];
+
+    if (!gameBoard) return 0;
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            const cell = gameBoard[r] && gameBoard[r][c];
+
+            // Check if the tile's background color is one of the purple shades
+            const isPurple = cell && cell.color && purpleClasses.some(pClass => cell.color.includes(pClass));
+
+            if (isPurple) {
+                // Check if the tile is part of a word in the current level's main word list
+                const isMainWordTile = cell.word && wordsToFind.includes(cell.word);
+
+                // Only increment the counter if it's a purple tile that is NOT a main word
+                if (!isMainWordTile) {
+                    purpleCount++;
+                }
+            }
+        }
+    }
+    return purpleCount;
+}
+
+//Kristen Upgrade
+// Kristen Upgrade
+function showBonusWord(word, translation) {
+    return new Promise(resolve => {
+        bonusWordTereo.textContent = word.toUpperCase();
+        bonusWordTranslation.textContent = `(${translation})`;
+        bonusWordOverlay.classList.add('visible');
+
+        const continueGame = () => {
+            bonusWordOverlay.classList.remove('visible');
+            bonusWordOverlay.removeEventListener('click', continueGame);
+            resolve();
+        };
+
+        bonusWordOverlay.addEventListener('click', continueGame);
+    });
+}
+//End of Kristen Upgrade to see translation of bonus words
+//End of Kristen Upgrade to see translation of bonus words
+        function clearHighlights() {
+            document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+            selectedTiles = [];
+            wordBuilderEl.innerHTML = '';
+        }
+
+        function handleStarClick(index) {
+            if (stars[index].used || isDragging) return;
+            stars[index].used = true;
+            stars[index].element.classList.add('used');
+            stars[index].element.style.backgroundColor = '#9ca3af';
+            stars[index].element.style.transform = 'scale(1)';
+            stars[index].element.removeEventListener('click', () => handleStarClick(index));
+            starsUsedCount++;
+            refreshBoard();
+            showMessage('Board refreshed!');
+        }
+
+        function handleTileClick(row, col) {
+            const newTile = { row, col };
+            const isAlready = selectedTiles.some(t => t.row === row && t.col === col);
+            if (isAlready) {
+                // Deselect tiles up to the clicked tile
+                const index = selectedTiles.findIndex(t => t.row === row && t.col === col);
+                selectedTiles = selectedTiles.slice(0, index + 1);
+                document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+                selectedTiles.forEach(t => {
+                    const tile = document.querySelector(`.tile[data-row="${t.row}"][data-col="${t.col}"]`);
+                    tile.classList.add('selected');
+                });
+                wordBuilderEl.innerHTML = '';
+                selectedTiles.forEach(t => {
+                    const built = document.createElement('div');
+                    built.classList.add('built-letter');
+                    built.textContent = gameBoard[t.row][t.col].letter.toUpperCase();
+                    wordBuilderEl.appendChild(built);
+                });
+            } else if (isValidAdjacency(newTile)) {
+                if (selectedTiles.length === 0) {
+                    selectionStartTime = Date.now(); // Start timing
+                }
+                selectedTiles.push(newTile);
+                const tile = document.querySelector(`.tile[data-row="${row}"][data-col="${col}"]`);
+                tile.classList.add('selected');
+                const built = document.createElement('div');
+                built.classList.add('built-letter');
+                built.textContent = gameBoard[row][col].letter.toUpperCase();
+                wordBuilderEl.appendChild(built);
+            }
+        }
+
+        function handleStart(e) {
+    // This new line prevents the browser's default dragging action
+    if (e.preventDefault) e.preventDefault();
+
+    isDragging = true;
+    selectionStartTime = Date.now(); // Start timing
+    handleMove(e);
+}
+
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX);
+            const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY);
+            const target = document.elementFromPoint(clientX, clientY);
+            const tile = target && target.closest('.tile');
+            if (tile && tile !== lastTile) {
+                const row = parseInt(tile.dataset.row);
+                const col = parseInt(tile.dataset.col);
+                const newTile = {row, col};
+                const isAlready = selectedTiles.some(t => t.row === row && t.col === col);
+                if (!isAlready && isValidAdjacency(newTile)) {
+                    selectedTiles.push(newTile);
+                    tile.classList.add('selected');
+                    lastTile = tile;
+                    const built = document.createElement('div');
+                    built.classList.add('built-letter');
+                    built.textContent = gameBoard[row][col].letter.toUpperCase();
+                    wordBuilderEl.appendChild(built);
+                }
+            }
+        }
+//Kristen Upgrade - Function Replacement
+async function handleEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    lastTile = null;
+    const timeTaken = Math.round((Date.now() - selectionStartTime) / 1000); // Calculate time taken in seconds
+    const word = getSelectedWord().toLowerCase();
+    const foundWord = wordsToFind.find(w => w === word);
+    const allWords = [...getAllWords(), ...getBonusWords().map(w => w.w)];
+    const isBonusWord = !foundWord && allWords.includes(word);
+    const levelName = `Level ${currentLevel + 1} - ${LEVELS[currentLevel].name}`;
+
+    if (foundWord && word.length >= 2) {
+        foundWordCounts[foundWord] = (foundWordCounts[foundWord] || 0) + 1;
+        const pointsGained = word.length;
+        score += pointsGained;
+        showMessage('Mīharo - you got it!');
+        dropLettersAndRefill(selectedTiles);
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const translation = wordInfo[foundWord].translation;
+        foundWordsTrail.push({
+            time,
+            level: levelName,
+            type: 'List Word',
+            word: word.toUpperCase(),
+            translation,
+            timeTaken,
+            pointsGained,
+            pointsTotal: score
+        });
+        displayWordList();
+        displayLearningLog();
+        updateScoreDisplay();
+    } else if (isBonusWord && word.length >= 2) {
+        const pointsGained = word.length * 5;
+        score += pointsGained;
+        const type = getAllWords().includes(word) ? 'Bonus Word (list)' : 'Bonus Word (hidden)';
+        const translation = getTranslation(word);
+
+        await showBonusWord(word, translation); 
+
+        dropLettersAndRefill(selectedTiles);
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        foundWordsTrail.push({
+            time,
+            level: levelName,
+            type,
+            word: word.toUpperCase(),
+            translation,
+            timeTaken,
+            pointsGained,
+            pointsTotal: score
+        });
+        displayLearningLog();
+        updateScoreDisplay();
+    } else if (word.length > 1) {
+        showMessage('That is not a valid word.');
+    }
+    clearHighlights();
+    checkWinCondition();
+}
+//end of change
+//        function handleEnd() {
+//            if (!isDragging) return;
+//            isDragging = false;
+//            lastTile = null;
+//            const timeTaken = Math.round((Date.now() - selectionStartTime) / 1000); // Calculate time taken in seconds
+//            const word = getSelectedWord().toLowerCase();
+//            const foundWord = wordsToFind.find(w => w === word);
+//            const allWords = [...getAllWords(), ...getBonusWords().map(w => w.w)];
+//            const isBonusWord = !foundWord && allWords.includes(word);
+//            const levelName = `Level ${currentLevel + 1} - ${LEVELS[currentLevel].name}`;
+//
+//            if (foundWord && word.length >= 2) {
+//                foundWordCounts[foundWord] = (foundWordCounts[foundWord] || 0) + 1;
+//                const pointsGained = word.length;
+//                score += pointsGained;
+//                showMessage('Mīharo - you got it!');
+//                dropLettersAndRefill(selectedTiles);
+//                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+//                const translation = wordInfo[foundWord].translation;
+//                foundWordsTrail.push({
+//                    time,
+//                    level: levelName,
+//                    type: 'List Word',
+//                    word: word.toUpperCase(),
+//                    translation,
+//                    timeTaken,
+//                    pointsGained,
+//                    pointsTotal: score
+//                });
+//                displayWordList();
+//                displayLearningLog();
+//                updateScoreDisplay();
+          //  } else if (isBonusWord && word.length >= 2) {
+          //      const pointsGained = word.length * 5;
+          //      score += pointsGained;
+          //      const type = getAllWords().includes(word) ? 'Bonus Word (list)' : 'Bonus Word (hidden)';
+          //      showMessage('Ka rawe! Bonus word found!');
+          //      dropLettersAndRefill(selectedTiles);
+          //      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          //      const translation = getTranslation(word);
+          //      foundWordsTrail.push({
+          //          time,
+          //          level: levelName,
+          //          type,
+          //          word: word.toUpperCase(),
+          //          translation,
+          //          timeTaken,
+          //          pointsGained,
+          //          pointsTotal: score
+          //      });
+// end of Kristen upgrade
+//                displayLearningLog();
+//                updateScoreDisplay();
+//            } else if (word.length > 1) {
+//                showMessage('That is not a valid word.');
+//            }
+//            clearHighlights();
+//            checkWinCondition();
+//        }
+
+// refreshboard and droplettersandrefill both changed 13sep25
+function dropLettersAndRefill(tilesToRemove) {
+    // Phase 1: Remove the found word and let letters fall.
+    const newGameBoard = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(null));
+    const removeSet = new Set(tilesToRemove.map(t => `${t.row},${t.col}`));
+
+    for (let c = 0; c < GRID_SIZE; c++) {
+        const columnStack = [];
+        for (let r = GRID_SIZE - 1; r >= 0; r--) {
+            if (!removeSet.has(`${r},${c}`) && gameBoard[r][c]) {
+                columnStack.push(gameBoard[r][c]);
+            }
+        }
+        let fillRow = GRID_SIZE - 1;
+        for (let i = 0; i < columnStack.length; i++) {
+            newGameBoard[fillRow][c] = columnStack[i];
+            fillRow--;
+        }
+    }
+    gameBoard = newGameBoard;
+
+    // Phase 2: Check which main words are still needed and prioritize placing them.
+    const wordsToFindStillRemaining = wordsToFind.filter(w => foundWordCounts[w] < FIND_COUNT_PER_WORD);
+    const wordsOnGrid = new Set(
+        gameBoard.flat().filter(c => c && c.word).map(c => c.word)
+    );
+
+    let wordsNotOnGrid = wordsToFindStillRemaining.filter(w => !wordsOnGrid.has(w));
+    if (wordsNotOnGrid.length > 0) {
+        wordsNotOnGrid.sort((a,b) => b.length - a.length);
+        for (const wordStr of wordsNotOnGrid) {
+            // Attempt to place the missing required word into the new gaps.
+            placeWord(wordInfo[wordStr].obj, gameBoard);
+        }
+    }
+
+    // Phase 3: Now fill the rest of the gaps with bonus/filler letters.
+    let otherWords = shuffle([...getAllWords(), ...getBonusWords().map(w => w.w)]).slice(0, 5);
+    otherWords.sort((a, b) => b.length - a.length);
+    const purpleShades = [
+        'bg-[#c084fc] text-black', 'bg-[#a855f7] text-white', 'bg-[#9333ea] text-white'
+    ];
+    for (let i = 0; i < otherWords.length; i++) {
+        let wordObj = { w: otherWords[i], c: purpleShades[i % purpleShades.length] };
+        placeWord(wordObj, gameBoard);
+    }
+
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'ā', 'ē', 'ī', 'ō', 'ū'];
+    let vowelIndex = 0;
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (gameBoard[r][c] === null) {
+                gameBoard[r][c] = { letter: vowels[vowelIndex], word: null, color: 'bg-[#d8b4fe] text-black' };
+                vowelIndex = (vowelIndex + 1) % vowels.length;
+            }
+        }
+    }
+
+    // Phase 4: Render and perform the purple-overload check.
+    renderBoard();
+
+    const purpleCount = countPurpleTilesOnBoard();
+    if (purpleCount >= 33) {
+        showMessage('Purple overload! Free board refresh!', 2500);
+        purpleResetTimeout = setTimeout(refreshBoard, 2500);
+    }
+}
+
+        function checkWinCondition() {
+            const allFound = wordsToFind.every(word => foundWordCounts[word] >= FIND_COUNT_PER_WORD);
+            if (allFound) {
+                completedLevels.add(currentLevel);
+                gameContainer.querySelectorAll('*').forEach(n => n.style.display = '');
+                winScreen.classList.remove('hidden');
+                const winText = currentLevel < LEVELS.length - 1 ? LEVEL_COMPLETION_MESSAGES[currentLevel] : 'Ka Mutu Katoa!';
+                const buttonsHTML = `
+                    <button class="win-button" id="replay-level-btn">Replay</button>
+                    ${currentLevel < LEVELS.length - 1 ? '<button class="win-button" id="next-level-btn">Next</button>' : ''}
+                `;
+                winScreen.innerHTML = `
+                    <div class="win-overlay">
+                        <div class="win-star"></div>
+                        <div class="win-text">${winText}</div>
+                        <div class="win-buttons">${buttonsHTML}</div>
+                    </div>`;
+                // Add level completion to learning log
+                foundWordsTrail.push({
+                    time: '',
+                    level: '',
+                    type: '',
+                    word: `Level ${currentLevel + 1}: ${LEVEL_COMPLETION_MESSAGES[currentLevel]}`,
+                    translation: '',
+                    timeTaken: '',
+                    pointsGained: '',
+                    pointsTotal: score
+                });
+                displayLearningLog();
+                document.getElementById('replay-level-btn').addEventListener('click', () => resetGame());
+                if (currentLevel < LEVELS.length - 1) {
+                    document.getElementById('next-level-btn').addEventListener('click', () => nextLevel());
+                }
+                initProgressBar();
+            }
+        }
+
+        function resetGame() {
+            clearTimeout(purpleResetTimeout); // 13th September
+            winScreen.classList.add('hidden');
+            winScreen.innerHTML = '';
+            initBoard();
+        }
+
+        function prevLevel() {
+            if (currentLevel > 0) {
+                currentLevel--;
+                resetGame();
+            }
+        }
+
+        function nextLevel() {
+            if (currentLevel < LEVELS.length - 1) {
+                currentLevel++;
+                resetGame();
+            }
+        }
+
+        function attachEventListeners() {
+    gridContainer.addEventListener('mousedown', handleStart);
+    gridContainer.addEventListener('mousemove', handleMove);
+    gridContainer.addEventListener('mouseup', handleEnd);
+    gridContainer.addEventListener('mouseleave', handleEnd);
+
+    // These touch listeners are updated to prevent default scrolling on mobile
+    gridContainer.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleStart(e.touches[0]);
+    }, { passive: false });
+
+    gridContainer.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // Also prevent scrolling while dragging on touch devices
+        handleMove(e.touches[0]);
+    }, { passive: false });
+    
+    gridContainer.addEventListener('touchend', handleEnd);
+
+    prevLevelBtn.addEventListener('click', () => { prevLevel(); });
+    nextLevelBtn.addEventListener('click', () => { nextLevel(); });
+    instructionsBtn.addEventListener('click', () => {
+        instructionsModal.style.display = 'flex';
+    });
+    modalClose.addEventListener('click', () => {
+        instructionsModal.style.display = 'none';
+    });
+    copyTrailBtn.addEventListener('click', copyToClipboard);
+function copyToClipboard() {
+    try {
+        const now = new Date().toLocaleString('en-NZ', {
+            weekday: 'long',
+            month: 'long',
+            day: '2-digit',
+            year: 'numeric'
+        });
+
+        const maoriDays = {
+            'Monday': 'Mane','Tuesday': 'Tūrei','Wednesday': 'Wenerei','Thursday': 'Tāite',
+            'Friday': 'Paraire','Saturday': 'Rāhoroi','Sunday': 'Rātapu'
+        };
+        const maoriMonths = {
+            'January': 'Kohitātea','February': 'Hui-tanguru','March': 'Poutū-te-rangi','April': 'Paenga-whāwhā',
+            'May': 'Haratua','June': 'Pipiri','July': 'Hōngongoi','August': 'Hereturikōkā',
+            'September': 'Mahuru','October': 'Whiringa-ā-nuku','November': 'Whiringa-ā-rangi','December': 'Hakihea'
+        };
+
+        const parts = now.split(/[, ]+/);
+        const weekday = parts[0];
+        const day = parts[1];
+        const month = parts[2];
+        const year = parts[3];
+        const maoriDate = `${maoriDays[weekday]}, ${maoriMonths[month]} ${day}, ${year}`;
+
+        const headers = [
+            'Time',
+            'Level',
+            'Type',
+            'Word',
+            'Meaning',
+            'Time Taken',
+            'Points Gained',
+            'Points Total'
+        ];
+
+        const raw = (foundWordsTrail || []);
+
+        // use flatMap so we can add spacer rows before/after specials
+        const rows = raw.flatMap(item => {
+            if (item.type === '') {
+                return [
+                    { spacer: true },
+                    { 
+                        special: true,
+                        message: String(item.word || ''), 
+                        pointsTotal: item.pointsTotal != null ? String(item.pointsTotal) : '' 
+                    },
+                    { spacer: true }
+                ];
+            } else {
+                return [{
+                    special: false,
+                    fields: [
+                        String(item.time || ''),
+                        String(item.level || ''),
+                        String(item.type || ''),
+                        String(item.word || ''),
+                        String(item.translation || ''),
+                        item.timeTaken != null ? String(item.timeTaken) + 's' : '',
+                        item.pointsGained != null ? String(item.pointsGained) : '',
+                        item.pointsTotal != null ? String(item.pointsTotal) : ''
+                    ]
+                }];
+            }
+        });
+
+        // compute column widths
+        const colCount = headers.length;
+        const colWidths = headers.map(h => h.length);
+        rows.forEach(r => {
+            if (r.special === false) {
+                r.fields.forEach((f, i) => {
+                    const len = String(f).length;
+                    if (len > colWidths[i]) colWidths[i] = len;
+                });
+            } else if (r.special) {
+                const ptLen = String(r.pointsTotal || '').length;
+                if (ptLen > colWidths[colCount - 1]) colWidths[colCount - 1] = ptLen;
+            }
+        });
+
+        //const GAP = 3; FROM HERE
+        //for (let i = 0; i < colWidths.length - 1; i++) colWidths[i] += GAP;
+        // Add GAP to all columns, including the second-to-last, to ensure spacing
+        const GAP = 3;
+        for (let i = 0; i < colWidths.length; i++) colWidths[i] += GAP;
+        const align = ['left', 'left', 'left', 'left', 'left', 'right', 'right', 'right'];
+        //const align = ['left','left','left','left','left','right','right','right']; TO HERE
+        const padCell = (s, w, a) => {
+            const str = String(s || '');
+            return a === 'right' ? str.padStart(w, ' ') : str.padEnd(w, ' ');
+        };
+
+       // const headerRow = headers.map((h, i) => padCell(h, colWidths[i], 'left')).join('');
+        const headerRow = headers.map((h, i) => padCell(h, colWidths[i], align[i])).join('');
+        const underlineRow = colWidths.map(w => '-'.repeat(w)).join('');
+
+        const combinedIndexStart = 3;
+        const combinedIndexEnd = 6;
+
+        const bodyRows = rows.map(r => {
+            if (r.spacer) {
+                return ''; // blank line
+            } else if (r.special) {
+                const firstPart = padCell('', colWidths[0], 'left')
+                                + padCell('', colWidths[1], 'left')
+                                + padCell('', colWidths[2], 'left');
+                const mergedWidth = colWidths.slice(combinedIndexStart, combinedIndexEnd + 1).reduce((a, b) => a + b, 0);
+                const mergedPart = padCell(r.message, mergedWidth, 'left');
+                const lastPart = padCell(r.pointsTotal || '', colWidths[colCount - 1], 'right');
+                return firstPart + mergedPart + lastPart;
+            } else {
+                return r.fields.map((f, i) => padCell(f, colWidths[i], align[i])).join('');
+            }
+        }).join('\n');
+
+        const text = `<pre>IB History Learning Log for ${maoriDate}\n\n${headerRow}\n${underlineRow}\n${bodyRows}</pre>`;
+
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = text;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+
+        alert('Copied Learning Log to clipboard!');
+    } catch (err) {
+        alert('Failed to copy, aroha mai, select and control C: ' + err);
+    }
+}
+}
+initTranslations();
+initBoard();
+attachEventListeners();
+}); // Correct closure of DOMContentLoaded
+</script>
+</body>
+</html>
