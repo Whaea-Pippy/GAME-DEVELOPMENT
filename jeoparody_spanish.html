@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy: Español</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            background-color: #F5F5DC;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #3E2723;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 10vh;
+            box-sizing: border-box;
+        }
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        #game-board {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto repeat(5, 1fr);
+            gap: 0.75rem;
+            min-height: 0;
+        }
+        .jeopardy-title {
+            font-family: 'Luckiest Guy', cursive;
+            color: #5D4037;
+            text-shadow: 1px 1px 0 #D7CCC8;
+            letter-spacing: 0.05em;
+        }
+        .card, .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.5rem;
+            min-height: 0;
+            min-width: 0;
+        }
+        .card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.15);
+        }
+        .point-value {
+            font-family: 'Luckiest Guy', cursive;
+            color: #FFFFFF;
+            text-shadow: 1px 1px 0 #111827;
+        }
+        .team-container {
+            transition: transform 0.3s ease, border 0.3s ease;
+        }
+        .active-turn {
+            border: 4px solid #FBBF24;
+            transform: scale(1.05);
+        }
+        .category-header { font-size: clamp(0.6rem, 2vw, 1rem); }
+        .point-value { font-size: clamp(1rem, 4vw, 2rem); }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Top Section -->
+        <div class="flex-shrink-0 mb-3">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl jeopardy-title text-center">Jeopardy: Español</h1>
+            <!-- Team Scores side-by-side -->
+            <div class="flex space-x-4 mt-2 justify-center">
+                <div id="team1-container" class="team-container bg-teal-800 rounded-lg p-2 sm:p-3 flex-1 max-w-xs text-center shadow-md">
+                    <h2 class="text-base sm:text-lg font-bold text-white">Equipo 1</h2>
+                    <span id="score1" class="text-xl sm:text-2xl font-bold text-white">$0</span>
+                    <div class="flex justify-center mt-1 space-x-2">
+                        <button onclick="adjustScore(1, 1)" class="bg-green-700 hover:bg-green-800 text-white rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-xs font-bold shadow-sm">+</button>
+                        <button onclick="adjustScore(1, -1)" class="bg-red-700 hover:bg-red-800 text-white rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-xs font-bold shadow-sm">-</button>
+                    </div>
+                </div>
+                <div id="team2-container" class="team-container bg-orange-800 rounded-lg p-2 sm:p-3 flex-1 max-w-xs text-center shadow-md">
+                    <h2 class="text-base sm:text-lg font-bold text-white">Equipo 2</h2>
+                    <span id="score2" class="text-xl sm:text-2xl font-bold text-white">$0</span>
+                    <div class="flex justify-center mt-1 space-x-2">
+                        <button onclick="adjustScore(2, 1)" class="bg-green-700 hover:bg-green-800 text-white rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-xs font-bold shadow-sm">+</button>
+                        <button onclick="adjustScore(2, -1)" class="bg-red-700 hover:bg-red-800 text-white rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-xs font-bold shadow-sm">-</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div id="game-board"></div>
+
+        <!-- Bottom Buttons -->
+        <div class="flex space-x-4 mt-3 justify-center flex-shrink-0">
+            <button onclick="resetGame()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-lg shadow-md text-sm sm:text-base">Reiniciar Juego</button>
+            <button id="final-jeopardy-btn" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg shadow-md text-sm sm:text-base">¡Jeopardy Final!</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div id="modal-content" class="bg-white text-black p-4 sm:p-6 rounded-lg shadow-xl max-w-2xl w-full text-center border-8">
+            <h2 id="modal-category" class="font-bold text-2xl sm:text-3xl mb-4"></h2>
+            <p id="modal-question" class="text-xl sm:text-2xl font-semibold mb-5"></p>
+            <div id="modal-answer-container" class="hidden text-xl font-bold mt-4 mb-4">
+                <span class="block text-gray-500 font-normal text-base">Respuesta:</span>
+                <span id="modal-answer-text" class="text-black"></span>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <button onclick="revealAnswer()" id="reveal-btn" class="text-white font-bold py-2 px-6 rounded-lg shadow-md text-lg">Revelar Respuesta</button>
+                <button onclick="closeModal()" id="close-btn" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-6 rounded-lg shadow-md text-lg hidden">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log("JavaScript is running! Initializing Jeopardy game in Spanish...");
+
+        const gameData = [
+            { 
+                category: "Colores", 
+                questions: [ 
+                    { question: "¿Cuál es el color de un limón?", answer: "Amarillo" }, 
+                    { question: "¿Cuál es el color de una rosa típica?", answer: "Rojo" }, 
+                    { question: "¿Cuál es el color de la noche?", answer: "Negro" }, 
+                    { question: "¿Cuál es el color de las nubes?", answer: "Blanco" }, 
+                    { question: "¿Cuál es el color del cielo despejado?", answer: "Azul" } 
+                ] 
+            },
+            { 
+                category: "Animales", 
+                questions: [ 
+                    { question: "¿Qué animal es conocido por su cuello largo?", answer: "Jirafa" }, 
+                    { question: "¿Qué animal marino es el más grande del mundo?", answer: "Ballena" }, 
+                    { question: "¿Qué reptil cambia de color para camuflarse?", answer: "Camaleón" }, 
+                    { question: "¿Qué ave nocturna es conocida por sus grandes ojos?", answer: "Búho" }, 
+                    { question: "¿Qué pez es famoso por su forma de estrella?", answer: "Estrella de mar" } 
+                ] 
+            },
+            { 
+                category: "El Cuerpo", 
+                questions: [ 
+                    { question: "¿Qué parte del cuerpo se usa para ver?", answer: "Ojos" }, 
+                    { question: "¿Qué parte del cuerpo se usa para escuchar?", answer: "Oídos" }, 
+                    { question: "¿Qué parte del cuerpo se usa para oler?", answer: "Nariz" }, 
+                    { question: "¿Cuántos dedos tiene una mano?", answer: "Cinco" }, 
+                    { question: "¿Qué órgano bombea sangre en el cuerpo?", answer: "Corazón" } 
+                ] 
+            },
+            { 
+                category: "Lugares", 
+                questions: [ 
+                    { question: "¿Cuál es el nombre de la montaña más alta del mundo?", answer: "Everest" }, 
+                    { question: "¿Cuál es la ciudad más grande de España?", answer: "Madrid" }, 
+                    { question: "¿Cuál es el río más largo de América del Sur?", answer: "Amazonas" }, 
+                    { question: "¿Qué ciudad es conocida como la 'Ciudad de la Luz'?", answer: "París" }, 
+                    { question: "¿Dónde se encuentran las famosas pirámides de Giza?", answer: "Egipto" } 
+                ] 
+            },
+            { 
+                category: "Jeopardy Final", 
+                questions: [ 
+                    { question: "¿Cuál es la palabra en español para 'amor profundo'?", answer: "Amor" } 
+                ] 
+            }
+        ];
+
+        const categoryUiColors = { 
+            "Colores": "bg-amber-800", 
+            "Animales": "bg-green-800", 
+            "El Cuerpo": "bg-orange-700", 
+            "Lugares": "bg-slate-700" 
+        };
+        const teamUiColors = {
+            1: { border: 'border-teal-800', text: 'text-teal-800', bg: 'bg-teal-800', hoverBg: 'hover:bg-teal-900' },
+            2: { border: 'border-orange-800', text: 'text-orange-800', bg: 'bg-orange-800', hoverBg: 'hover:bg-orange-900' }
+        };
+        const finalJeopardyUiColors = { border: 'border-yellow-500', text: 'text-yellow-500', bg: 'bg-yellow-500', hoverBg: 'hover:bg-yellow-600' };
+
+        let scores = { team1: 0, team2: 0 };
+        let currentTurn = 1;
+        let currentQuestionValue = 0;
+        const pointValues = [100, 200, 300, 400, 500];
+        let revealedCards = new Set();
+        
+        const board = document.getElementById('game-board');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalCategory = document.getElementById('modal-category');
+        const modalQuestion = document.getElementById('modal-question');
+        const modalAnswerContainer = document.getElementById('modal-answer-container');
+        const modalAnswerText = document.getElementById('modal-answer-text');
+        const revealBtn = document.getElementById('reveal-btn');
+        const closeBtn = document.getElementById('close-btn');
+        const finalJeopardyBtn = document.getElementById('final-jeopardy-btn');
+        const team1Container = document.getElementById('team1-container');
+        const team2Container = document.getElementById('team2-container');
+
+        const shuffleArray = arr => [...arr].sort(() => Math.random() - 0.5);
+
+        const updateTurnIndicator = () => {
+            team1Container.classList.toggle('active-turn', currentTurn === 1);
+            team2Container.classList.toggle('active-turn', currentTurn === 2);
+        };
+
+        const renderBoard = () => {
+            board.innerHTML = '';
+            const gameCategories = shuffleArray(gameData.slice(0, 4));
+
+            // Add category headers
+            gameCategories.forEach(category => {
+                const header = document.createElement('div');
+                header.className = `category-header rounded-lg text-white font-bold shadow-md ${categoryUiColors[category.category]}`;
+                header.textContent = category.category.toUpperCase();
+                board.appendChild(header);
+            });
+
+            // Add cards row by row to ensure alignment
+            pointValues.forEach((pointValue, i) => {
+                gameCategories.forEach(category => {
+                    const question = category.questions[i];
+                    const cardId = `${category.category}-${pointValue}`;
+                    const card = document.createElement('div');
+                    card.className = `card rounded-lg shadow-lg text-white font-bold ${categoryUiColors[category.category]} hover:bg-opacity-80`;
+                    
+                    if (revealedCards.has(cardId)) {
+                        card.classList.add('opacity-50', 'cursor-default');
+                    } else {
+                        card.innerHTML = `<div class="point-value">$${pointValue}</div>`;
+                        card.addEventListener('click', () => {
+                            revealedCards.add(cardId);
+                            card.innerHTML = '';
+                            card.classList.add('opacity-50', 'cursor-default');
+                            currentQuestionValue = pointValue;
+                            openModal(category.category, question.question, question.answer);
+                        }, { once: true });
+                    }
+                    board.appendChild(card);
+                });
+            });
+        };
+
+        const openModal = (category, question, answer, isFinal = false) => {
+            const colors = isFinal ? finalJeopardyUiColors : teamUiColors[currentTurn];
+
+            modalContent.className = 'bg-white text-black p-4 sm:p-6 rounded-lg shadow-xl max-w-2xl w-full text-center border-8';
+            modalCategory.className = 'font-bold text-2xl sm:text-3xl mb-4';
+            revealBtn.className = 'text-white font-bold py-2 px-6 rounded-lg shadow-md text-lg';
+            
+            modalContent.classList.add(colors.border);
+            modalCategory.classList.add(colors.text);
+            revealBtn.classList.add(colors.bg, colors.hoverBg);
+
+            modalCategory.textContent = category.toUpperCase();
+            modalQuestion.textContent = question;
+            modalAnswerText.textContent = answer;
+            modalAnswerContainer.classList.add('hidden');
+            revealBtn.classList.remove('hidden');
+            closeBtn.classList.add('hidden');
+            modal.classList.remove('hidden');
+        };
+
+        finalJeopardyBtn.addEventListener('click', () => {
+            const finalData = gameData[4];
+            openModal(finalData.category, finalData.questions[0].question, finalData.questions[0].answer, true);
+        });
+
+        const closeModal = () => modal.classList.add('hidden');
+        
+        const revealAnswer = () => {
+            modalAnswerContainer.classList.remove('hidden');
+            revealBtn.classList.add('hidden');
+            closeBtn.classList.remove('hidden');
+        };
+
+        const adjustScore = (team, multiplier) => {
+            if (currentQuestionValue === 0) return;
+            scores[`team${team}`] += currentQuestionValue * multiplier;
+            document.getElementById(`score${team}`).textContent = `$${scores[`team${team}`]}`;
+            currentTurn = team === 1 ? 2 : 1;
+            updateTurnIndicator();
+            currentQuestionValue = 0;
+        };
+
+        const resetGame = () => {
+            scores = { team1: 0, team2: 0 };
+            document.getElementById('score1').textContent = '$0';
+            document.getElementById('score2').textContent = '$0';
+            currentTurn = 1;
+            currentQuestionValue = 0;
+            revealedCards.clear();
+            updateTurnIndicator();
+            renderBoard();
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    renderBoard();
+                }, 100);
+            });
+            renderBoard();
+            updateTurnIndicator();
+        });
+    </script>
+</body>
+</html>

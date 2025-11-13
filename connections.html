@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Te Reo Māori — Connections</title>
+<style>
+  :root{
+    --blue: #b3d8ff;
+    --green:#bdecc8;
+    --orange:#ffd39b;
+    --purple:#d2b6ff;
+    --gold:#ffe680;
+    --red:#ffb3b3;
+    --brown:#d2a679;
+    --pink:#ffc0dd;
+    --location:#FFD700;
+    --yellow:#fff7a8;
+    --ink:#1f2937;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    font-family:Inter, system-ui, -apple-system, Arial, sans-serif;
+    margin:0;
+    background:#fbfbff;
+    color:var(--ink);
+  }
+
+  header{padding:18px 14px; text-align:center}
+  h1{margin:0;font-size:24px}
+  .sub{color:#5b6270;font-size:13px;margin-top:6px}
+
+  .controls{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    align-items:center;
+    margin:14px 8px;
+    flex-wrap:wrap;
+  }
+
+  button{
+    background:#fff;
+    border:0;
+    padding:10px 14px;
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(25,25,25,.06);
+    cursor:pointer;
+  }
+  #newBtn{background:#0ea5a4;color:#fff}
+  #cheatBtn{background:#f97316;color:#fff}
+  #tries{
+    background:#eef2ff;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:700;
+  }
+
+  #wrap{max-width:900px;margin:0 auto;padding:8px}
+  #solved{display:flex;flex-direction:column;gap:12px;align-items:center;margin:10px auto}
+
+  .group-row{
+    display:grid;
+    grid-template-columns:repeat(4,140px);
+    gap:10px;
+    padding:10px;
+    border-radius:14px;
+    align-items:center;
+  }
+
+  .group-title{
+    grid-column:1/-1;
+    text-align:left;
+    font-weight:800;
+    padding:8px;
+    border-radius:10px;
+    background:rgba(255,255,255,.55);
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+
+  /* ---- GRID ---- */
+  #grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(120px,1fr));
+    gap:12px;
+    margin:12px auto;
+    max-width:560px;
+  }
+
+  /* ✅ Mobile layout: 8 rows of 2 */
+  @media (max-width: 640px) {
+    #grid {
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      max-width: 340px;
+    }
+    .group-row {
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      max-width: 340px;
+    }
+  }
+
+  .card{
+    background:var(--yellow);
+    padding:16px;
+    border-radius:12px;
+    min-height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-weight:700;
+    box-shadow:0 8px 20px rgba(15,15,15,.06);
+    transition:transform .12s ease,box-shadow .12s ease
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:0 18px 30px rgba(15,15,15,.08)}
+  .card.selected{outline:3px solid #111}
+  .card.matched{cursor:default;opacity:0.98}
+  .small{font-size:13px;font-weight:700}
+
+  /* modal */
+  .modal-backdrop{
+    position:fixed;inset:0;display:none;place-items:center;
+    background:rgba(0,0,0,.36);z-index:50
+  }
+  .modal{
+    background:#fff;padding:18px;border-radius:12px;
+    box-shadow:0 12px 40px rgba(0,0,0,.25);max-width:520px;width:92%
+  }
+  .modal h2{margin:0 0 6px}
+  .modal p{margin:0 0 12px;color:#374151}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<header>
+  <h1>Te Reo Māori — Connections</h1>
+  <div class="sub">Click 4 cards that belong together. Find 4 groups to win.</div>
+  <div class="controls">
+    <button id="newBtn">New Puzzle</button>
+    <button id="cheatBtn">Cheat (3s)</button>
+    <div id="tries">Tries: 0 / 6</div>
+  </div>
+</header>
+
+<main id="wrap">
+  <div id="solved"></div>
+  <div id="grid"></div>
+</main>
+
+<!-- modal -->
+<div id="modalWrap" class="modal-backdrop">
+  <div class="modal">
+    <h2 id="modalTitle">You win!</h2>
+    <p id="modalMsg">Great mahi — want to play again?</p>
+    <div class="actions">
+      <button id="playAgain">Play Again</button>
+      <button id="closeModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const categories = {
+  animals: { label:'Animals', color:'var(--blue)', words:[
+    {maori:'kurī',english:'dog'},{maori:'ngeru',english:'cat'},{maori:'hoiho',english:'horse'},{maori:'manu',english:'bird'},{maori:'poaka',english:'pig'},{maori:'hipi',english:'sheep'},{maori:'kāhu',english:'hawk'},{maori:'whekī',english:'octopus'},{maori:'tuna',english:'eel'},{maori:'pīpī',english:'chick'},{maori:'kākā',english:'parrot'},{maori:'tīrairaka',english:'fantail'},{maori:'pūngāwerewere',english:'spider'},{maori:'mango',english:'shark'},{maori:'pāpaka',english:'crab'},{maori:'kiore',english:'rat'},{maori:'kererū',english:'wood pigeon'},{maori:'pīwaiwaka',english:'fantail'},{maori:'tīeke',english:'saddleback'},{maori:'tohorā',english:'whale'} ]},
+
+  pronouns: { label:'Pronouns', color:'var(--green)', words:[
+    {maori:'ahau',english:'I/me'},{maori:'au',english:'I/me'},{maori:'koe',english:'you (sg)'},{maori:'kōrua',english:'you two'},{maori:'koutou',english:'you (pl)'},{maori:'ia',english:'he/she'},{maori:'rātou',english:'they (pl)'},{maori:'māua',english:'we two (excl)'},{maori:'tāua',english:'we two (incl)'},{maori:'mātou',english:'we (excl)'},{maori:'tātou',english:'we (incl)'},{maori:'tāku',english:'my'},{maori:'āna',english:'his/hers'},{maori:'mōku',english:'for me'},{maori:'mōu',english:'for you'},{maori:'rāua',english:'those two'} ]},
+
+  feelings: { label:'Feelings', color:'var(--orange)', words:[
+    {maori:'koa',english:'happy'},{maori:'pōuri',english:'sad'},{maori:'hiakai',english:'hungry'},{maori:'makariri',english:'cold'},{maori:'wera',english:'hot'},{maori:'hōhā',english:'annoyed'},{maori:'mākona',english:'satisfied'},{maori:'matewai',english:'thirsty'},{maori:'māharahara',english:'worried'},{maori:'āwangawanga',english:'anxious'},{maori:'whakamā',english:'embarrassed'},{maori:'riri',english:'angry'},{maori:'harikoa',english:'joyful'},{maori:'ngenge',english:'tired'},{maori:'āmaimai',english:'nervous'},{maori:'māia',english:'brave'},{maori:'whakamīharo',english:'amazed'},{maori:'ohorere',english:'surprised'},{maori:'mataku',english:'frightened'},{maori:'manahau',english:'cheerful'} ]},
+
+  months: { label:'Months', color:'var(--purple)', words:[
+    {maori:'Kohi-tātea',english:'January'},{maori:'Hui-tanguru',english:'February'},{maori:'Poutū-te-rangi',english:'March'},{maori:'Paenga-whāwhā',english:'April'},{maori:'Haratua',english:'May'},{maori:'Pipiri',english:'June'},{maori:'Hōngongoi',english:'July'},{maori:'Here-turi-kōkā',english:'August'},{maori:'Mahuru',english:'September'},{maori:'Whiringa-ā-nuku',english:'October'},{maori:'Whiringa-ā-rangi',english:'November'},{maori:'Hakihea',english:'December'} ]},
+
+  weekdays: { label:'Weekdays', color:'var(--gold)', words:[
+    {maori:'Rāhina',english:'Monday'},{maori:'Rātū',english:'Tuesday'},{maori:'Rāapa',english:'Wednesday'},{maori:'Rāpare',english:'Thursday'},{maori:'Rāmere',english:'Friday'},{maori:'Rāhoroi',english:'Saturday'},{maori:'Rātapu',english:'Sunday'} ]},
+
+  seasons: { label:'Seasons', color:'var(--red)', words:[
+    {maori:'Raumati',english:'summer'},{maori:'Ngahuru',english:'autumn'},{maori:'Hōtoke',english:'winter'},{maori:'Kōanga',english:'spring'} ]},
+
+  tense: { label:'Tense markers', color:'var(--brown)', words:[
+    {maori:'kei te',english:'present'},{maori:'kua',english:'perfect'},{maori:'i',english:'past'},{maori:'ka',english:'future'},{maori:'me',english:'should'},{maori:'e … ana',english:'continuous'},{maori:'mua',english:'before'},{maori:'ā muri ake',english:'after'},{maori:'ākuanei',english:'soon'},{maori:'tōna wā',english:'at that time'} ]},
+
+  food: { label:'Food', color:'var(--pink)', words:[
+    {maori:'parāoa',english:'bread'},{maori:'miraka',english:'milk'},{maori:'hēki',english:'egg'},{maori:'āporo',english:'apple'},{maori:'rēmana',english:'lemon'},{maori:'hua rākau',english:'fruit'},{maori:'rīwai',english:'potato'},{maori:'mīti',english:'meat'},{maori:'ika',english:'fish'},{maori:'huka',english:'sugar'},{maori:'pata',english:'butter'},{maori:'tiakarete',english:'chocolate'},{maori:'kai',english:'food'},{maori:'hōtiti',english:'sausage'},{maori:'rētihi',english:'lettuce'},{maori:'pīni',english:'beans'},{maori:'kāroti',english:'carrot'},{maori:'ārani',english:'orange'} ]},
+
+  location: { label:'Location', color:'var(--location)', words:[
+    {maori:'konei',english:'here (by me)'},{maori:'konā',english:'there (by you)'},{maori:'korā',english:'over there'},{maori:'tēnei',english:'this (by me)'},{maori:'tēnā',english:'that (by you)'},{maori:'tērā',english:'that (over there)'},{maori:'reira',english:'that/there'},{maori:'wāhi',english:'place'},{maori:'pae',english:'area'},{maori:'roto',english:'inside'},{maori:'waho',english:'outside'},{maori:'runga',english:'above'},{maori:'raro',english:'below'},{maori:'tōna taha',english:'beside'},{maori:'waenganui',english:'between'},{maori:'mua',english:'in front'},{maori:'muri',english:'behind'} ]}
+};
+
+// --- state ---
+let puzzle = []; // array of {maori, english, cat}
+let tries = 0;
+const maxTries = 6;
+const solvedCats = new Set();
+
+// elements
+const gridEl = document.getElementById('grid');
+const solvedEl = document.getElementById('solved');
+const triesEl = document.getElementById('tries');
+const newBtn = document.getElementById('newBtn');
+const cheatBtn = document.getElementById('cheatBtn');
+const modalWrap = document.getElementById('modalWrap');
+const modalTitle = document.getElementById('modalTitle');
+const modalMsg = document.getElementById('modalMsg');
+const playAgainBtn = document.getElementById('playAgain');
+const closeModalBtn = document.getElementById('closeModal');
+
+newBtn.addEventListener('click', newPuzzle);
+cheatBtn.addEventListener('click', cheat);
+playAgainBtn.addEventListener('click', ()=>{ hideModal(); newPuzzle(); });
+closeModalBtn.addEventListener('click', hideModal);
+
+// shuffle helper
+function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+
+function updateTries(){ triesEl.textContent = `Tries: ${tries} / ${maxTries}`; }
+
+function newPuzzle(){
+  // reset
+  tries = 0; solvedCats.clear(); updateTries(); gridEl.innerHTML=''; solvedEl.innerHTML=''; puzzle = [];
+
+  // truly random pick 4 categories
+  const keys = shuffle(Object.keys(categories)).slice(0,4);
+
+  keys.forEach(k => {
+    const words = shuffle(categories[k].words).slice(0,4);
+    words.forEach(w => puzzle.push({ maori:w.maori, english:w.english, cat:k }));
+  });
+
+  puzzle = shuffle(puzzle);
+
+  // build grid
+  puzzle.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.cat = item.cat;
+    card.dataset.maori = item.maori;
+    card.dataset.english = item.english;
+    card.textContent = item.maori;
+    card.addEventListener('click', ()=> selectCard(card));
+    gridEl.appendChild(card);
+  });
+}
+
+function selectCard(card){
+  if(card.classList.contains('matched')) return;
+  card.classList.toggle('selected');
+
+  const selected = Array.from(document.querySelectorAll('#grid .card.selected'));
+  if(selected.length === 4){
+    const cat = selected[0].dataset.cat;
+    const correct = selected.every(c => c.dataset.cat === cat);
+
+    if(correct){
+      handleMatch(cat, selected);
+      if(solvedCats.size === 4){
+        setTimeout(()=> showModal('Ka mau te wehi! You win!','You found all four groups. Kia ora!'), 250);
+      }
+    } else {
+      tries++;
+      updateTries();
+      // flash red briefly
+      selected.forEach(c=>{ c.style.boxShadow = '0 0 0 4px rgba(239,68,68,.2) inset'; });
+      setTimeout(()=> selected.forEach(c=>{ c.classList.remove('selected'); c.style.boxShadow=''; }), 700);
+      if(tries >= maxTries){
+        setTimeout(()=> revealSolution(), 500);
+        setTimeout(()=> showModal('Kua mutu ngā taumahi','Out of tries — here is the solution.'), 750);
+      }
+    }
+  }
+}
+
+function handleMatch(cat, cards){
+  solvedCats.add(cat);
+
+  // create a row for the solved category and append at top (appendChild will stack in order solved)
+  const row = document.createElement('div');
+  row.className = 'group-row';
+  row.style.background = categories[cat].color;
+
+  const title = document.createElement('div');
+  title.className = 'group-title';
+  title.textContent = categories[cat].label + ' — ' + capitalize(cat);
+  row.appendChild(title);
+
+  // move each card into the row and update its appearance
+  cards.forEach(c => {
+    c.classList.remove('selected');
+    c.classList.add('matched');
+    c.style.background = categories[cat].color;
+    c.textContent = `${c.dataset.maori} (${c.dataset.english})`;
+    row.appendChild(c); // moves node from grid to solved row
+  });
+
+  solvedEl.appendChild(row);
+}
+
+function revealSolution(){
+  const remaining = Array.from(document.querySelectorAll('#grid .card'));
+  const catsLeft = Array.from(new Set(remaining.map(r=>r.dataset.cat)));
+  catsLeft.forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'group-row';
+    row.style.background = categories[cat].color;
+
+    const title = document.createElement('div');
+    title.className = 'group-title';
+    title.textContent = categories[cat].label + ' — ' + capitalize(cat);
+    row.appendChild(title);
+
+    remaining.filter(c=>c.dataset.cat===cat).forEach(c=>{
+      c.classList.remove('selected');
+      c.classList.add('matched');
+      c.style.background = categories[cat].color;
+      c.textContent = `${c.dataset.maori} (${c.dataset.english})`;
+      row.appendChild(c);
+    });
+
+    solvedEl.appendChild(row);
+    solvedCats.add(cat);
+  });
+}
+
+function cheat(){
+  // show english translations in place for 3s without reshuffling
+  const all = Array.from(document.querySelectorAll('.card'));
+  all.forEach(c=>{ if(!c.classList.contains('matched')) c.textContent = `${c.dataset.maori} (${c.dataset.english})`; });
+  setTimeout(()=>{ all.forEach(c=>{ if(!c.classList.contains('matched')) c.textContent = c.dataset.maori; }); }, 3000);
+}
+
+function showModal(title, msg){
+  modalTitle.textContent = title;
+  modalMsg.textContent = msg;
+  modalWrap.style.display = 'grid';
+}
+function hideModal(){ modalWrap.style.display = 'none'; }
+
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// init
+newPuzzle();
+
+// attach global handlers
+window.newPuzzle = newPuzzle; // allow in-page button to call
+</script>
+</body>
+</html>

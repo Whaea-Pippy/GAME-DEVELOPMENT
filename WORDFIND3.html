@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Te Reo Word Find #3</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 1400px; margin: 0 auto; display: flex; }
+        #wordsearch { border-collapse: collapse; margin: 20px 0; }
+        #wordsearch td { width: 30px; height: 30px; text-align: center; font-size: 20px; border: 1px solid black; cursor: pointer; user-select: none; }
+        .selected { background-color: #32CD32 !important; color: black !important; }
+        .highlighted { background-color: #FFFF99 !important; color: black !important; }
+        .found0 { background-color: #6495ED !important; color: white !important; }
+        .found1 { background-color: #FF7F50 !important; color: white !important; }
+        .found2 { background-color: #9ACD32 !important; color: white !important; }
+        .found3 { background-color: #FFC0CB !important; color: black !important; }
+        .found4 { background-color: #DAA520 !important; color: white !important; }
+        .found5 { background-color: #BA55D3 !important; color: white !important; }
+        .found6 { background-color: #40E0D0 !important; color: black !important; }
+        .found7 { background-color: #FFD700 !important; color: black !important; }
+        .found8 { background-color: #B0C4DE !important; color: black !important; }
+        .found9 { background-color: #DEB887 !important; color: black !important; }
+        .found10 { background-color: #F08080 !important; color: white !important; }
+        .found11 { background-color: #7B68EE !important; color: white !important; }
+        .found12 { background-color: #00FF7F !important; color: black !important; }
+        .found13 { background-color: #9370DB !important; color: white !important; }
+        .found14 { background-color: #FFA500 !important; color: black !important; }
+        .found15 { background-color: #8A2BE2 !important; color: white !important; }
+        .found16 { background-color: #CD5C5C !important; color: white !important; }
+        .found17 { background-color: #20B2AA !important; color: white !important; }
+        .found18 { background-color: #4682B4 !important; color: black !important; }
+        .found19 { background-color: #FF6347 !important; color: white !important; }
+        .found20 { background-color: #FF4500 !important; color: white !important; }
+        .found-word-color { font-weight: bold; }
+        .word-count { font-size: 14px; font-weight: normal; margin-left: 5px; }
+        .lists { display: flex; justify-content: space-around; flex: 1; }
+        .find, .found { width: 45%; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 5px 0; font-size: 18px; }
+        .alphabet-panel { width: 200px; margin-left: 20px; }
+        .alphabet-panel h2 { font-size: 18px; margin-bottom: 10px; }
+        .alphabet-button { display: inline-block; width: 30px; height: 30px; margin: 2px; text-align: center; line-height: 30px; font-size: 16px; border: 1px solid black; cursor: pointer; background-color: #f0f0f0; }
+        .alphabet-button.active { background-color: #FFFF99; }
+        .clear-button, .cheat-button { display: block; width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; text-align: center; }
+        .clear-button { background-color: #dc3545; color: white; }
+        .clear-button:hover { background-color: #c82333; }
+        .cheat-button { background-color: #6f42c1; color: white; }
+        .cheat-button:hover { background-color: #5a32a3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>Te Reo Word Find #3</h1>
+            <table id="wordsearch">
+                <tr><td data-row="0" data-col="0">Ū</td><td data-row="0" data-col="1">K</td><td data-row="0" data-col="2">W</td><td data-row="0" data-col="3">E</td><td data-row="0" data-col="4">Ū</td><td data-row="0" data-col="5">W</td><td data-row="0" data-col="6">A</td><td data-row="0" data-col="7">R</td><td data-row="0" data-col="8">O</td><td data-row="0" data-col="9">H</td><td data-row="0" data-col="10">A</td><td data-row="0" data-col="11">N</td><td data-row="0" data-col="12">W</td><td data-row="0" data-col="13">T</td><td data-row="0" data-col="14">N</td></tr>
+                <tr><td data-row="1" data-col="0">T</td><td data-row="1" data-col="1">N</td><td data-row="1" data-col="2">E</td><td data-row="1" data-col="3">Ō</td><td data-row="1" data-col="4">R</td><td data-row="1" data-col="5">K</td><td data-row="1" data-col="6">Ē</td><td data-row="1" data-col="7">T</td><td data-row="1" data-col="8">T</td><td data-row="1" data-col="9">K</td><td data-row="1" data-col="10">Ō</td><td data-row="1" data-col="11">R</td><td data-row="1" data-col="12">E</td><td data-row="1" data-col="13">R</td><td data-row="1" data-col="14">O</td></tr>
+                <tr><td data-row="2" data-col="0">O</td><td data-row="2" data-col="1">M</td><td data-row="2" data-col="2">A</td><td data-row="2" data-col="3">N</td><td data-row="2" data-col="4">U</td><td data-row="2" data-col="5">H</td><td data-row="2" data-col="6">I</td><td data-row="2" data-col="7">R</td><td data-row="2" data-col="8">I</td><td data-row="2" data-col="9">W</td><td data-row="2" data-col="10">A</td><td data-row="2" data-col="11">I</td><td data-row="2" data-col="12">H</td><td data-row="2" data-col="13">P</td><td data-row="2" data-col="14">K</td></tr>
+                <tr><td data-row="3" data-col="0">R</td><td data-row="3" data-col="1">M</td><td data-row="3" data-col="2">A</td><td data-row="3" data-col="3">R</td><td data-row="3" data-col="4">A</td><td data-row="3" data-col="5">E</td><td data-row="3" data-col="6">N</td><td data-row="3" data-col="7">I</td><td data-row="3" data-col="8">M</td><td data-row="3" data-col="9">Ū</td><td data-row="3" data-col="10">R</td><td data-row="3" data-col="11">Ē</td><td data-row="3" data-col="12">Ū</td><td data-row="3" data-col="13">W</td><td data-row="3" data-col="14">Ī</td></tr>
+                <tr><td data-row="4" data-col="0">I</td><td data-row="4" data-col="1">N</td><td data-row="4" data-col="2">A</td><td data-row="4" data-col="3">O</td><td data-row="4" data-col="4">T</td><td data-row="4" data-col="5">E</td><td data-row="4" data-col="6">A</td><td data-row="4" data-col="7">R</td><td data-row="4" data-col="8">O</td><td data-row="4" data-col="9">A</td><td data-row="4" data-col="10">U</td><td data-row="4" data-col="11">U</td><td data-row="4" data-col="12">U</td><td data-row="4" data-col="13">R</td><td data-row="4" data-col="14">U</td></tr>
+                <tr><td data-row="5" data-col="0">U</td><td data-row="5" data-col="1">M</td><td data-row="5" data-col="2">Ā</td><td data-row="5" data-col="3">O</td><td data-row="5" data-col="4">R</td><td data-row="5" data-col="5">I</td><td data-row="5" data-col="6">A</td><td data-row="5" data-col="7">H</td><td data-row="5" data-col="8">M</td><td data-row="5" data-col="9">A</td><td data-row="5" data-col="10">H</td><td data-row="5" data-col="11">I</td><td data-row="5" data-col="12">M</td><td data-row="5" data-col="13">N</td><td data-row="5" data-col="14">M</td></tr>
+                <tr><td data-row="6" data-col="0">U</td><td data-row="6" data-col="1">P</td><td data-row="6" data-col="2">K</td><td data-row="6" data-col="3">A</td><td data-row="6" data-col="4">I</td><td data-row="6" data-col="5">W</td><td data-row="6" data-col="6">H</td><td data-row="6" data-col="7">A</td><td data-row="6" data-col="8">R</td><td data-row="6" data-col="9">E</td><td data-row="6" data-col="10">Ū</td><td data-row="6" data-col="11">W</td><td data-row="6" data-col="12">Ō</td><td data-row="6" data-col="13">Ī</td><td data-row="6" data-col="14">R</td></tr>
+                <tr><td data-row="7" data-col="0">Ō</td><td data-row="7" data-col="1">W</td><td data-row="7" data-col="2">H</td><td data-row="7" data-col="3">A</td><td data-row="7" data-col="4">K</td><td data-row="7" data-col="5">A</td><td data-row="7" data-col="6">Ō</td><td data-row="7" data-col="7">I</td><td data-row="7" data-col="8">M</td><td data-row="7" data-col="9">A</td><td data-row="7" data-col="10">R</td><td data-row="7" data-col="11">A</td><td data-row="7" data-col="12">M</td><td data-row="7" data-col="13">A</td><td data-row="7" data-col="14">Ō</td></tr>
+                <tr><td data-row="8" data-col="0">I</td><td data-row="8" data-col="1">A</td><td data-row="8" data-col="2">H</td><td data-row="8" data-col="3">Ā</td><td data-row="8" data-col="4">N</td><td data-row="8" data-col="5">G</td><td data-row="8" data-col="6">I</td><td data-row="8" data-col="7">Ō</td><td data-row="8" data-col="8">Ū</td><td data-row="8" data-col="9">Ū</td><td data-row="8" data-col="10">Ā</td><td data-row="8" data-col="11">Ā</td><td data-row="8" data-col="12">A</td><td data-row="8" data-col="13">N</td><td data-row="8" data-col="14">P</td></tr>
+                <tr><td data-row="9" data-col="0">O</td><td data-row="9" data-col="1">P</td><td data-row="9" data-col="2">U</td><td data-row="9" data-col="3">Ā</td><td data-row="9" data-col="4">T</td><td data-row="9" data-col="5">A</td><td data-row="9" data-col="6">M</td><td data-row="9" data-col="7">A</td><td data-row="9" data-col="8">R</td><td data-row="9" data-col="9">I</td><td data-row="9" data-col="10">K</td><td data-row="9" data-col="11">I</td><td data-row="9" data-col="12">Ā</td><td data-row="9" data-col="13">Ī</td><td data-row="9" data-col="14">Ē</td></tr>
+                <tr><td data-row="10" data-col="0">W</td><td data-row="10" data-col="1">T</td><td data-row="10" data-col="2">Ē</td><td data-row="10" data-col="3">N</td><td data-row="10" data-col="4">Ā</td><td data-row="10" data-col="5">K</td><td data-row="10" data-col="6">O</td><td data-row="10" data-col="7">E</td><td data-row="10" data-col="8">A</td><td data-row="10" data-col="9">Ī</td><td data-row="10" data-col="10">Ī</td><td data-row="10" data-col="11">W</td><td data-row="10" data-col="12">U</td><td data-row="10" data-col="13">Ā</td><td data-row="10" data-col="14">Ā</td></tr>
+                <tr><td data-row="11" data-col="0">W</td><td data-row="11" data-col="1">H</td><td data-row="11" data-col="2">Ā</td><td data-row="11" data-col="3">N</td><td data-row="11" data-col="4">A</td><td data-row="11" data-col="5">U</td><td data-row="11" data-col="6">A</td><td data-row="11" data-col="7">P</td><td data-row="11" data-col="8">Ō</td><td data-row="11" data-col="9">W</td><td data-row="11" data-col="10">H</td><td data-row="11" data-col="11">I</td><td data-row="11" data-col="12">R</td><td data-row="11" data-col="13">I</td><td data-row="11" data-col="14">T</td></tr>
+                <tr><td data-row="12" data-col="0">W</td><td data-row="12" data-col="1">A</td><td data-row="12" data-col="2">K</td><td data-row="12" data-col="3">A</td><td data-row="12" data-col="4">H</td><td data-row="12" data-col="5">M</td><td data-row="12" data-col="6">K</td><td data-row="12" data-col="7">I</td><td data-row="12" data-col="8">A</td><td data-row="12" data-col="9">O</td><td data-row="12" data-col="10">R</td><td data-row="12" data-col="11">A</td><td data-row="12" data-col="12">T</td><td data-row="12" data-col="13">A</td><td data-row="12" data-col="14">Ō</td></tr>
+                <tr><td data-row="13" data-col="0">W</td><td data-row="13" data-col="1">Ē</td><td data-row="13" data-col="2">Ū</td><td data-row="13" data-col="3">W</td><td data-row="13" data-col="4">O</td><td data-row="13" data-col="5">T</td><td data-row="13" data-col="6">Ū</td><td data-row="13" data-col="7">H</td><td data-row="13" data-col="8">A</td><td data-row="13" data-col="9">E</td><td data-row="13" data-col="10">R</td><td data-row="13" data-col="11">E</td><td data-row="13" data-col="12">M</td><td data-row="13" data-col="13">A</td><td data-row="13" data-col="14">I</td></tr>
+                <tr><td data-row="14" data-col="0">N</td><td data-row="14" data-col="1">Ē</td><td data-row="14" data-col="2">T</td><td data-row="14" data-col="3">Ē</td><td data-row="14" data-col="4">N</td><td data-row="14" data-col="5">Ā</td><td data-row="14" data-col="6">K</td><td data-row="14" data-col="7">O</td><td data-row="14" data-col="8">U</td><td data-row="14" data-col="9">T</td><td data-row="14" data-col="10">O</td><td data-row="14" data-col="11">U</td><td data-row="14" data-col="12">P</td><td data-row="14" data-col="13">O</td><td data-row="14" data-col="14">I</td></tr>
+            </table>
+            <div class="lists">
+                <div class="find">
+                    <h2>Words to Find</h2>
+                    <ul id="find-list">
+                        <li data-word-index="0">AROHA</li>
+                        <li data-word-index="1">KAI</li>
+                        <li data-word-index="2">WAI</li>
+                        <li data-word-index="3">TĒNĀKOE</li>
+                        <li data-word-index="4">HAEREMAI</li>
+                        <li data-word-index="5">KIAORA</li>
+                        <li data-word-index="6">WHĀNAU</li>
+                        <li data-word-index="7">HĀNGI</li>
+                        <li data-word-index="8">MAHI</li>
+                        <li data-word-index="9">AOTEAROA</li>
+                        <li data-word-index="10">PŌWHIRI</li>
+                        <li data-word-index="11">MĀORI</li>
+                        <li data-word-index="12">MANUHIRI</li>
+                        <li data-word-index="13">KŌRERO</li>
+                        <li data-word-index="14">HAKA</li>
+                        <li data-word-index="15">MARAE</li>
+                        <li data-word-index="16">TAMARIKI</li>
+                        <li data-word-index="17">WAKA</li>
+                        <li data-word-index="18">WHARE</li>
+                        <li data-word-index="19">TĒNĀKOUTOU</li>
+                        <li data-word-index="20">MARAMA</li>
+                    </ul>
+                </div>
+                <div class="found">
+                    <h2>Found Words</h2>
+                    <ul id="found-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="alphabet-panel">
+            <h2>Māori Alphabet</h2>
+            <div id="alphabet-buttons"></div>
+            <button class="clear-button" onclick="clearHighlight()">Clear Highlights</button>
+            <button class="cheat-button" onclick="showSolution()">Cheat</button>
+        </div>
+    </div>
+    <script>
+ const table = document.getElementById('wordsearch');
+    const cells = [];
+    for (let row of table.rows) {
+        let r = [];
+        for (let cell of row.cells) {
+            r.push(cell);
+        }
+        cells.push(r);
+    }
+
+    const wordData = [
+        { word: "AROHA", coords: [[0,6],[0,7],[0,8],[0,9],[0,10]], count: 0 },
+        { word: "KAI", coords: [[6,2],[6,3],[6,4]], count: 0 },
+        { word: "WAI", coords: [[2,9],[2,10],[2,11]], count: 0 },
+        { word: "TĒNĀKOE", coords: [[10,1],[10,2],[10,3],[10,4],[10,5],[10,6],[10,7]], count: 0 },
+        { word: "HAEREMAI", coords: [[13,7],[13,8],[13,9],[13,10],[13,11],[13,12],[13,13],[13,14]], count: 0 },
+        { word: "KIAORA", coords: [[12,6],[12,7],[12,8],[12,9],[12,10],[12,11]], count: 0 },
+        { word: "WHĀNAU", coords: [[11,0],[11,1],[11,2],[11,3],[11,4],[11,5]], count: 0 },
+        { word: "HĀNGI", coords: [[8,2],[8,3],[8,4],[8,5],[8,6]], count: 0 },
+        { word: "MAHI", coords: [[5,8],[5,9],[5,10],[5,11]], count: 0 },
+        { word: "AOTEAROA", coords: [[4,2],[4,3],[4,4],[4,5],[4,6],[4,7],[4,8],[4,9]], count: 0 },
+        { word: "PŌWHIRI", coords: [[11,7],[11,8],[11,9],[11,10],[11,11],[11,12],[11,13]], count: 0 },
+        { word: "MĀORI", coords: [[5,1],[5,2],[5,3],[5,4],[5,5]], count: 0 },
+        { word: "MANUHIRI", coords: [[2,1],[2,2],[2,3],[2,4],[2,5],[2,6],[2,7],[2,8]], count: 0 },
+        { word: "KŌRERO", coords: [[1,9],[1,10],[1,11],[1,12],[1,13],[1,14]], count: 0 },
+        { word: "HAKA", coords: [[7,2],[7,3],[7,4],[7,5]], count: 0 },
+        { word: "MARAE", coords: [[3,1],[3,2],[3,3],[3,4],[3,5]], count: 0 },
+        { word: "TAMARIKI", coords: [[9,4],[9,5],[9,6],[9,7],[9,8],[9,9],[9,10],[9,11]], count: 0 },
+        { word: "WAKA", coords: [[12,0],[12,1],[12,2],[12,3]], count: 0 },
+        { word: "WHARE", coords: [[6,5],[6,6],[6,7],[6,8],[6,9]], count: 0 },
+        { word: "TĒNĀKOUTOU", coords: [[14,2],[14,3],[14,4],[14,5],[14,6],[14,7],[14,8],[14,9],[14,10],[14,11]], count: 0 },
+        { word: "MARAMA", coords: [[7,8],[7,9],[7,10],[7,11],[7,12],[7,13]], count: 0 }
+    ];
+
+    const words = wordData.map(d => d.word);
+    const wordIndexes = {};
+    words.forEach((w, i) => wordIndexes[w] = i);
+
+    const colorValues = ['#6495ED', '#FF7F50', '#9ACD32', '#FFC0CB', '#DAA520', '#BA55D3', '#40E0D0', '#FFD700', '#B0C4DE', '#DEB887', '#F08080', '#7B68EE', '#00FF7F', '#9370DB', '#FFA500', '#8A2BE2', '#CD5C5C', '#20B2AA', '#4682B4', '#FF6347', '#FF4500'];
+
+    const maoriAlphabet = ['A', 'Ā', 'E', 'Ē', 'I', 'Ī', 'O', 'Ō', 'U', 'Ū', 'H', 'K', 'M', 'N', 'P', 'R', 'T', 'W', 'NG', 'WH'];
+    let highlightedLetters = new Set();
+    let selectedCells = [];
+    let isDragging = false;
+    let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    let touchStartTime = 0;
+    let touchStartCell = null;
+    let cheatTimeout = null;
+
+    function clearSelection() {
+        document.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
+        selectedCells = [];
+    }
+
+    function getCellsBetween(start, end) {
+        const startRow = parseInt(start.dataset.row);
+        const startCol = parseInt(start.dataset.col);
+        const endRow = parseInt(end.dataset.row);
+        const endCol = parseInt(end.dataset.col);
+
+        const dy = endRow - startRow;
+        const dx = endCol - startCol;
+
+        if (Math.abs(dy) !== Math.abs(dx) && dx !== 0 && dy !== 0) {
+            return null;
+        }
+
+        const newSelection = [];
+        const length = Math.max(Math.abs(dy), Math.abs(dx));
+        const stepY = dy === 0 ? 0 : dy / length;
+        const stepX = dx === 0 ? 0 : dx / length;
+
+        for (let i = 0; i <= length; i++) {
+            const r = Math.round(startRow + i * stepY);
+            const c = Math.round(startCol + i * stepX);
+            if (cells[r] && cells[r][c]) {
+                newSelection.push(cells[r][c]);
+            } else {
+                return null;
+            }
+        }
+        return newSelection;
+    }
+
+    function isAdjacent(cell1, cell2) {
+        const r1 = parseInt(cell1.dataset.row);
+        const c1 = parseInt(cell1.dataset.col);
+        const r2 = parseInt(cell2.dataset.row);
+        const c2 = parseInt(cell2.dataset.col);
+        return Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1;
+    }
+
+    function handleStart(e) {
+        e.preventDefault();
+        const cell = e.target.closest('#wordsearch td');
+        if (!cell) return;
+        isDragging = true;
+        clearSelection();
+        cell.classList.add('selected');
+        selectedCells = [cell];
+        if (e.type === 'touchstart') {
+            touchStartTime = Date.now();
+            touchStartCell = cell;
+        }
+        // console.log('Start event:', e.type); // Uncomment for debugging
+    }
+
+    function handleMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        const currentCell = document.elementFromPoint(clientX, clientY);
+        if (!currentCell || !currentCell.matches('#wordsearch td')) return;
+
+        const path = getCellsBetween(selectedCells[0], currentCell);
+        if (path) {
+            clearSelection();
+            path.forEach(cell => cell.classList.add('selected'));
+            selectedCells = path;
+        }
+        // console.log('Move event:', e.type); // Uncomment for debugging
+    }
+
+    function handleEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        if (e.type === 'touchend') {
+            const duration = Date.now() - touchStartTime;
+            if (duration < 200 && selectedCells.length === 1 && touchStartCell === selectedCells[0]) {
+                clearSelection();
+                return;
+            }
+        }
+        checkWord();
+        clearSelection();
+        // console.log('End event:', e.type); // Uncomment for debugging
+    }
+
+    function handleClick(e) {
+        if (e.type === 'touchstart') return; // Ignore touch clicks to avoid conflicts
+        const cell = e.target.closest('#wordsearch td');
+        if (!cell) return;
+        if (selectedCells.length === 1) {
+            const twoClickSelection = getCellsBetween(selectedCells[0], cell);
+            if (twoClickSelection) {
+                clearSelection();
+                twoClickSelection.forEach(c => c.classList.add('selected'));
+                selectedCells = twoClickSelection;
+                checkWord();
+                clearSelection();
+                return;
+            }
+        }
+        clearSelection();
+        cell.classList.add('selected');
+        selectedCells = [cell];
+        // console.log('Click event:', e.type); // Uncomment for debugging
+    }
+
+    table.addEventListener('mousedown', handleStart);
+    table.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+    table.addEventListener('touchstart', handleStart);
+    table.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleEnd);
+    table.addEventListener('click', handleClick);
+
+    function checkWord() {
+        if (!selectedCells || selectedCells.length < 2) {
+            clearSelection();
+            return;
+        }
+
+        let wordStr = selectedCells.map(c => c.innerText).join('');
+        let revStr = [...wordStr].reverse().join('');
+        let foundWordIndex = -1;
+
+        const normalize = str => str.replace(/[ĀĒĪ�OŪ]/g, c => ({'Ā': 'A', 'Ē': 'E', 'Ī': 'I', 'Ō': 'O', 'Ū': 'U'}[c]));
+        const normalizedWordStr = normalize(wordStr);
+        const normalizedRevStr = normalize(revStr);
+        const normalizedWords = words.map(normalize);
+
+        if (normalizedWords.includes(normalizedWordStr)) {
+            foundWordIndex = normalizedWords.indexOf(normalizedWordStr);
+        } else if (normalizedWords.includes(normalizedRevStr)) {
+            foundWordIndex = normalizedWords.indexOf(normalizedRevStr);
+        }
+
+        if (foundWordIndex !== -1) {
+            const foundWord = wordData[foundWordIndex].word;
+            wordData[foundWordIndex].count++;
+
+            let foundLi = document.querySelector(`#found-list li[data-word-index="${foundWordIndex}"]`);
+            if (foundLi) {
+                const countSpan = foundLi.querySelector('.word-count');
+                countSpan.innerText = wordData[foundWordIndex].count > 1 ? `(+${wordData[foundWordIndex].count - 1})` : '';
+            } else {
+                let newLi = document.createElement('li');
+                newLi.dataset.wordIndex = foundWordIndex;
+                newLi.innerText = foundWord;
+                newLi.style.color = colorValues[foundWordIndex];
+                const countSpan = document.createElement('span');
+                countSpan.classList.add('word-count');
+                countSpan.innerText = wordData[foundWordIndex].count > 1 ? `(+${wordData[foundWordIndex].count - 1})` : '';
+                newLi.appendChild(countSpan);
+                document.getElementById('found-list').appendChild(newLi);
+
+                const findLi = document.querySelector(`#find-list li[data-word-index="${foundWordIndex}"]`);
+                if (findLi) {
+                    findLi.remove();
+                }
+            }
+
+            selectedCells.forEach(c => {
+                c.classList.remove('selected');
+                c.classList.add(`found${foundWordIndex}`);
+            });
+        } else {
+            clearSelection();
+        }
+    }
+
+    function showSolution() {
+        if (cheatTimeout) {
+            clearTimeout(cheatTimeout);
+        }
+
+        const originalClasses = new Map();
+        cells.forEach((row, r) => {
+            row.forEach((cell, c) => {
+                originalClasses.set(cell, cell.className || '');
+            });
+        });
+
+        cells.forEach(row => row.forEach(cell => {
+            cell.classList.remove('selected', 'highlighted');
+            for (let i = 0; i <= 20; i++) {
+                cell.classList.remove(`found${i}`);
+            }
+        }));
+
+        wordData.forEach((word, index) => {
+            word.coords.forEach(([r, c]) => {
+                if (cells[r] && cells[r][c]) {
+                    cells[r][c].classList.add(`found${index}`);
+                }
+            });
+        });
+
+        cheatTimeout = setTimeout(() => {
+            cells.forEach(row => row.forEach(cell => {
+                cell.className = originalClasses.get(cell) || '';
+            }));
+            // console.log('Cheat timeout completed'); // Uncomment for debugging
+            cheatTimeout = null;
+        }, 2000);
+    }
+
+    function createAlphabetButtons() {
+        const panel = document.getElementById('alphabet-buttons');
+        maoriAlphabet.forEach(letter => {
+            const button = document.createElement('div');
+            button.classList.add('alphabet-button');
+            button.innerText = letter;
+            button.addEventListener('click', () => {
+                if (highlightedLetters.has(letter)) {
+                    highlightedLetters.delete(letter);
+                    button.classList.remove('active');
+                    clearLetterHighlight(letter);
+                } else {
+                    highlightedLetters.add(letter);
+                    button.classList.add('active');
+                    highlightLetter(letter);
+                }
+            });
+            panel.appendChild(button);
+        });
+    }
+
+    function highlightLetter(letter) {
+        if (letter === 'NG' || letter === 'WH') {
+            cells.forEach(row => {
+                row.forEach((cell, cIdx) => {
+                    if (cIdx < row.length - 1) {
+                        if ((letter === 'NG' && cell.innerText === 'N' && row[cIdx + 1].innerText === 'G') ||
+                            (letter === 'WH' && cell.innerText === 'W' && row[cIdx + 1].innerText === 'H')) {
+                            cell.classList.add('highlighted');
+                            row[cIdx + 1].classList.add('highlighted');
+                        }
+                    }
+                });
+            });
+        } else {
+            cells.forEach(row => {
+                row.forEach(cell => {
+                    if (cell.innerText === letter) {
+                        cell.classList.add('highlighted');
+                    }
+                });
+            });
+        }
+    }
+
+    function clearLetterHighlight(letter) {
+        if (letter === 'NG' || letter === 'WH') {
+            cells.forEach(row => {
+                row.forEach((cell, cIdx) => {
+                    if (cIdx < row.length - 1) {
+                        if ((letter === 'NG' && cell.innerText === 'N' && row[cIdx + 1].innerText === 'G') ||
+                            (letter === 'WH' && cell.innerText === 'W' && row[cIdx + 1].innerText === 'H')) {
+                            cell.classList.remove('highlighted');
+                            row[cIdx + 1].classList.remove('highlighted');
+                        }
+                    }
+                });
+            });
+        } else {
+            cells.forEach(row => {
+                row.forEach(cell => {
+                    if (cell.innerText === letter) {
+                        cell.classList.remove('highlighted');
+                    }
+                });
+            });
+        }
+    }
+
+    function clearHighlight() {
+        highlightedLetters.forEach(letter => clearLetterHighlight(letter));
+        highlightedLetters.clear();
+        document.querySelectorAll('.alphabet-button').forEach(button => button.classList.remove('active'));
+    }
+
+    createAlphabetButtons();
+   </script>
+</body>
+</html>

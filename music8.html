@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroque Influence on Modern Music — Flashcards</title>
+<style>
+body {
+  font-family: 'Poppins', 'Nunito', sans-serif;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/musicmodern.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+}
+.flashcard {
+  width: 80vw;
+  height: 80vh;
+  perspective: 1000px;
+  cursor: pointer;
+}
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  padding: 20px;
+  box-sizing: border-box;
+  border: 10px solid;
+}
+.flashcard-front {
+  color: #0c4a6e;
+  font-size: 10vmin;
+  font-weight: 700;
+  text-align: center;
+}
+.flashcard-back {
+  color: #1e293b;
+  transform: rotateY(180deg);
+  font-size: 5.5vmin;
+  text-align: center;
+  word-wrap: break-word;
+}
+.buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background-color: #0ea5a4;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+button:hover { background-color: #0d9488; }
+button.secondary { background-color: #64748b; }
+
+@media (max-width: 768px) {
+  .flashcard {
+    height: 70vh;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="flashcard" id="flashcard">
+  <div class="flashcard-inner" id="flashcard-inner">
+    <div class="flashcard-front" id="flashcard-front"></div>
+    <div class="flashcard-back" id="flashcard-back"></div>
+  </div>
+</div>
+
+<div class="buttons">
+  <button id="prevCard" class="secondary">Previous</button>
+  <button id="nextCard">Next</button>
+  <button id="shuffleCards" class="secondary">Shuffle</button>
+</div>
+
+<script>
+const flashcards = [
+  { mi: "Baroque Influence", en: "Modern music often borrows ideas from the Baroque period — especially patterns, harmony, and contrast." },
+  { mi: "Basso Continuo", en: "The Baroque bass line inspired today’s bass guitar and drum grooves that keep the rhythm strong." },
+  { mi: "Ornamentation", en: "Baroque musicians decorated melodies with trills and runs — modern guitarists and singers still do this!" },
+  { mi: "Contrast", en: "Baroque composers loved sudden changes in loudness or texture — pop producers use this too in drops or bridges." },
+  { mi: "Sequence", en: "A short musical idea repeated higher or lower — still used in film scores, EDM, and orchestral pop." },
+  { mi: "Polyphony", en: "Several melodies played at once — used in choral music and layered tracks in modern arrangements." },
+  { mi: "Terraced Dynamics", en: "Baroque pieces changed volume suddenly — similar to how modern songs shift between verse and chorus energy." },
+  { mi: "Rhythmic Drive", en: "The steady pulse of Baroque dance music is echoed in modern beats that make people move." },
+  { mi: "Chord Progressions", en: "Baroque composers developed clear harmonic patterns — the same I–V–vi–IV chords appear in pop hits today." },
+  { mi: "Harpsichord to Synth", en: "The harpsichord’s bright tone inspired electronic keyboards and synth sounds in modern tracks." },
+  { mi: "Counterpoint", en: "Layering independent melodies — from Bach to modern film composers like Hans Zimmer." },
+  { mi: "Baroque Forms", en: "Forms like fugue and concerto shape modern songwriting — think of builds, solos, and refrains." },
+  { mi: "Improvisation", en: "Baroque performers improvised ornaments — similar to jazz and pop artists adding their own flair." },
+  { mi: "Virtuosity", en: "Show-off playing began with Baroque soloists — now seen in guitar solos, drum fills, and vocal riffs." },
+  { mi: "Sacred to Stage", en: "Baroque music often praised God — modern adaptations turn those dramatic styles into theatre or film soundtracks." },
+  { mi: "Mood and Affect", en: "Baroque composers aimed to express emotion — today’s artists do the same through lyrics and tone." },
+  { mi: "Orchestra", en: "The modern orchestra grew from the Baroque ensemble — still used in movies and pop concerts." },
+  { mi: "Continuity", en: "Baroque pieces often flow without breaks — similar to how DJs blend songs or concept albums link tracks." },
+  { mi: "Repetition and Motif", en: "Small repeating ideas give structure — heard in Bach and in modern hooks and riffs." },
+  { mi: "Legacy", en: "From Bach to Billie Eilish — the Baroque spirit lives on through pattern, contrast, and creativity." }
+];
+
+
+let current = 0;
+
+const flashcard = document.getElementById('flashcard');
+const flashcardInner = document.getElementById('flashcard-inner');
+const front = document.getElementById('flashcard-front');
+const back = document.getElementById('flashcard-back');
+
+function getRandomSoftColor() {
+  const hue = Math.floor(Math.random() * 360);
+  /* FIX: Make card background transparent, keep border opaque */
+  const baseColor = `hsla(${hue}, 70%, 85%, 0.85)`;
+  const darkerColor = `hsl(${hue}, 70%, 65%)`;
+  return { base: baseColor, darker: darkerColor };
+}
+
+function updateCard() {
+  const card = flashcards[current];
+  const mainWord = card.mi.split('—')[0].trim();
+  front.textContent = mainWord;
+  back.innerHTML = `<p><strong>${card.mi}</strong></p><p>${card.en}</p>`;
+  
+  const colors = getRandomSoftColor();
+  front.style.backgroundColor = colors.base;
+  front.style.borderColor = colors.darker;
+  back.style.backgroundColor = colors.base;
+  back.style.borderColor = colors.darker;
+  
+  flashcard.classList.remove('flipped');
+}
+
+flashcard.addEventListener('click', () => {
+  flashcard.classList.toggle('flipped');
+});
+
+document.getElementById('nextCard').addEventListener('click', (e) => {
+  e.stopPropagation();
+  current = (current + 1) % flashcards.length;
+  updateCard();
+});
+
+document.getElementById('prevCard').addEventListener('click', (e) => {
+  e.stopPropagation();
+  current = (current - 1 + flashcards.length) % flashcards.length;
+  updateCard();
+});
+
+document.getElementById('shuffleCards').addEventListener('click', (e) => {
+  e.stopPropagation();
+  for (let i = flashcards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+  }
+  current = 0;
+  updateCard();
+});
+
+updateCard();
+</script>
+</body>
+</html>

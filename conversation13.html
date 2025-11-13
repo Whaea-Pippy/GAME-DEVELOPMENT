@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ngā Pātai me ngā Whakautu - Q&A Practice</title>
+  <style>
+    body{font-family:Poppins,Nunito,sans-serif;background:#f6f8fb;margin:0;padding:24px;color:#0f172a}
+    .container{max-width:900px;margin:0 auto}
+    h1,h2{text-align:center}
+    .question{background:#fff;border-radius:14px;padding:16px;margin-bottom:24px;box-shadow:0 6px 18px rgba(15,23,42,.06)}
+    .tiles-grid{display:flex;flex-wrap:wrap;gap:10px}
+    .tile{padding:12px 16px;border-radius:10px;font-weight:600;cursor:pointer;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+    .tile[data-used="true"]{opacity:.45;cursor:default}
+    .chip-1{background:#ffecd1}.chip-2{background:#e6fbe6}.chip-3{background:#e8f0ff}.chip-4{background:#fef08a}.chip-5{background:#fbcfe8}
+    .answer{background:#fff;border-radius:12px;min-height:90px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;box-shadow:0 6px 18px rgba(15,23,42,.04)}
+    button{padding:10px 14px;border:0;border-radius:10px;font-weight:700;color:#fff;background:#0ea5a4;cursor:pointer;margin-right:8px}
+    button.secondary{background:#64748b}
+    .feedback{margin-top:10px;font-weight:700}
+    .correct{color:green}.incorrect{color:#b91c1c}
+    .flashcard-container{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:24px}
+    .flashcard{width:100%;perspective:1000px}
+    .flashcard-inner{position:relative;width:100%;text-align:center;transition:transform .6s;transform-style:preserve-3d;box-shadow:0 4px 8px 0 rgba(0,0,0,.2);border-radius:10px;min-height:120px}
+    .flashcard:hover .flashcard-inner{transform:rotateY(180deg)}
+    .flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:1.1em;border-radius:10px;padding:12px;box-sizing:border-box}
+    .flashcard-front{background-color:#d1e7dd;color:#0f172a}
+    .flashcard-back{background-color:#e8f0ff;color:#0f172a;transform:rotateY(180deg)}
+    .flashcard-back p{margin:4px 0}
+    .vocab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:24px}
+    .vocab-card{perspective:1000px;min-height:100px}
+    .vocab-card-inner{position:relative;width:100%;height:100%;text-align:center;transition:transform .6s;transform-style:preserve-3d;box-shadow:0 4px 8px 0 rgba(0,0,0,.2);border-radius:10px}
+    .vocab-card:hover .vocab-card-inner{transform:rotateY(180deg)}
+    .vocab-card-front,.vocab-card-back{position:absolute;width:100%;height:100%;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:flex;justify-content:center;align-items:center;font-size:1em;border-radius:10px;padding:5px;box-sizing:border-box}
+    .vocab-card-front{background-color:#e6fbe6;color:#0f172a}
+    .vocab-card-back{background-color:#ffecd1;color:#0f172a;transform:rotateY(180deg)}
+    .q-label{font-weight:700;color:#0ea5a4}
+    .video-container{position:relative;overflow:hidden;width:100%;padding-top:56.25%;margin-top:24px}
+    .video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ngā Pātai me ngā Whakautu</h1>
+    <p style="text-align:center;">A random selection of Q&A and vocabulary. Refresh the page to get a new set.</p>
+
+    <h2>Questions & Answers</h2>
+    <div class="flashcard-container" id="qa-pairs"></div>
+
+    <h2>Vocabulary</h2>
+    <div class="vocab-grid" id="vocabulary"></div>
+
+    <h2>Sentence Building</h2>
+    <p style="text-align:center;">Click the tiles in order to build the correct Māori sentence.</p>
+    <div id="activities"></div>
+
+    <h2>Video</h2>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/TvR0_Udz-Tg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const allContent = {
+    qa: [
+      { q: { mi: "Kei te aha koe i tēnei rā?", en: "What are you doing today?" }, a: { mi: "Kei te ako au i te reo Māori.", en: "I am learning Māori." } },
+      { q: { mi: "Āhea koe haere ai ki te toa?", en: "When will you go to the shop?" }, a: { mi: "Ā muri i te kura au haere ai.", en: "I will go after school." } },
+      { q: { mi: "Kei hea taku pukoro waea?", en: "Where is my phone?" }, a: { mi: "Kei runga i te tēpu tō pukoro waea.", en: "Your phone is on the table." } },
+      { q: { mi: "He aha te kai pai ki a koe?", en: "What food do you like?" }, a: { mi: "He hēki me te paraoa te kai pai ki ahau.", en: "I like eggs and bread." } },
+      { 
+  q: { mi: "Tokohia ngā tamariki i tō whānau?", en: "How many children are in your family?" }, 
+  a: { mi: "Tokotoru ngā tamariki i tōku whānau.", en: "There are three children in my family." } 
+},
+
+      { q: { mi: "Kei hea te ngeru?", en: "Where is the cat?" }, a: { mi: "Kei runga te ngeru i te tūru.", en: "The cat is on the chair." } }
+    ],
+    vocab: [
+      { mi: "kei te aha", en: "doing what" }, { mi: "ako", en: "learn" }, { mi: "reo Māori", en: "Māori language" },
+      { mi: "āhea", en: "when" }, { mi: "haere", en: "go" }, { mi: "toa", en: "shop" }, { mi: "kura", en: "school" },
+      { mi: "kei hea", en: "where" }, { mi: "pukoro waea", en: "phone" }, { mi: "tēpu", en: "table" },
+      { mi: "he aha", en: "what" }, { mi: "kai", en: "food" }, { mi: "hēki", en: "egg" }, { mi: "paraoa", en: "bread" },
+      { mi: "e hia", en: "how many" }, { mi: "tamariki", en: "children" }, { mi: "whānau", en: "family" },
+      { mi: "ngeru", en: "cat" }, { mi: "tūru", en: "chair" }, { mi: "kei runga", en: "on / on top" }
+    ],
+    sentences: [
+      { eng: "What are you doing today?", order: ["Kei", "te", "aha", "koe", "i", "tēnei", "rā?"] },
+      { eng: "I am learning Māori.", order: ["Kei", "te", "ako", "au", "i", "te", "reo", "Māori."] },
+      { eng: "When will you go to the shop?", order: ["Āhea", "koe", "haere", "ai", "ki", "te", "toa?"] },
+      { eng: "I will go after school.", order: ["Ā", "muri", "i", "te", "kura", "au", "haere", "ai."] },
+      { eng: "Where is my phone?", order: ["Kei", "hea", "taku", "pukoro", "waea?"] },
+      { eng: "Your phone is on the table.", order: ["Kei", "runga", "i", "te", "tēpu", "tō", "pukoro", "waea."] },
+      { eng: "What food do you like?", order: ["He", "aha", "te", "kai", "pai", "ki", "a", "koe?"] },
+      { eng: "I like eggs and bread.", order: ["He", "hēki", "me", "te", "paraoa", "te", "kai", "pai", "ki", "ahau."] },
+      { eng: "How many children are in your family?", order: ["Tokohia", "ngā", "tamariki", "i", "tō", "whānau?"] },
+      { eng: "There are three children in my family.", order: ["Tokotoru", "ngā", "tamariki", "i", "tōku", "whānau."] },
+      { eng: "Where is the cat?", order: ["Kei", "hea", "te", "ngeru?"] },
+      { eng: "The cat is on the chair.", order: ["Kei", "runga", "te", "ngeru", "i", "te", "tūru."] }
+    ]
+  };
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function createQACard(item) {
+    return `
+      <div class="flashcard">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">
+            <p><span class="q-label">Q:</span> ${item.q.mi}</p>
+            <p><span class="q-label">A:</span> ${item.a.mi}</p>
+          </div>
+          <div class="flashcard-back">
+            <p><span class="q-label">Q:</span> ${item.q.en}</p>
+            <p><span class="q-label">A:</span> ${item.a.en}</p>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function createVocabCard(item) {
+    return `
+      <div class="vocab-card">
+        <div class="vocab-card-inner">
+          <div class="vocab-card-front"><p>${item.mi}</p></div>
+          <div class="vocab-card-back"><p>${item.en}</p></div>
+        </div>
+      </div>`;
+  }
+
+  const qaContainer = document.getElementById('qa-pairs');
+  const vocabContainer = document.getElementById('vocabulary');
+  const activitiesContainer = document.getElementById('activities');
+
+  const randomVocab = shuffle([...allContent.vocab]);
+
+  qaContainer.innerHTML = allContent.qa.map(createQACard).join('');
+  vocabContainer.innerHTML = randomVocab.map(createVocabCard).join('');
+
+  function buildActivity(item, idx){
+    if(!activitiesContainer) return;
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.innerHTML = `<h3>${idx + 1}. ${item.eng}</h3>
+      <div class='tiles-grid' id='tiles${idx}'></div>
+      <div class='answer' id='ans${idx}'><div class='answer-placeholder'>Click tiles above to build your sentence.</div></div>
+      <button id='check${idx}'>Check</button>
+      <button class='secondary' id='reset${idx}'>Reset</button>
+      <div class='feedback' id='feed${idx}'></div>`;
+    activitiesContainer.appendChild(div);
+
+    const tilesGrid = document.getElementById(`tiles${idx}`);
+    const answer = document.getElementById(`ans${idx}`);
+    const feedback = document.getElementById(`feed${idx}`);
+
+    let answerArr = [];
+    let tiles = item.order.map((t, i) => ({ id: i, text: t, used: false, styleClass: 'chip-' + ((i % 5) + 1) }));
+
+    function renderTiles(){
+      tilesGrid.innerHTML = '';
+      shuffle([...tiles]).forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'tile ' + t.styleClass;
+        el.textContent = t.text;
+        el.dataset.id = t.id;
+        el.dataset.used = t.used;
+        el.addEventListener('click', () => selectTile(t, el));
+        tilesGrid.appendChild(el);
+      });
+    }
+
+    function selectTile(tileObj, el){
+      if (tileObj.used) return;
+      tileObj.used = true;
+      el.dataset.used = true;
+      answerArr.push(tileObj.text);
+      const chip = document.createElement('div');
+      chip.className = 'tile ' + tileObj.styleClass;
+      chip.textContent = tileObj.text;
+      chip.addEventListener('click', () => {
+        answerArr.splice(answerArr.indexOf(tileObj.text), 1);
+        tileObj.used = false;
+        chip.remove();
+        updatePlaceholder();
+        renderTiles();
+      });
+      answer.querySelector('.answer-placeholder')?.remove();
+      answer.appendChild(chip);
+    }
+
+    function updatePlaceholder(){
+      if (answerArr.length === 0) {
+        const ph = document.createElement('div');
+        ph.className = 'answer-placeholder';
+        ph.textContent = 'Click tiles above to build your sentence.';
+        answer.appendChild(ph);
+      }
+    }
+
+    document.getElementById(`check${idx}`).addEventListener('click', () => {
+      const user = answerArr.join(' ').replace(/\s+/g, ' ').trim();
+      const correct = item.order.join(' ').replace(/\s+/g, ' ').trim();
+      const isCorrect = (user === correct);
+      feedback.textContent = isCorrect ? '🎉 Tino pai! - Correct.' : '✖ Aroha mai - try again.';
+      feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    });
+
+    document.getElementById(`reset${idx}`).addEventListener('click', () => {
+      answerArr = [];
+      tiles.forEach(t => t.used = false);
+      answer.innerHTML = '<div class="answer-placeholder">Click tiles above to build your sentence.</div>';
+      feedback.textContent = '';
+      renderTiles();
+    });
+
+    renderTiles();
+  }
+
+  allContent.sentences.forEach(buildActivity);
+
+})();
+</script>
+</body>
+</html>
