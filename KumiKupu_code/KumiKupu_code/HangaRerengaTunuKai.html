@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hanga Rerenga Tunu Kai</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0fff0;
+        padding: 20px;
+        font-size: 1.5em;
+    }
+    .input-row {
+        margin: 10px 0;
+    }
+    label {
+        margin-right: 10px;
+        font-weight: bold;
+    }
+    select {
+        padding: 5px;
+        font-size: 1em;
+        font-family: inherit;
+    }
+    .green select, .green label { color: green; }
+    .blue select, .blue label { color: blue; }
+    .red select, .red label { color: red; }
+    .purple select, .purple label { color: purple; }
+
+    .output {
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    .green { color: green; }
+    .red { color: red; }
+    .blue { color: blue; }
+    .purple { color: purple; }
+</style>
+</head>
+<body>
+
+<h2>Hanga Rerenga Tunu Kai</h2>
+
+<p>Today's date is: <span id="current-date"></span></p>
+
+<script>
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('current-date').textContent = today.toLocaleDateString('en-NZ', options);
+</script>
+
+<div class="input-row green">
+    <label for="tense">Tense:</label>
+    <select id="tense">
+        <option value="Kei te|present">Kei te</option>
+        <option value="I te|past">I te</option>
+        <option value="Ka|future">Ka</option>
+        <option value="Kua|perfect">Kua</option>
+        <option value="E ... ana|continuous">E ... ana</option>
+    </select>
+</div>
+
+<div class="input-row blue">
+    <label for="pronoun">Pronoun / Name:</label>
+    <select id="pronoun">
+        <option value="au|I">au</option>
+        <option value="koe|you">koe</option>
+        <option value="ia|he/she">ia</option>
+        <option value="Mere|Mere">Mere</option>
+    </select>
+</div>
+
+<div class="input-row red">
+    <label for="verb">Verb:</label>
+    <select id="verb" onchange="updateObjects()">
+        <option value="tunu">tunu</option>
+        <option value="tapatapahi">tapatapahi</option>
+        <option value="whakakōhua">whakakōhua</option>
+        <option value="whakaranu">whakaranu</option>
+        <option value="tāpiri">tāpiri</option>
+    </select>
+</div>
+
+<div class="input-row purple">
+    <label for="object">Object:</label>
+    <select id="object"></select>
+</div>
+
+<div class="output" id="maoriSentence"></div>
+<div class="output" id="englishSentence"></div>
+
+<script>
+const objectOptions = {
+  "tunu": [
+    { mi: "i te keke", en: "the cake" },
+    { mi: "i ngā ika", en: "the fish" },
+    { mi: "i te mīti", en: "the meat" }
+  ],
+  "tapatapahi": [
+    { mi: "i ngā huawhenua", en: "the vegetables" },
+    { mi: "i te rīwai", en: "the potato" },
+    { mi: "i te kāroti", en: "the carrot" }
+  ],
+  "whakakōhua": [
+    { mi: "i ngā heihei", en: "the chickens" },
+    { mi: "i te mīti", en: "the meat" },
+    { mi: "i te rīwai", en: "the potato" }
+  ],
+  "whakaranu": [
+    { mi: "i ngā kai", en: "the ingredients" },
+    { mi: "i te pata me te huka", en: "the butter and sugar" },
+    { mi: "i te paraoa me te wai", en: "the flour and water" }
+  ],
+  "tāpiri": [
+    { mi: "i te tōtē", en: "the salt" },
+    { mi: "i te huka", en: "the sugar" },
+    { mi: "i ngā rēmana", en: "the lemons" }
+  ]
+};
+
+const enVerbs = {
+  "tunu":       { base: "cook",   prog: "cooking", pastPart: "cooked" },
+  "tapatapahi": { base: "chop",   prog: "chopping", pastPart: "chopped" },
+  "whakakōhua": { base: "boil",   prog: "boiling", pastPart: "boiled" },
+  "whakaranu":  { base: "mix",    prog: "mixing",  pastPart: "mixed" },
+  "tāpiri":     { base: "add",    prog: "adding",  pastPart: "added" }
+};
+
+function updateObjects() {
+    const verb = document.getElementById("verb").value;
+    const objectSelect = document.getElementById("object");
+    objectSelect.innerHTML = "";
+    objectOptions[verb].forEach((obj) => {
+        const option = document.createElement("option");
+        option.value = `${obj.mi}|${obj.en}`;
+        option.textContent = obj.mi;
+        objectSelect.appendChild(option);
+    });
+    updateSentence();
+}
+
+function updateSentence() {
+    const [tenseM, tenseType] = document.getElementById("tense").value.split("|");
+    const [pronounM, pronounE] = document.getElementById("pronoun").value.split("|");
+    const verbM = document.getElementById("verb").value;
+    const verbE = enVerbs[verbM];
+    const [objectM, objectE] = document.getElementById("object").value.split("|");
+
+    let pronounOutM = pronounM;
+    if (["Mere"].includes(pronounM)) pronounOutM = "a " + pronounM;
+
+    // Māori sentence
+    let maoriSentence = "";
+    if (tenseM === "E ... ana") {
+        maoriSentence = `<span class="green">E</span> <span class="red">${verbM}</span> <span class="green">ana</span> <span class="blue">${pronounOutM}</span> <span class="purple">${objectM}</span>.`;
+    } else {
+        maoriSentence = `<span class="green">${tenseM}</span> <span class="red">${verbM}</span> <span class="blue">${pronounOutM}</span> <span class="purple">${objectM}</span>.`;
+    }
+
+    // English sentence
+    let aux = "";
+    let mainVerb = verbE.base;
+
+    if (tenseType === "present" || tenseType === "continuous") {
+        mainVerb = verbE.prog;
+        if (pronounE === "I") aux = "am";
+        else if (["you", "they"].includes(pronounE)) aux = "are";
+        else aux = "is";
+    } else if (tenseType === "past") {
+        mainVerb = verbE.prog;
+        if (["you", "they"].includes(pronounE)) aux = "were";
+        else aux = "was";
+    } else if (tenseType === "future") {
+        aux = "will";
+        mainVerb = verbE.base;
+    } else if (tenseType === "perfect") {
+        mainVerb = verbE.pastPart;
+        aux = ["I", "you", "they"].includes(pronounE) ? "have" : "has";
+    }
+
+    const englishSentence = `<span class="blue">${pronounE.charAt(0).toUpperCase() + pronounE.slice(1)}</span> 
+                             <span class="green">${aux}</span> 
+                             <span class="red">${mainVerb}</span> 
+                             <span class="purple">${objectE}</span>.`;
+
+    document.getElementById("maoriSentence").innerHTML = maoriSentence;
+    document.getElementById("englishSentence").innerHTML = englishSentence;
+}
+
+document.querySelectorAll("select").forEach(sel => {
+    sel.addEventListener("change", updateSentence);
+});
+
+updateObjects(); // Initialize object list on load
+</script>
+
+</body>
+</html>

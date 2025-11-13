@@ -4,15 +4,15 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kēmu Kāri – Te Reo Māori Card Game Phrases</title>
+<title>Whutupaoro — Rugby Vocabulary</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
 body { 
     font-family: Arial, sans-serif; 
     padding: 20px; 
-    background-color: #fff0f6; 
-    background-image: url('images/conversation16.jpg');
+    background-color: #f0f4f8; 
+    background-image: url('images/rugby.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -25,17 +25,16 @@ body {
     align-items: center;
     gap: 20px;
     margin-bottom: 20px;
-    background-color: rgba(255, 240, 246, 0.8);
+    background-color: rgba(240, 244, 248, 0.8);
     padding: 15px;
     border-radius: 15px;
 }
 
-.header-container h2 { margin: 0; color: #b30059; }
+.header-container h2 { margin: 0; color: #1a535c; }
 
-/* ================= DROPDOWN ================= */
 .selector-container {
-    background-color: #f8b8d1;
-    border: 3px solid #b30059;
+    background-color: #4ecdc4;
+    border: 3px solid #1a535c;
     border-radius: 15px;
     padding: 5px 15px;
     display: inline-block;
@@ -48,7 +47,7 @@ body {
     font-family: 'Poppins', sans-serif;
     font-size: clamp(1.8rem, 5vw, 2.5rem);
     font-weight: 700;
-    color: #b30059;
+    color: #1a535c;
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -57,24 +56,21 @@ body {
     text-align-last: center;
 }
 
-/* ================= SECTIONS ================= */
-
 h3 {
-    background-color: rgba(255, 240, 246, 0.8);
+    background-color: rgba(240, 244, 248, 0.8);
     padding: 10px;
     border-radius: 10px;
-    color: #b30059;
+    color: #1a535c;
 }
 
 #flashcards-section, #quiz-section, #matching-section, .matched-container {
-    background-color: rgba(255, 240, 246, 0.6);
+    background-color: rgba(240, 244, 248, 0.6);
     padding: 15px;
     border-radius: 15px;
     margin-bottom: 20px;
 }
 
-
-/* ================= FLASHCARDS ================= */
+/* Flashcards */
 #flashcards-section {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -83,7 +79,7 @@ h3 {
 #flashcards-section .card {
   height: 100px;
   padding: 10px;
-  border: 4px solid #b30059;
+  border: 4px solid #1a535c;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
@@ -94,11 +90,11 @@ h3 {
   font-size: 18px;
   word-wrap: break-word;
   transition: transform 0.6s, background-color 0.6s;
-  background-color: rgba(255, 230, 240, 0.7);
+  background-color: rgba(204, 235, 233, 0.7);
 }
-#flashcards-section .card.flipped { background-color: rgba(255, 214, 235, 0.8); }
+#flashcards-section .card.flipped { background-color: rgba(221, 221, 221, 0.8); }
 
-/* ================= QUIZ ================= */
+/* Quiz */
 #quiz-section .quiz-question {
   margin-bottom: 20px;
   border-top: 2px solid #ccc;
@@ -108,7 +104,7 @@ h3 {
     font-size: 1.2em;
     margin-bottom: 10px;
     display: block;
-    color: #800040;
+    color: #1a535c;
 }
 .quiz-options {
     display: grid;
@@ -120,10 +116,10 @@ h3 {
   padding: 8px; 
   width: 100%; 
   border-radius: 8px;
-  border: 2px solid #b30059;
+  border: 2px solid #1a535c;
 }
 
-/* ================= MATCHING ================= */
+/* Matching */
 .matched-container {
   display: flex;
   flex-direction: column; 
@@ -159,12 +155,12 @@ h3 {
   border: 2px dashed #ccc;
   padding: 10px;
   border-radius: 10px;
-  background-color: #fff5fa;
+  background-color: #f0f4f8;
 }
 #matching-section .drag-item {
   height: 50px;
-  border: 2px solid #b30059;
-  background: #ffe6f2;
+  border: 2px solid #1a535c;
+  background: #ccebe9;
   cursor: pointer;
   text-align: center;
   display: flex;
@@ -175,7 +171,30 @@ h3 {
   box-sizing: border-box;
 }
 
-/* ================= MOBILE STYLES ================= */
+/* Source links */
+#source-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    background-color: rgba(240, 244, 248, 0.8);
+    padding: 15px;
+    border-radius: 15px;
+}
+
+#source-links a {
+  color: #1a535c;
+  font-weight: bold;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+#source-links a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile */
 @media (max-width: 768px) {
     #flashcards-section { grid-template-columns: repeat(2, 1fr); }
     .quiz-options { grid-template-columns: repeat(2, 1fr); }
@@ -183,36 +202,22 @@ h3 {
     #matching-section .drag-item { font-size: 16px; }
     .pair { font-size: 1.1rem; }
     .matching-box { grid-template-columns: 1fr; }
-}
-
-.video-container {
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-    max-width: 100%;
-    background: #000;
-}
-
-.video-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    #source-links { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 
 <body>
 <div class="header-container">
-    <h2>Kēmu Kāri – Te Reo Māori Card Game Practice</h2>
+    <h2>Whutupaoro — Rugby Vocabulary</h2>
     <div class="selector-container">
       <select id="category-selector" onchange="updateContent()">
         <option value="select" selected>-- Select --</option>
-        <option value="rerenga">Rerenga Kōrero (Phrases)</option>
-        <option value="kupu">Kupu (Words)</option>
-        <option value="combined" >Katoa (All Together)</option>
+        <option value="officialTerms">Official Terms</option>
+        <option value="positions">Positions</option>
+        <option value="gameplay">Game-play</option>
+        <option value="sentences">Sentences</option>
+        <option value="combined">All Together</option>
       </select>
     </div>
 </div>
@@ -227,85 +232,112 @@ h3 {
 <div class="matched-container" id="matched-pairs"></div>
 <div id="matching-section"></div>
 
+<h3>Vocab Source Links (Click on the links for Pronunciation)</h3>
+<div id="source-links"></div>
+
+<h3>Rugby Kupu Pronunciation</h3>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/NHty-NiMh-s?si=cPsaFCXt-r7XqOxC" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
 <script>
 // ================== DATA ==================
-const data = {
-    select: [
-  ["Pīrangi tākaro kāri?", "Wanna play cards?"],
-  ["Ko au te toa!", "I'm the winner!"],
-  ["Kua hinga koe!", "You lose!"],
-  ["Tētahi tāhae!", "Cheater!"],
+const vocab = {
+  select: [
+    ["Whutupōro", "Rugby"],
+    ["Kaitākaro", "Player"],
+    ["Kaiako", "Coach"],
+    ["Kaitaki", "Captain"],
+    ["Kaiwawao", "Referee"],
+    ["Whana", "Kick"],
+    ["Rīwhi", "Pass"],
+    ["Oma", "Run"],
+    ["Pāwhiri", "Tackle"],
+    ["Piro", "Try / Point"],
+    ["Kaute", "Score"],
+    ["Toa", "Winner"]
+  ],
+  officialTerms: [
+    ["Whutupōro", "Rugby"],
+    ["Pā whutupōro", "Touch rugby"],
+    ["Takiwhitu", "Sevens rugby"],
+    ["Whutupōro kōwhaki", "Rippa rugby / non-contact"],
+    ["Rīki", "Rugby league"],
+    ["Haurua tuatahi", "First half"],
+    ["Haurua tuarua", "Second half"],
+    ["Kakari", "Scrum / Halfback"],
+    ["Kaunuku", "Flanker / Maul participant"],
+    ["Kaunuku hinga", "Collapsed maul"],
+    ["Āpitinga", "Ruck"],
+    ["Kaiwawao", "Referee / Umpire"],
+    ["Kaitākaro", "Player"],
+    ["Kaitaki", "Captain"],
+    ["Whiwhinga", "Number 8 / Points"],
+    ["Whana taka", "Drop-kick / Drop goal"],
+    ["Whana turuki", "Conversion kick"],
+    ["Maka tūtira", "Line-out throw"],
+    ["Maka whakamua", "Forward pass"],
+    ["Maka tāwhiro", "Spin / Spiral pass"],
+    ["Māka (hē)", "Mark"],
+    ["Mahi tahi", "Teamwork"]
+  ],
 
-  ["Kei a koe", "Your turn"],
-  ["Māu e tohatoha", "Your deal"],
-  ["Māku e tohatoha", "My deal"],
-  ["Anō?", "Play again?"],
+  positions: [
+    ["Kaitākaro", "Player"],
+    ["Kaiako", "Coach"],
+    ["Kaitaki", "Captain"],
+    ["Kaiwawao", "Referee"],
+    ["Kakari", "Halfback"],
+    ["Poumua", "Prop"],
+    ["Kaunuku", "Flanker / Lock"],
+    ["Whiwhinga", "Number 8"],
+    ["Haurua tuatahi", "First five-eighth / Fly-half"],
+    ["Haurua tuarua", "Second five-eighth / Inside centre"],
+    ["Poutāhū", "Centre / Outside centre"],
+    ["Maka tūtira", "Line-out throw"],
+    ["Maka whakamua", "Forward pass"],
+    ["Mahi tahi", "Support / Teamwork"],
+    ["Whiwhinga", "Fullback / Goal kicker"]
+  ],
 
-  ["Kei a wai?", "Who's next?"],
-  ["Kia tere!", "Hurry up!"],
-  ["Kāti te titiro whakakeko!", "Stop peeking!"],
-  ["Me mate ururoa!", "Don't give up!"],
-],
-rerenga: [
-  ["Pīrangi tākaro kāri?", "Wanna play cards?"],
-  ["Ko au te toa!", "I'm the winner!"],
-  ["Kua hinga koe!", "You lose!"],
-  ["Tētahi tāhae!", "Cheater!"],
-  ["E kore a muri e hokia!", "Table card! (what’s done is done)"],
-  ["Kei a koe", "Your turn"],
-  ["Māu e tohatoha", "Your deal"],
-  ["Māku e tohatoha", "My deal"],
-  ["He kēmu tere, pai te rere", "Fast games – a good game"],
-  ["Anō?", "Play again?"],
-  ["Kaiamuamu!", "Sore loser!"],
-  ["Kei a wai?", "Who's next?"],
-  ["Kāore i te whakaaetia!", "You can't do that."],
-  ["Ka hinga koe i a au!", "I'm gonna waste you!"],
-  ["Kia tere!", "Hurry up!"],
-  ["Tahi rā koe!", "What a cheek!"],
-  ["Me whai whare", "You need to follow suit"],
-  ["Ka aroha hoki", "Aw poor you (sarcastic)"],
-  ["Kāti te titiro whakakeko!", "Stop peeking!"],
-  ["Me mate ururoa!", "Don't give up!"],
-  ["He ika tūpuhi", "Scaredy-cat, wimp"],
-  ["He roro hipi!", "Sheep's brain!"]
-],
-kupu: [
-  ["Tānapu", "Trump (card)"],
-  ["Whare", "Suit"],
-  ["Hai", "Ace"],
-  ["Hāte", "Hearts"],
-  ["Pēti", "Spades"],
-  ["Taimana", "Diamonds"],
-  ["Karapū", "Clubs"],
-  ["Kēhua", "Joker"],
-  ["Putu kāri", "Deck of cards"],
-  ["Kēmu", "Game"],
-  ["Tākaro", "Play"],
-  ["Toa", "Winner"],
-  ["Hinga", "Lose / fall"],
-  ["Tāhae", "Cheater / thief"],
-  ["Tohatoha", "Deal / share out"],
-  ["Rere", "Flow / run / pace (of the game)"],
-  ["Anō", "Again / repeat"],
-  ["Kei a koe", "Your turn"],
-  ["Kia tere", "Hurry up"],
-  ["Whai whare", "Follow suit"],
-  ["Titiro", "Look / watch / peek"],
-  ["Whakakeko", "Sneaky / peeking"],
-  ["Mate", "Die / lose / fail (used in ‘me mate ururoa’)"],
-  ["Ururua / ururoa", "Fighting shark (symbol of persistence)"],
-  ["Ika", "Fish"],
-  ["Roro", "Brain"],
-  ["Hipi", "Sheep"],
-  ["Aroha", "Compassion / pity"],
-  ["Tahi rā koe", "What a cheek! (literally ‘You one!’)"]
-],
+  gameplay: [
+    ["Whutupōro", "Rugby"],
+    ["Whana", "Kick"],
+    ["Rīwhi", "Pass"],
+    ["Oma", "Run"],
+    ["Pāwhiri", "Tackle"],
+    ["Āpitinga", "Ruck"],
+    ["Kaunuku", "Maul"],
+    ["Whana tīmatanga", "Kick-off"],
+    ["Rārangi whakapuru", "Scrum"],
+    ["Whiu rārangi", "Lineout"],
+    ["Piro", "Try / Point"],
+    ["Whiwhinga", "Penalty / Score"],
+    ["Kaute", "Score"],
+    ["Toa", "Winner"],
+    ["Hinga", "Loser"]
+  ],
+
+  sentences: [
+    ["Ko au te kaitākaro pai.", "I am a good player."],
+    ["Ko te kaiako e ako ana i te kapa.", "The coach is teaching the team."],
+    ["Ko te kaitaki te rangatira o te kapa.", "The captain is the leader of the team."],
+    ["Ka whana ahau ki te pōro.", "I kick the ball."],
+    ["Ka rīwhi te kaitākaro ki te hoa.", "The player passes to a teammate."],
+    ["Ka oma te kapa ki te raina.", "The team runs to the line."],
+    ["Ka pāwhiri te kaitākaro i te hoa riri.", "The player tackles the opponent."],
+    ["Kei roto te pōro i te āpitinga.", "The ball is in the ruck."],
+    ["Ka whiua te pōro ki te tuara.", "The ball is kicked to the back."],
+    ["Kua whiwhi piro te kapa.", "The team scored a try."],
+    ["Kua toa tātou i te kēmu.", "We won the game."],
+    ["Kua hinga tātou i te kēmu.", "We lost the game."],
+    ["Ka tīmata te kēmu i te whana tīmatanga.", "The game starts with a kick-off."],
+    ["Ka tautoko ngā kaitākaro i te āpitinga.", "The players support in the ruck."],
+    ["Ka whana te kakari ki te pōro.", "The halfback kicks the ball."],
+    ["Kua pāwhiritia te kaitākaro e te hoa riri.", "The player is tackled by an opponent."]
+  ],
 combined: []
 };
 
-// Combine both lists
-data.combined = [...data.rerenga, ...data.kupu];
+vocab.combined = [...vocab.positions, ...vocab.gameplay, ...vocab.sentences];
 
 // ================= FUNCTIONS =================
 let selectedWords = [];
@@ -337,7 +369,7 @@ function showFlashcards() {
 function showQuiz(category) {
   const container = document.getElementById('quiz-section');
   container.innerHTML = '';
-  const categoryData = data[category] || [];
+  const categoryData = vocab[category] || [];
   const questions = selectedWords;
   if (questions.length < 4) return container.innerHTML = '<p>Not enough data for a full quiz.</p>';
   questions.forEach(row => {
@@ -391,7 +423,7 @@ function showMatching() {
   const leftWords = pairs.map(p => p[0]);
   const rightWords = shuffleArray(pairs.map(p => p[1]));
   let firstSelection = null;
-  const palette = ['#ffb3d9','#ffd1dc','#fff3a3','#c9f7b5','#b7f0f6','#d1c6ff','#f7b3ff','#ffb3b3'];
+  const palette = ['#a8e6cf','#dcedc1','#ffd3b6','#ffaaa5','#ff8b94','#a2d5f2','#9bcfb0','#77a0a9'];
   let colorIndex = 0;
 
   function createBox(word, side) {
@@ -408,7 +440,7 @@ function showMatching() {
     if (box.style.backgroundColor) return;
     if (!firstSelection) {
       firstSelection = box;
-      box.style.border = '3px solid #b30059';
+      box.style.border = '3px solid #1a535c';
     } else if (box.dataset.side !== firstSelection.dataset.side) {
       const leftWord = firstSelection.dataset.side === 'left' ? firstSelection.dataset.word : box.dataset.word;
       const rightWord = firstSelection.dataset.side === 'right' ? firstSelection.dataset.word : box.dataset.word;
@@ -430,15 +462,15 @@ function showMatching() {
         firstSelection.style.border = '2px solid red';
         box.style.border = '2px solid red';
         setTimeout(() => {
-            firstSelection.style.border = '2px solid #b30059';
-            box.style.border = '2px solid #b30059';
+            firstSelection.style.border = '2px solid #1a535c';
+            box.style.border = '2px solid #1a535c';
         }, 500);
       }
       firstSelection = null;
     } else { 
-        firstSelection.style.border = '2px solid #b30059';
+        firstSelection.style.border = '2px solid #1a535c';
         firstSelection = box;
-        box.style.border = '3px solid #b30059';
+        box.style.border = '3px solid #1a535c';
     }
   }
 
@@ -448,21 +480,58 @@ function showMatching() {
 
 function updateContent() {
   const category = document.getElementById('category-selector').value;
-  const categoryData = data[category] || [];
+  const categoryData = vocab[category] || [];
   selectedWords = shuffleArray([...categoryData]).slice(0, 12);
   showFlashcards();
   showQuiz(category);
   showMatching();
 }
 
-// Initial load of content
+// ================= SOURCE LINKS =================
+const sourceLinks = {
+  "Whutupōro (rugby)": "https://paekupu.co.nz/word/whutuporo",  
+  "Pā whutupōro (touch rugby)": "https://paekupu.co.nz/word/pa-whutuporo",  
+  "Takiwhitu (sevens rugby)": "https://paekupu.co.nz/word/whutuporo-takiwhitu-2",  
+  "Whutupōro kōwhaki (rippa rugby/non‑contact rugby)": "https://paekupu.co.nz/word/whutuporo-kowhaki",  
+  "Rīki (rugby league)": "https://paekupu.co.nz/word/whutuporo-2",  
+  "Haurua tuatahi (first half)": "https://paekupu.co.nz/word/haurua-tuatahi",  
+  "Haurua tuarua (second half)": "https://paekupu.co.nz/word/haurua-tuarua",  
+  "Kakari (scrum)": "https://paekupu.co.nz/word/kakari",  
+  "Kaunuku (maul)": "https://paekupu.co.nz/word/kaunuku-4",  
+  "Kaunuku hinga (collapsed maul)": "https://paekupu.co.nz/word/kaunuku-hinga",  
+  "Āpitinga (ruck)": "https://paekupu.co.nz/word/ketuketu-2",  
+  "Āpititū (mark/oppose in sport)": "https://paekupu.co.nz/word/apititu",  
+  "Inaki (overlap)": "https://paekupu.co.nz/word/inaki",  
+  "Kaiwawao (referee/umpire)": "https://paekupu.co.nz/word/kaiwawao2",  
+  "Kaitākaro (player)": "https://paekupu.co.nz/word/kaitakaro",  
+  "Kaitaki (captain)": "https://paekupu.co.nz/word/kaitaki",  
+  "Whiwhinga (point/score)": "https://paekupu.co.nz/word/whiwhinga",  
+  "Whana taka (drop‑kick/drop goal)": "https://paekupu.co.nz/word/whana-taka",  
+  "Whana turuki (conversion kick)": "https://paekupu.co.nz/word/whana-turuki",  
+  "Maka tūtira (line‑out throw)": "https://paekupu.co.nz/word/maka-rangitaha",  
+  "Maka whakamua (forward pass)": "https://paekupu.co.nz/word/maka-whakamua",  
+  "Maka tāwhiro (spin/spiral pass)": "https://paekupu.co.nz/word/maka-tawhiro",  
+  "Māka (hē) (mark)": "https://paekupu.co.nz/word/maka-2",  
+  "Mahi tahi (teamwork)": "https://paekupu.co.nz/word/mahi-tahi"  
+};
+
+
+function showSourceLinks() {
+    const container = document.getElementById('source-links');
+    container.innerHTML = '';
+    for (const [word, link] of Object.entries(sourceLinks)) {
+        const a = document.createElement('a');
+        a.href = link;
+        a.textContent = word;
+        a.target = "_blank"; 
+        container.appendChild(a);
+    }
+}
+
+// Initial Load
 updateContent();
+showSourceLinks();
 
 </script>
-
-<div class="video-container">
-    <iframe src="https://www.youtube.com/embed/3uC7bbyh-jk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-
 </body>
 </html>

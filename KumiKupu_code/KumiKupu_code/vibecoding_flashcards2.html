@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Dev Flashcards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-bottom: 25px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #666;
+    }
+    
+    .flashcard-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 44px; /* 20% of 220px card width */
+      justify-items: center;
+      align-items: center;
+    }
+    
+    .flashcard {
+      width: 220px;
+      height: 150px;
+      perspective: 1000px;
+    }
+    
+    .flashcard .inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    
+    .flashcard .inner.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    .flashcard .front, .flashcard .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .flashcard .front {
+      font-size: 2em;
+      font-weight: 900;
+      color: #fff;
+      padding: 15px;
+    }
+
+    .flashcard .back {
+      transform: rotateY(180deg);
+      font-size: 1.1em;
+      font-weight: normal;
+      color: #000;
+      line-height: 1.3em;
+      padding: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌈 Web Dev Flashcards 🌈</h1>
+  <button onclick="resetCards()">Reset</button>
+
+  <div class="flashcard-container">
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#e53935;">HTML</div>
+        <div class="back" style="background-color:#ef9a9a;">The standard markup language used to create web pages.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#fb8c00;">CSS</div>
+        <div class="back" style="background-color:#ffcc80;">Styles the HTML elements on a web page (colors, layout, fonts).</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#fdd835;">JavaScript</div>
+        <div class="back" style="background-color:#fff59d; color:#333;">A programming language that makes web pages interactive.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#43a047;">Firebase</div>
+        <div class="back" style="background-color:#a5d6a7;">A cloud platform for hosting apps, databases, and authentication.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#1e88e5;">FireStudio</div>
+        <div class="back" style="background-color:#90caf9;">A tool/interface for building and managing Firebase projects visually.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#8e24aa;">Firebase Console</div>
+        <div class="back" style="background-color:#ce93d8;">The web interface to manage Firebase apps, data, and settings.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#d81b60;">GitHub</div>
+        <div class="back" style="background-color:#f48fb1;">A platform for hosting code repositories and version control.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#00897b;">Node.js</div>
+        <div class="back" style="background-color:#80cbc4;">JavaScript runtime used to run JS on the server.</div>
+      </div>
+    </div>
+
+    <div class="flashcard">
+      <div class="inner" onclick="flipCard(this)">
+        <div class="front" style="background-color:#6d4c41;">API</div>
+        <div class="back" style="background-color:#bcaaa4;">A set of rules that allows different software to communicate with each other.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function flipCard(card) {
+      card.classList.toggle('flipped');
+    }
+
+    function resetCards() {
+      document.querySelectorAll('.inner').forEach(card => {
+        card.classList.remove('flipped');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baroque Composer Quiz</title>
+  <style>
+    /* FIX: Apply background to the entire page */
+    body {
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/music5.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      font-family: sans-serif;
+      padding-top: 20px; /* Add space at the top */
+      padding-bottom: 20px; /* Add space at the bottom */
+    }
+
+    /* FIX: Restore original quiz styles */
+    #composer-quiz {
+      background: #fff7e6;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin: 30px auto;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      justify-items: center;
+    }
+
+    .quiz-option {
+      background-color: #f0f0f0;
+      border: none;
+      border-radius: 12px;
+      padding: 15px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      min-width: 140px;
+      transition: all 0.3s ease;
+      color: #000; /* Ensure button text is black */
+    }
+
+    .quiz-option:hover {
+      background-color: #ffe599;
+      transform: scale(1.05);
+    }
+
+    .quiz-button {
+      margin-top: 25px;
+      padding: 10px 20px;
+      border: none;
+      background: #ffcc66;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <section id="composer-quiz" class="activity-section">
+    <h2>🎶 Baroque Composer Quiz</h2>
+    
+    <div id="progress-container" style="margin-bottom: 20px;">
+      <div id="progress-bar" style="height: 20px; background: #ddd; border-radius: 10px; overflow: hidden;">
+        <div id="progress-fill" style="height: 100%; width: 0%; background: #ffcc66;"></div>
+      </div>
+      <p id="score-text" style="margin: 5px 0 0 0; font-weight: bold;">Score: 0/0</p>
+    </div>
+    
+    <p id="quiz-fact" class="question-text"></p>
+    <div id="quiz-options" class="quiz-options"></div>
+    <p id="feedback" style="font-weight:bold; margin-top: 15px;"></p>
+    <button id="next-question" class="quiz-button" style="display:none;">Next Question</button>
+  </section>
+
+  <script>
+  // --- Composer Data ---
+  const composers = {
+    Bach: { name: "Johann Sebastian Bach", facts: [
+      "Born in Germany (1685–1750)",
+      "Worked as a church musician",
+      "Wrote 'Toccata and Fugue in D minor'",
+      "Wrote 'The Well-Tempered Clavier'",
+      "Had 20 children"
+    ]},
+    Handel: { name: "George Frideric Handel", facts: [
+      "Born in Germany but became a British citizen",
+      "Wrote 'Messiah'",
+      "Wrote 'Water Music'",
+      "Worked for kings and buried in Westminster Abbey",
+      "Went blind near the end of life but kept composing"
+    ]},
+    Vivaldi: { name: "Antonio Vivaldi", facts: [
+      "Born in Venice, Italy",
+      "Wrote 'The Four Seasons'",
+      "Taught at a girls' orphanage",
+      "Known for energetic rhythms",
+      "Wrote over 500 concertos"
+    ]},
+    Purcell: { name: "Henry Purcell", facts: [
+      "Born in London (1659–1695)",
+      "Wrote 'Dido and Aeneas'",
+      "Organist at Westminster Abbey",
+      "Blended English, French, and Italian styles",
+      "Music played at Queen Elizabeth II’s coronation"
+    ]}
+  };
+
+  // --- Build question pool: pick 10 random facts for quiz ---
+  let allFacts = [];
+  for (const composer in composers) {
+    composers[composer].facts.forEach(f => allFacts.push({ fact: f, answer: composer }));
+  }
+  allFacts = allFacts.sort(() => Math.random() - 0.5).slice(0,10);
+
+  // --- Quiz State ---
+  let currentQuestion = 0;
+  let score = 0;
+
+  // --- Elements ---
+  const factEl = document.getElementById("quiz-fact");
+  const optionsEl = document.getElementById("quiz-options");
+  const feedbackEl = document.getElementById("feedback");
+  const nextBtn = document.getElementById("next-question");
+  const progressFill = document.getElementById("progress-fill");
+  const scoreText = document.getElementById("score-text");
+
+  // --- Load Question ---
+  function loadQuestion() {
+    feedbackEl.textContent = "";
+    nextBtn.style.display = "none";
+    optionsEl.innerHTML = "";
+    
+    const q = allFacts[currentQuestion];
+    factEl.textContent = `🔹 Fact: ${q.fact}`;
+
+    // Create shuffled options
+    const optionKeys = Object.keys(composers).sort(() => Math.random() - 0.5);
+    optionKeys.forEach(key => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-option";
+      btn.textContent = composers[key].name;
+      btn.onclick = () => checkAnswer(btn, key, q.answer);
+      optionsEl.appendChild(btn);
+    });
+
+    updateProgress();
+  }
+
+  // --- Check Answer ---
+  function checkAnswer(btn, selected, correct) {
+    // Disable all buttons
+    document.querySelectorAll(".quiz-option").forEach(b => b.disabled = true);
+
+    if (selected === correct) {
+      btn.style.backgroundColor = "#8BC34A"; // green
+      feedbackEl.textContent = "✅ Correct!";
+      score++;
+    } else {
+      btn.style.backgroundColor = "#F44336"; // red
+      feedbackEl.textContent = `❌ Incorrect! Correct answer: ${composers[correct].name}`;
+      // Highlight correct
+      document.querySelectorAll(".quiz-option").forEach(b => {
+        if (b.textContent === composers[correct].name) b.style.backgroundColor = "#8BC34A";
+      });
+    }
+    
+    scoreText.textContent = `Score: ${score}/${currentQuestion+1}`;
+    nextBtn.style.display = "inline-block";
+  }
+
+  // --- Progress Bar ---
+  function updateProgress() {
+    progressFill.style.width = `${(currentQuestion / allFacts.length) * 100}%`;
+  }
+
+  // --- Next Question ---
+  nextBtn.onclick = () => {
+    currentQuestion++;
+    if (currentQuestion >= allFacts.length) {
+      factEl.textContent = `🎉 Quiz complete! Final score: ${score}/${allFacts.length}`;
+      optionsEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      nextBtn.style.display = "none";
+      progressFill.style.width = "100%";
+      scoreText.textContent = `Score: ${score}/${allFacts.length}`;
+    } else {
+      loadQuestion();
+    }
+  };
+
+  // --- Initialize ---
+  loadQuestion();
+  </script>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Championship Math Quest — Year 9 | Aotearoa</title>
+  <style>
+    :root {
+      --bg: #0f0f23;
+      --card: #1a1a2e;
+      --accent: #00d4ff;
+      --accent-dark: #0066cc;
+      --success: #00ff88;
+      --danger: #ff4444;
+      --muted: #8892b0;
+      --text: #e6f1ff;
+      --highlight: #ffd700;
+      --max-width: 1000px;
+      --pad: 1.5rem;
+      font-family: 'Courier New', 'JetBrains Mono', monospace, system-ui;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: linear-gradient(135deg, #0f0f23 0%, #16213e 50%, #1a1a2e 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--pad);
+      font-size: clamp(16px, 2.5vw, 18px);
+    }
+    .wrap { width: 100%; max-width: var(--max-width); margin: 0 auto; }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; gap: 0.8rem; align-items: center; }
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: linear-gradient(45deg, var(--accent), #ff6b6b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+    .logo svg { width: 40px; height: 40px; fill: #ffffff; }
+    h1 {
+      font-size: clamp(1.5rem, 3vw, 1.8rem);
+      margin: 0;
+      color: var(--text);
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+    p.lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+
+    .card {
+      background: var(--card);
+      padding: var(--pad);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    .topbar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .status { display: flex; gap: 0.8rem; align-items: center; }
+    .chip {
+      background: linear-gradient(45deg, #1e293b, #334155);
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+    .timer { font-size: clamp(1rem, 2.5vw, 1.1rem); }
+
+    .room { display: none; }
+    .room.active { display: block; }
+
+    .quiz {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 600px) { .quiz { grid-template-columns: 1fr 300px; } }
+    @media (min-width: 900px) { .quiz { grid-template-columns: 1fr 350px; } }
+
+    .puzzle {
+      padding: 1.25rem;
+      border-radius: 12px;
+      background: #1e293b;
+      border: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    /* Epic gaming level backgrounds */
+    #level1 {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+      border: 1px solid #4f46e5;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 0 30px rgba(79, 70, 229, 0.2);
+    }
+    #level2 {
+      background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%);
+      border: 1px solid #10b981;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+    }
+    #level3 {
+      background: linear-gradient(135deg, #7c2d12 0%, #dc2626 50%, #ef4444 100%);
+      border: 1px solid #f87171;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 0 30px rgba(248, 113, 113, 0.2);
+    }
+    #level4 {
+      background: linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #8b5cf6 100%);
+      border: 1px solid #a78bfa;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 0 30px rgba(167, 139, 250, 0.3);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--muted);
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+    }
+    input[type=text], input[type=number] {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: #0f172a;
+      color: var(--text);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      font-family: 'Courier New', monospace;
+    }
+    input:focus {
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+      outline: none;
+      border-color: var(--accent);
+    }
+    button {
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 0;
+      background: linear-gradient(45deg, var(--accent), #0066cc);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: inherit;
+    }
+    button:hover { 
+      background: linear-gradient(45deg, #0066cc, var(--accent));
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    button:active { transform: translateY(1px); }
+    .muted { color: var(--muted); }
+
+    .hint {
+      background: rgba(0, 212, 255, 0.1);
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      font-size: clamp(0.85rem, 2vw, 0.9rem);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    .footer {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .solved {
+      background: rgba(0, 255, 136, 0.1);
+      border-left: 4px solid var(--success);
+    }
+    .locked {
+      opacity: 0.6;
+      background: #374151;
+    }
+
+    .clue {
+      font-weight: 700;
+      font-size: clamp(1.25rem, 2.5vw, 1.4rem);
+      color: var(--text);
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+
+    .progress {
+      height: 14px;
+      background: #374151;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    .progress > i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #00ff88);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+
+    .small { font-size: clamp(0.8rem, 1.8vw, 0.85rem); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--pad);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+    .modal .card {
+      max-width: 700px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+    }
+
+    .debug {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(26, 26, 46, 0.9);
+      color: var(--accent);
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent);
+      z-index: 100;
+      font-family: 'Courier New', monospace;
+    }
+
+    @media (max-width: 600px) {
+      .logo { width: 48px; height: 48px; }
+      header { gap: 0.75rem; }
+      h1 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
+      .card { padding: 1rem; }
+      button { padding: 0.6rem 0.8rem; }
+      input[type=text], input[type=number] { padding: 0.6rem; }
+    }
+    @media (min-width: 600px) and (max-width: 900px) {
+      .wrap { max-width: 90%; }
+      .quiz { grid-template-columns: 1fr 280px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="debug" id="debugInfo">SYSTEM LOADING...</div>
+  
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" id="logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Gaming Championship Math Quest — Year 9</h1>
+          <p class="lead">Aotearoa NZ challenges: algebra, fractions, geometry & patterns. Level up your skills!</p>
+        </div>
+      </div>
+      <div style="margin-left: auto; text-align: right;" class="small muted">Admin: configurable challenges & solutions</div>
+    </header>
+
+    <div class="card">
+      <div class="topbar">
+        <div class="status">
+          <div class="chip">Level <span id="levelIndex">1</span>/4</div>
+          <div class="chip timer">⏱️ <span id="timer">10:00</span></div>
+          <div class="chip">XP: <span id="points">0</span></div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button id="pauseBtn" class="small">Pause</button>
+          <button id="saveBtn" class="small">Save</button>
+          <button id="resetBtn" class="small">Reset</button>
+        </div>
+      </div>
+
+      <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
+
+      <section id="level1" class="room active" aria-labelledby="l1">
+        <h2 id="l1" class="clue">Level 1 — Code Breaker Challenge</h2>
+        <div class="quiz" style="margin-top: 1rem;">
+          <div class="puzzle">
+            <p>Hack the system code: <strong>2x + 3 = 11</strong>. What is <strong>x</strong>?</p>
+            <label for="l1ans">Enter the value of x</label>
+            <input id="l1ans" type="number" inputmode="numeric" placeholder="x" aria-label="Level 1 answer" />
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+              <button id="l1check">Execute</button>
+              <button id="l1hint" class="small">Hint</button>
+            </div>
+            <div id="l1msg" class="muted small" style="margin-top: 0.75rem;"></div>
+          </div>
+          <aside class="puzzle">
+            <h3 class="small">Strategy Guide</h3>
+            <p class="muted small">Isolate the variable using inverse operations.</p>
+            <div class="hint small" id="l1hintbox" style="display: none;">Subtract 3 from both sides, then divide by 2.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="level2" class="room" aria-labelledby="l2">
+        <h2 id="l2" class="clue">Level 2 — Resource Management</h2>
+        <div class="quiz" style="margin-top: 1rem;">
+          <div class="puzzle">
+            <p>Combine resources: <strong>1/4 + 1/3</strong>. Enter as a fraction (e.g., 2/3).</p>
+            <label for="l2ans">Enter the fraction</label>
+            <input id="l2ans" type="text" placeholder="a/b" aria-label="Level 2 answer" />
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+              <button id="l2check">Execute</button>
+              <button id="l2hint" class="small">Hint</button>
+            </div>
+            <div id="l2msg" class="muted small" style="margin-top: 0.75rem;"></div>
+          </div>
+          <aside class="puzzle">
+            <h3 class="small">Strategy Guide</h3>
+            <p class="muted small">Find a common base to merge resources.</p>
+            <div class="hint small" id="l2hintbox" style="display: none;">The least common denominator for 4 and 3 is 12.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="level3" class="room" aria-labelledby="l3">
+        <h2 id="l3" class="clue">Level 3 — Arena Calculations</h2>
+        <div class="quiz" style="margin-top: 1rem;">
+          <div class="puzzle">
+            <p>The battle arena is rectangular, 5m wide and 8m long. What is the perimeter in meters?</p>
+            <label for="l3ans">Enter the perimeter in meters</label>
+            <input id="l3ans" type="number" inputmode="numeric" aria-label="Level 3 answer" />
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+              <button id="l3check">Execute</button>
+              <button id="l3hint" class="small">Hint</button>
+            </div>
+            <div id="l3msg" class="muted small" style="margin-top: 0.75rem;"></div>
+          </div>
+          <aside class="puzzle">
+            <h3 class="small">Strategy Guide</h3>
+            <p class="muted small">Perimeter = 2 × (width + length).</p>
+            <div class="hint small" id="l3hintbox" style="display: none;">Add width and length, then multiply by 2.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="level4" class="room" aria-labelledby="l4">
+        <h2 id="l4" class="clue">Final Boss — Pattern Recognition</h2>
+        <div class="quiz" style="margin-top: 1rem;">
+          <div class="puzzle">
+            <p>Decode the sequence for the final attack: <strong>2, 5, 8, 11, ?</strong>.</p>
+            <label for="l4ans">Enter the next number</label>
+            <input id="l4ans" type="number" inputmode="numeric" aria-label="Level 4 answer" />
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+              <button id="l4check">Execute</button>
+              <button id="l4hint" class="small">Hint</button>
+            </div>
+            <div id="l4msg" class="muted small" style="margin-top: 0.75rem;"></div>
+          </div>
+          <aside class="puzzle">
+            <h3 class="small">Strategy Guide</h3>
+            <p class="muted small">Analyze the pattern between consecutive numbers.</p>
+            <div class="hint small" id="l4hintbox" style="display: none;">Each number increases by 3.</div>
+          </aside>
+        </div>
+      </section>
+
+      <div class="footer">
+        <div class="muted small">Hints used: <span id="hintsUsed">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Debug system
+    const debugInfo = document.getElementById('debugInfo');
+    function updateDebug(msg) {
+      debugInfo.textContent = `> ${msg}`;
+      console.log('DEBUG:', msg);
+    }
+
+    updateDebug('SYSTEM INITIALIZING...');
+
+    function initializeGame() {
+      updateDebug('LOADING GAME MODULES...');
+
+      const levels = [
+        { id: 'level1', check: checkL1, hintText: 'Subtract 3 from both sides, then divide by 2.', points: 20 },
+        { id: 'level2', check: checkL2, hintText: 'The least common denominator for 4 and 3 is 12.', points: 15 },
+        { id: 'level3', check: checkL3, hintText: 'Add width and length, then multiply by 2.', points: 15 },
+        { id: 'level4', check: checkL4, hintText: 'Each number increases by 3.', points: 25 },
+      ];
+
+      const getCssVariable = (name) => {
+        try {
+          return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        } catch (e) {
+          console.warn('Failed to get CSS variable:', name);
+          return name === '--success' ? '#00ff88' : '#ff4444';
+        }
+      };
+      
+      const successColor = getCssVariable('--success');
+      const dangerColor = getCssVariable('--danger');
+
+      let gameState = {
+        index: 0,
+        points: 0,
+        hints: 0,
+        solved: new Array(levels.length).fill(false),
+        totalTime: 10 * 60
+      };
+
+      let timerInterval = null;
+      let isPaused = false;
+
+      // Get DOM elements
+      const levelIndexEl = document.getElementById('levelIndex');
+      const pointsEl = document.getElementById('points');
+      const hintsEl = document.getElementById('hintsUsed');
+      const timerEl = document.getElementById('timer');
+      const progressFill = document.getElementById('progressFill');
+      const pauseBtn = document.getElementById('pauseBtn');
+
+      // Check if all elements exist
+      const requiredElements = [levelIndexEl, pointsEl, hintsEl, timerEl, progressFill, pauseBtn];
+      const missingElements = requiredElements.filter(el => !el);
+      if (missingElements.length > 0) {
+        updateDebug(`MISSING ELEMENTS: ${missingElements.length}`);
+        return;
+      }
+
+      updateDebug('ALL SYSTEMS ONLINE');
+
+      // Initialize UI
+      updateUI();
+      startTimer();
+
+      // Add event listeners with error handling
+      function safeAddListener(element, event, handler, name) {
+        if (element) {
+          element.addEventListener(event, (e) => {
+            try {
+              updateDebug(`${name.toUpperCase()} ACTIVATED`);
+              handler(e);
+            } catch (error) {
+              console.error(`Error in ${name} handler:`, error);
+              updateDebug(`ERROR IN ${name.toUpperCase()}`);
+            }
+          });
+          updateDebug(`${name.toUpperCase()} REGISTERED`);
+        } else {
+          updateDebug(`${name.toUpperCase()} NOT FOUND`);
+        }
+      }
+
+      safeAddListener(pauseBtn, 'click', () => {
+        isPaused = !isPaused;
+        pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+        if (isPaused) {
+          clearInterval(timerInterval);
+        } else {
+          startTimer();
+        }
+      }, 'pause system');
+
+      safeAddListener(document.getElementById('saveBtn'), 'click', () => {
+        alert('Game progress saved to memory buffer.');
+      }, 'save system');
+
+      safeAddListener(document.getElementById('resetBtn'), 'click', () => {
+        if (confirm('Reset all progress? This will restart the championship.')) {
+          gameState = {
+            index: 0,
+            points: 0,
+            hints: 0,
+            solved: new Array(levels.length).fill(false),
+            totalTime: 10 * 60
+          };
+          isPaused = false;
+          updateUI();
+          startTimer();
+        }
+      }, 'reset system');
+
+      // Add level-specific listeners
+      levels.forEach((l, i) => {
+        const lid = l.id;
+        const checkBtnId = lid.replace('level', 'l') + 'check';
+        const hintBtnId = lid.replace('level', 'l') + 'hint';
+        const hintBoxId = lid.replace('level', 'l') + 'hintbox';
+        
+        const checkBtn = document.getElementById(checkBtnId);
+        const hintBtn = document.getElementById(hintBtnId);
+        const hintBox = document.getElementById(hintBoxId);
+
+        updateDebug(`SCANNING ${checkBtnId}: ${!!checkBtn ? 'FOUND' : 'MISSING'}`);
+        updateDebug(`SCANNING ${hintBtnId}: ${!!hintBtn ? 'FOUND' : 'MISSING'}`);
+
+        safeAddListener(checkBtn, 'click', () => l.check(), `${checkBtnId} execute`);
+        
+        safeAddListener(hintBtn, 'click', () => {
+          if (hintBox && hintBox.style.display === 'none') {
+            hintBox.style.display = 'block';
+            gameState.hints++;
+            hintsEl.textContent = gameState.hints;
+          }
+        }, `${hintBtnId} hint`);
+      });
+
+      // Check functions
+      function checkL1() {
+        const input = document.getElementById('l1ans');
+        const msg = document.getElementById('l1msg');
+        if (!input || !msg) return;
+        
+        const val = Number(input.value.trim());
+        if (!Number.isFinite(val)) {
+          msg.textContent = 'Invalid input. Enter a number.';
+          msg.style.color = dangerColor;
+          return;
+        }
+        if (val === 4) {
+          winLevel(0);
+          msg.textContent = 'SUCCESS — Code breaker level complete!';
+          msg.style.color = successColor;
+        } else {
+          msg.textContent = 'Access denied. Try isolating the variable.';
+          msg.style.color = dangerColor;
+        }
+      }
+
+      function checkL2() {
+        const input = document.getElementById('l2ans');
+        const msg = document.getElementById('l2msg');
+        if (!input || !msg) return;
+        
+        const val = input.value.trim().replace(/\s+/g, '');
+        if (!val.match(/^\d+\/\d+$/)) {
+          msg.textContent = 'Invalid format. Enter as fraction a/b.';
+          msg.style.color = dangerColor;
+          return;
+        }
+        if (val === '7/12') {
+          winLevel(1);
+          msg.textContent = 'SUCCESS — Resources combined efficiently!';
+          msg.style.color = successColor;
+        } else {
+          msg.textContent = 'Resource merge failed. Check common denominator.';
+          msg.style.color = dangerColor;
+        }
+      }
+
+      function checkL3() {
+        const input = document.getElementById('l3ans');
+        const msg = document.getElementById('l3msg');
+        if (!input || !msg) return;
+        
+        const val = Number(input.value.trim());
+        if (!Number.isFinite(val)) {
+          msg.textContent = 'Invalid input. Enter a number.';
+          msg.style.color = dangerColor;
+          return;
+        }
+        if (val === 26) {
+          winLevel(2);
+          msg.textContent = 'SUCCESS — Arena measurements verified!';
+          msg.style.color = successColor;
+        } else {
+          msg.textContent = 'Calculation error. Check perimeter formula.';
+          msg.style.color = dangerColor;
+        }
+      }
+
+      function checkL4() {
+        const input = document.getElementById('l4ans');
+        const msg = document.getElementById('l4msg');
+        if (!input || !msg) return;
+        
+        const val = Number(input.value.trim());
+        if (!Number.isFinite(val)) {
+          msg.textContent = 'Invalid input. Enter a number.';
+          msg.style.color = dangerColor;
+          return;
+        }
+        if (val === 14) {
+          winLevel(3);
+          msg.textContent = 'VICTORY — Final boss defeated!';
+          msg.style.color = successColor;
+        } else {
+          msg.textContent = 'Pattern recognition failed. Analyze sequence.';
+          msg.style.color = dangerColor;
+        }
+      }
+
+      function winLevel(i) {
+        if (gameState.solved[i]) return;
+        gameState.solved[i] = true;
+        gameState.points += levels[i].points;
+        updateUI();
+
+        const allSolved = gameState.solved.every(s => s);
+        if (allSolved) {
+          showVictory();
+        } else {
+          const next = findNextUnsolved(i + 1);
+          if (next !== null) {
+            gameState.index = next;
+            updateUI();
+          }
+        }
+      }
+
+      function findNextUnsolved(start) {
+        for (let i = start; i < levels.length; i++) {
+          if (!gameState.solved[i]) return i;
+        }
+        return null;
+      }
+
+      function updateUI() {
+        levels.forEach((l, i) => {
+          const el = document.getElementById(l.id);
+          if (el) {
+            el.classList.toggle('active', i === gameState.index);
+            el.classList.toggle('locked', !gameState.solved[i] && i !== gameState.index);
+            el.classList.toggle('solved', gameState.solved[i]);
+          }
+        });
+        
+        if (levelIndexEl) levelIndexEl.textContent = Math.min(gameState.index + 1, levels.length);
+        if (pointsEl) pointsEl.textContent = gameState.points;
+        if (hintsEl) hintsEl.textContent = gameState.hints;
+        
+        if (progressFill) {
+          const solvedCount = gameState.solved.filter(Boolean).length;
+          const pct = Math.round((solvedCount / levels.length) * 100);
+          progressFill.style.width = pct + '%';
+        }
+      }
+
+      function startTimer() {
+        if (isPaused || gameState.totalTime <= 0) return;
+        updateTimerDisplay();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          gameState.totalTime--;
+          if (gameState.totalTime <= 0) {
+            clearInterval(timerInterval);
+            onTimeUp();
+          }
+          updateTimerDisplay();
+        }, 1000);
+      }
+
+      function updateTimerDisplay() {
+        if (!timerEl) return;
+        const mm = Math.floor(gameState.totalTime / 60);
+        const ss = gameState.totalTime % 60;
+        timerEl.textContent = `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+      }
+
+      function onTimeUp() {
+        isPaused = true;
+        if (pauseBtn) pauseBtn.textContent = 'Resume';
+        alert('TIME EXPIRED! Admin can reset timer or allow continuation.');

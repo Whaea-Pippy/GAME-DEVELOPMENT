@@ -1,1 +1,6 @@
+I TELL YOU THIS EVERYTIME
+I HAVE EVEN SAVED IT UNDER correctdeploycommand.txt
+AND EVERYTIME YOU TRY TO AUTHENTICATE FIREBASE
+WHEN WE DO NOT NEED TO:
+
 cd KumiKupu_code && firebase deploy --only hosting
