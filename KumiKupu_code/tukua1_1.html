@@ -168,6 +168,7 @@ body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff;
         <option value="informalGreetings">Informal Greetings</option>
         <option value="formalGreetings">Formal Greetings</option>
         <option value="informalFarewells">Informal Farewells</option>
+        <option value="formalFarewells">Formal Farewells</option>
         <option value="keyQuestions">Key Questions</option>
       </select>
     </div>
@@ -207,12 +208,12 @@ const data = {
     ["Ahiahi mārie", "Good afternoon"],
     ["Pō mārie", "Good night"],
     ["Kia ora e hoa", "Hello friend"],
-    ["Kia ora Sam", "Hello Sam"],
+    ["Kia ora [name]", "Hello [name]"],
     ["Kia ora koutou", "Hello everyone (informal)"],
     ["Kia ora tātou", "Hello to us all"],
     ["Haere mai", "Welcome"],
     ["Tēnā koe e hoa", "Greetings to you friend"],
-    ["Kia ora rā", "Hello (friendly / extended)"]
+    ["Kia ora e hoa mā", "Hello friends"]
   ],
   formalGreetings: [
     ["Tēnā koe", "Hello (formal, 1 person)"],
@@ -228,6 +229,20 @@ const data = {
     ["Tēnā koe i tēnei ahiahi", "Greetings to you this afternoon"],
     ["Tēnā koe i tēnei pō", "Greetings to you tonight"]
   ],
+  formalFarewells: [
+  ["Haere rā", "Go well (someone leaving)"],
+  ["E noho rā", "Stay well (you leaving)"],
+  ["Haere rā e hoa", "Go well, friend"],
+  ["E noho rā e hoa", "Stay well, friend"],
+  ["Haere rā i tēnei rā", "Go well today"],
+  ["Haere rā i tēnei pō", "Go well this evening"],
+  ["E noho rā koutou katoa", "Stay well everyone"],
+  ["Haere rā e rangatira", "Go well, leader"],
+  ["E noho rā e hoa rangatira", "Stay well, esteemed friend"],
+  ["Haere rā i tēnei wiki", "Go well this week"],
+  ["E noho rā e hoa mā", "Stay well, friends"],
+  ["Haere rā i te rā nei", "Go well this day"]
+],
   informalFarewells: [
     ["Mā te wā", "See you later"],
     ["Ka kite anō", "See you again"],
@@ -246,7 +261,7 @@ const data = {
     ["Ko wai tō ingoa?", "What is your name?"],
     ["Ko Hone tōku ingoa", "My name is Hone"],
     ["Ko Mia tōku ingoa", "My name is Mia"],
-    ["Ko tō ingoa tēnā?", "What is your name (polite)?"],
+    ["Ko wai tō ingoa e hoa?", "What is your name friend?"],
     ["Kei te pēhea koe?", "How are you?"],
     ["Kei te pai ahau", "I am good"],
     ["Kei te ngenge ahau", "I am tired"],
