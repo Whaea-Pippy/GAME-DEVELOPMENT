@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ngā Kaupapa Ako Part One - Te Reo Tūtaki</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff; }
+
+.header-container {
+    display: flex;
+    flex-wrap: wrap; 
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.header-container h2 { margin: 0; }
+
+/* ================= DROPDOWN ================= */
+.selector-container {
+    background-color: #ADD8E6;
+    border: 3px solid #00008B;
+    border-radius: 15px;
+    padding: 5px 15px;
+    display: inline-block;
+}
+
+#category-selector {
+    min-width: 300px;
+    background-color: transparent;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    text-align: center;
+    text-align-last: center;
+}
+
+/* ================= FLASHCARDS ================= */
+#flashcards-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+#flashcards-section .card {
+  height: 100px;
+  padding: 10px;
+  border: 4px solid #333;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  word-wrap: break-word;
+  transition: transform 0.6s, background-color 0.6s;
+  background-color: lightyellow;
+}
+#flashcards-section .card.flipped { background-color: lightblue; }
+
+/* ================= QUIZ ================= */
+#quiz-section .quiz-question {
+  margin-bottom: 20px;
+  border-top: 2px solid #ccc;
+  padding-top: 15px;
+}
+#quiz-section .quiz-question b {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    display: block;
+}
+.quiz-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+#quiz-section .quiz-options button { font-size: 16px; padding: 8px; width: 100%; }
+
+/* ================= MATCHING (Corrected for both Desktop and Mobile) ================= */
+
+/* Matched Pairs (Top Section) - Corrected to be full-width rows */
+.matched-container {
+  display: flex;
+  flex-direction: column; /* Stack pairs vertically */
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.pair {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+  font-size: 1.4rem; /* Larger font */
+  text-align: center;
+}
+.pair .sep { font-weight: bold; }
+
+/* Clickable Word Boxes (Bottom Section) */
+.matching-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* THIS IS THE FIX: 2 columns for desktop, restored from original layout */
+.matching-box {
+  flex: 1;
+  display: grid; /* Use grid for columns */
+  grid-template-columns: repeat(2, 1fr); /* Two columns within each box */
+  align-content: start; /* Align items to the top */
+  gap: 10px;
+  min-height: 200px;
+  border: 2px dashed #ccc;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #fafafa;
+}
+
+#matching-section .drag-item {
+  height: 50px;
+  border: 2px solid #666;
+  background: #eee;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+/* ================= MOBILE STYLES (Verified Perfect) ================= */
+@media (max-width: 768px) {
+    #flashcards-section { grid-template-columns: repeat(2, 1fr); }
+    .quiz-options { grid-template-columns: repeat(2, 1fr); }
+    .matching-container { gap: 10px; }
+    #matching-section .drag-item { font-size: 16px; }
+    .pair { font-size: 1.1rem; }
+
+    /* THIS IS THE FIX: Revert to 1 column on mobile to keep it perfect */
+    .matching-box {
+        grid-template-columns: 1fr; /* Single column on mobile */
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="header-container">
+    <h2>Ngā Kupu – Meeting & Greeting</h2>
+    <div class="selector-container">
+      <select id="category-selector" onchange="updateContent()">
+        <option value="select" selected>--Select--</option>
+        <option value="informalGreetings">Informal Greetings</option>
+        <option value="formalGreetings">Formal Greetings</option>
+        <option value="informalFarewells">Informal Farewells</option>
+        <option value="keyQuestions">Key Questions</option>
+      </select>
+    </div>
+</div>
+
+<h3>Flashcards</h3>
+<div id="flashcards-section"></div>
+
+<h3>Quiz</h3>
+<div id="quiz-section"></div>
+
+<h3>Matching - CLICK - CLICK</h3>
+<div class="matched-container" id="matched-pairs"></div>
+<div id="matching-section"></div>
+
+<script>
+// Vocabulary data
+const data = {
+    select: [
+    ["Kia ora", "Hi / Hello (informal)"],
+    ["Mōrena", "Morning (informal)"],
+    ["Ata mārie", "Good morning"],
+    ["Ahiahi mārie", "Good afternoon"],
+    ["Pō mārie", "Good night"],
+    ["Tēnā koe", "Hello (formal, one person)"],
+    ["Tēnā kōrua", "Hello (formal, two people)"],
+    ["Tēnā koutou", "Hello (formal, three or more)"],
+    ["Mā te wā", "See you later"],
+    ["Ka kite anō", "See you again"],
+    ["Haere rā", "Goodbye (someone leaving)"],
+    ["E noho rā", "Goodbye (you leaving)"]
+],
+  informalGreetings: [
+    ["Kia ora", "Hi / Hello (informal)"],
+    ["Mōrena", "Morning (casual)"],
+    ["Ata mārie", "Good morning"],
+    ["Ahiahi mārie", "Good afternoon"],
+    ["Pō mārie", "Good night"],
+    ["Kia ora e hoa", "Hello friend"],
+    ["Kia ora Sam", "Hello Sam"],
+    ["Kia ora koutou", "Hello everyone (informal)"],
+    ["Kia ora tātou", "Hello to us all"],
+    ["Haere mai", "Welcome"],
+    ["Tēnā koe e hoa", "Greetings to you friend"],
+    ["Kia ora rā", "Hello (friendly / extended)"]
+  ],
+  formalGreetings: [
+    ["Tēnā koe", "Hello (formal, 1 person)"],
+    ["Tēnā kōrua", "Hello (formal, 2 people)"],
+    ["Tēnā koutou", "Hello (formal, 3+ people)"],
+    ["Tēnā koe e rangatira", "Greetings, leader"],
+    ["Tēnā koe i tēnei rā", "Greetings to you today"],
+    ["Tēnā koutou katoa", "Greetings to you all"],
+    ["Tēnā koe e hoa", "Greetings to you, friend"],
+    ["Tēnā koe e hoa rangatira", "Greetings to you, esteemed friend"],
+    ["Tēnā kōrua e hoa mā", "Greetings to you both, friends"],
+    ["Tēnā koutou e hoa mā", "Greetings to you all, friends"],
+    ["Tēnā koe i tēnei ahiahi", "Greetings to you this afternoon"],
+    ["Tēnā koe i tēnei pō", "Greetings to you tonight"]
+  ],
+  informalFarewells: [
+    ["Mā te wā", "See you later"],
+    ["Ka kite anō", "See you again"],
+    ["Ka kite ākuanei", "See you soon"],
+    ["Ka kite i a koe ā te pō", "See you tonight"],
+    ["Ka kite āpōpō", "See you tomorrow"],
+    ["Haere rā", "Goodbye (they leave)"],
+    ["E noho rā", "Goodbye (you leave)"],
+    ["Mā te wā e kite anō ai", "See you later again"],
+    ["Ka kite i a koe ā tērā wiki", "See you next week"],
+    ["Haere rā e hoa", "Goodbye, friend"],
+    ["E noho rā e hoa", "Stay well, friend"],
+    ["Ka kite ākuanei e hoa", "See you soon, friend"]
+  ],
+  keyQuestions: [
+    ["Ko wai tō ingoa?", "What is your name?"],
+    ["Ko Hone tōku ingoa", "My name is Hone"],
+    ["Ko Mia tōku ingoa", "My name is Mia"],
+    ["Ko tō ingoa tēnā?", "What is your name (polite)?"],
+    ["Kei te pēhea koe?", "How are you?"],
+    ["Kei te pai ahau", "I am good"],
+    ["Kei te ngenge ahau", "I am tired"],
+    ["Kei te māuiui ahau", "I am sick / unwell"],
+    ["Nō hea koe?", "Where are you from?"],
+    ["Nō Manurewa ahau", "I am from Manurewa"],
+    ["Nō Tāmaki Makaurau ahau", "I am from Auckland"],
+    ["Nō Rotorua ahau", "I am from Rotorua"]
+  ]
+};
+
+
+let selectedWords = [];
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function showFlashcards() {
+  const container = document.getElementById('flashcards-section');
+  container.innerHTML = '';
+  if (selectedWords.length === 0) return container.textContent = 'No data found';
+
+  selectedWords.forEach(row => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.textContent = row[0];
+    card.onclick = () => {
+      card.classList.toggle('flipped');
+      card.textContent = card.classList.contains('flipped') ? row[1] : row[0];
+    };
+    container.appendChild(card);
+  });
+}
+
+function showQuiz(category) {
+  const container = document.getElementById('quiz-section');
+  container.innerHTML = '';
+  const categoryData = data[category] || [];
+  const questions = selectedWords;
+  if (questions.length < 4) return container.innerHTML = '<p>Not enough data for a full quiz.</p>';
+
+  questions.forEach((row, i) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'quiz-question';
+    qDiv.innerHTML = `<b>${row[0]}</b>`;
+    
+    const optionsContainer = document.createElement('div');
+    optionsContainer.className = 'quiz-options';
+
+    const distractors = [];
+    while (distractors.length < 3) {
+      const r = categoryData[Math.floor(Math.random() * categoryData.length)][1];
+      if (r !== row[1] && !distractors.includes(r)) distractors.push(r);
+    }
+    const options = shuffleArray([row[1], ...distractors]);
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (btn.disabled) return;
+        if (opt === row[1]) {
+          btn.style.backgroundColor = 'lightgreen';
+        } else {
+          btn.style.backgroundColor = 'lightcoral';
+        }
+        optionsContainer.querySelectorAll('button').forEach(b => b.disabled = true);
+      };
+      optionsContainer.appendChild(btn);
+    });
+    qDiv.appendChild(optionsContainer);
+    container.appendChild(qDiv);
+  });
+}
+
+function showMatching() {
+  const sectionContainer = document.getElementById('matching-section');
+  const matchedContainer = document.getElementById('matched-pairs');
+  sectionContainer.innerHTML = '';
+  matchedContainer.innerHTML = '';
+  
+  const pairs = selectedWords.filter(row => row[0] && row[1]);
+  if (pairs.length === 0) {
+      sectionContainer.textContent = 'No data found';
+      return;
+  }
+
+  const matchingContainer = document.createElement('div');
+  matchingContainer.className = 'matching-container';
+  sectionContainer.appendChild(matchingContainer);
+
+  const leftCol = document.createElement('div');
+  leftCol.className = 'matching-box';
+  const rightCol = document.createElement('div');
+  rightCol.className = 'matching-box';
+  matchingContainer.appendChild(leftCol);
+  matchingContainer.appendChild(rightCol);
+
+  const leftWords = pairs.map(p => p[0]);
+  const rightWords = shuffleArray(pairs.map(p => p[1]));
+
+  let firstSelection = null;
+  const palette = ['#FFB3B3', '#FFD1A3', '#FFF3A3', '#C9F7B5', '#B7F0F6', '#C9C6FF', '#F7B3FF', '#DE85A6','#F0A326', '#E9FC6D', "#28992a", "#43a6e8" ];
+  let colorIndex = 0;
+
+  function createBox(word, side) {
+    const div = document.createElement('div');
+    div.className = 'drag-item';
+    div.innerText = word;
+    div.dataset.side = side;
+    div.dataset.word = word;
+    div.onclick = () => handleClick(div);
+    return div;
+  }
+
+  function handleClick(box) {
+    if (box.style.backgroundColor) return;
+    if (!firstSelection) {
+      firstSelection = box;
+      box.style.border = '3px solid blue';
+    } else if (box.dataset.side !== firstSelection.dataset.side) {
+      const leftWord = firstSelection.dataset.side === 'left' ? firstSelection.dataset.word : box.dataset.word;
+      const rightWord = firstSelection.dataset.side === 'right' ? firstSelection.dataset.word : box.dataset.word;
+      const correctRight = pairs.find(p => p[0] === leftWord)?.[1];
+      if (rightWord === correctRight) {
+        const color = palette[colorIndex % palette.length];
+        colorIndex++;
+        [firstSelection, box].forEach(el => {
+          el.style.backgroundColor = color;
+          el.style.border = '2px solid #666';
+          el.onclick = null;
+        });
+        
+        const pairChip = document.createElement('div');
+        pairChip.className = 'pair';
+        pairChip.style.backgroundColor = color;
+        pairChip.innerHTML = `<span>${leftWord}</span><span class="sep">↔</span><span>${rightWord}</span>`;
+        matchedContainer.appendChild(pairChip);
+
+      } else {
+        firstSelection.style.border = '2px solid red';
+        box.style.border = '2px solid red';
+        setTimeout(() => {
+            firstSelection.style.border = '2px solid #666';
+            box.style.border = '2px solid #666';
+        }, 500);
+      }
+      firstSelection = null;
+    } else { 
+        firstSelection.style.border = '2px solid #666';
+        firstSelection = box;
+        box.style.border = '3px solid blue';
+    }
+  }
+
+  leftWords.forEach(w => leftCol.appendChild(createBox(w, 'left')));
+  rightWords.forEach(w => rightCol.appendChild(createBox(w, 'right')));
+}
+
+
+function updateContent() {
+  const category = document.getElementById('category-selector').value;
+  const categoryData = data[category] || [];
+  selectedWords = shuffleArray([...categoryData]).slice(0, 12);
+  
+  showFlashcards();
+  showQuiz(category);
+  showMatching();
+}
+
+updateContent();
+</script>
+<div class="wrap" style="text-align: center; margin-top: 40px;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/1VHNUT3iBzI?si=2JCVj05gtOJCJzDU" title="Ngā Kaupapa Ako Part One - Te Reo Tūtaki" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+</body>
+</html>
