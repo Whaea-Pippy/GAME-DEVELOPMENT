@@ -89,7 +89,6 @@ body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff;
 
 /* ================= MATCHING (Corrected for both Desktop and Mobile) ================= */
 
-/* Matched Pairs (Top Section) - Corrected to be full-width rows */
 .matched-container {
   display: flex;
   flex-direction: column; /* Stack pairs vertically */
@@ -117,7 +116,6 @@ body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff;
   margin-top: 20px;
 }
 
-/* THIS IS THE FIX: 2 columns for desktop, restored from original layout */
 .matching-box {
   flex: 1;
   display: grid; /* Use grid for columns */
@@ -163,7 +161,7 @@ body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff;
 
 <body>
 <div class="header-container">
-    <h2>Ngā Kupu – Meeting & Greeting</h2>
+    <h2>Tukua 1.1 – Meeting & Greeting</h2>
     <div class="selector-container">
       <select id="category-selector" onchange="updateContent()">
         <option value="select" selected>--Select--</option>
@@ -427,6 +425,9 @@ updateContent();
 </script>
 <div class="wrap" style="text-align: center; margin-top: 40px;">
   <iframe width="560" height="315" src="https://www.youtube.com/embed/1VHNUT3iBzI?si=2JCVj05gtOJCJzDU" title="Ngā Kaupapa Ako Part One - Te Reo Tūtaki" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<div style="text-align: center; margin-top: 20px;">
+    <a href="https://github.com/Whaea-Pippy/GAME-DEVELOPMENT/blob/main/KumiKupu_code/tukua1_1.html" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-align: center; text-decoration: none; border-radius: 5px;">Link to CODE</a>
 </div>
 </body>
 </html>
