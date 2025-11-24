@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="utf-8">
+<title>Kei hea te pea?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0; background: #f0fdfa; font-family: 'Fredoka', sans-serif;
+    display: flex; flex-direction: column; align-items: center; padding: 20px; color: #334155;
+  }
+  h1 { color: #0f766e; margin: 0 0 10px 0; }
+  p { margin: 0 0 20px 0; color: #64748b; font-size: 0.9rem; }
+
+  /* CONTROLS */
+  .controls {
+    background: white; padding: 15px; border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 15px; align-items: center;
+    width: 100%; max-width: 600px;
+  }
+  select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; width: 100%; }
+
+  .toggle-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .toggle-group { background: #e2e8f0; border-radius: 8px; padding: 4px; display: flex; }
+  
+  .toggle-btn {
+    border: none; background: transparent; padding: 8px 12px;
+    border-radius: 6px; cursor: pointer; font-weight: 600; color: #64748b; font-size: 0.9rem;
+  }
+  .toggle-btn.active { background: white; color: #0d9488; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+  /* IMAGE AREA */
+  .scene-box {
+    width: 100%; max-width: 400px; 
+    height: 260px; 
+    background: white; border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px;
+    border: 4px solid white;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+  }
+  .scene-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; 
+      border-radius: 16px; 
+  }
+  
+  /* GAME AREA */
+  .game-area { width: 100%; max-width: 600px; text-align: center; }
+  .hint { color: #64748b; font-style: italic; margin-bottom: 10px; min-height: 20px; }
+
+  .answer-slot {
+    min-height: 60px; background: #fff; border: 2px dashed #cbd5e1;
+    border-radius: 12px; display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 8px; padding: 10px; margin-bottom: 20px;
+  }
+  .answer-slot.correct { border-color: #22c55e; background: #dcfce7; border-style: solid; }
+
+  .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .word {
+    background: white; border: 1px solid #cbd5e1; border-bottom: 3px solid #cbd5e1;
+    padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; user-select: none;
+  }
+  .word:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .feedback { height: 30px; font-weight: bold; color: #22c55e; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Kei hea te pea?</h1>
+<p>Select settings to match the video transcript structure.</p>
+
+<div class="controls">
+  <select id="location" onchange="init()">
+    <option value="roto">Roto (Inside house)</option>
+    <option value="runga">Runga (On table)</option>
+    <option value="muri">Muri (Behind table)</option>
+    <option value="taha">Taha (Beside table)</option>
+    <option value="waenganui">Waenganui (Between table & chair)</option>
+  </select>
+
+  <div class="toggle-row">
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setMode('tense', 'Kei', this)">Kei (Now)</button>
+      <button class="toggle-btn" onclick="setMode('tense', 'I', this)">I (Past)</button>
+    </div>
+
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setMode('struct', 'standard', this)">Standard</button>
+      <button class="toggle-btn" onclick="setMode('struct', 'switched', this)">Switched</button>
+      <button class="toggle-btn" onclick="setMode('struct', 'short', this)">Short</button>
+    </div>
+  </div>
+</div>
+
+<div id="scene" class="scene-box"></div>
+
+<div class="game-area">
+  <div id="hint" class="hint"></div>
+  <div id="answer" class="answer-slot"></div>
+  <div id="bank" class="word-bank"></div>
+  <div id="feedback" class="feedback"></div>
+</div>
+
+<script>
+// --- DATA BASED ON TRANSCRIPT ---
+const locations = {
+  roto: { 
+    loc: 'roto', 
+    container: ['te', 'whare'], 
+    eng: 'inside the house', 
+    image: 'bear_roto.png' 
+  },
+  runga: { 
+    loc: 'runga', 
+    container: ['te', 'tēpu'], 
+    eng: 'on the table', 
+    image: 'bear_runga.png' 
+  },
+  muri: { 
+    loc: 'muri', 
+    container: ['te', 'tēpu'], 
+    eng: 'behind the table', 
+    image: 'bear_muri.png' 
+  },
+  taha: { 
+    loc: 'te taha', 
+    container: ['te', 'tēpu'], 
+    eng: 'beside the table', 
+    image: 'bear_taha.png' 
+  },
+  waenganui: { 
+    loc: 'waenganui', 
+    container: ['te', 'tēpu', 'me', 'te', 'tūru'], 
+    eng: 'between the table and the chair', 
+    image: 'bear_waenganui.png' 
+  }
+};
+
+let state = {
+  loc: 'roto',
+  tense: 'Kei',
+  struct: 'standard', // standard, switched, short
+  built: [],
+  target: []
+};
+
+function getParticle(loc) {
+    if (loc === 'muri' || loc === 'taha') {
+        return 'o'; 
+    }
+    return 'i';
+}
+
+function setMode(key, val, btn) {
+  state[key] = val;
+  btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  init();
+}
+
+function init() {
+  state.loc = document.getElementById('location').value;
+  const d = locations[state.loc];
+  const particle = getParticle(state.loc);
+  
+  let parts = [];
+  
+  if (state.struct === 'short') {
+    parts = [state.tense, d.loc];
+  } 
+  else if (state.struct === 'standard') {
+    parts.push(state.tense);
+    parts.push(d.loc);
+    
+    if (state.loc !== 'waenganui') { 
+        parts.push(particle); 
+    } else {
+        parts.push('i'); 
+    }
+    
+    parts.push(...d.container);
+    parts.push('te', 'pea');
+  } 
+  else if (state.struct === 'switched') {
+    parts.push(state.tense);
+    parts.push(d.loc);
+    parts.push('te', 'pea');
+    
+    if (state.loc !== 'waenganui') {
+        parts.push(particle); 
+    } else {
+        parts.push('i'); 
+    }
+    
+    parts.push(...d.container);
+  }
+
+  // --- CAPITALISATION FIX ---
+  let targetWords = parts.map(w => w.toLowerCase());
+  if (targetWords.length > 0) {
+    targetWords[0] = state.tense; 
+  }
+
+  state.target = targetWords;
+  state.built = [];
+  
+  // English Hint
+  const time = state.tense.toLowerCase() === 'kei' ? 'is' : 'was';
+  document.getElementById('hint').textContent = `The bear ${time} ${d.eng}.`;
+
+  renderGame();
+  drawImageScene(d.image); 
+}
+
+function renderGame() {
+  const bank = document.getElementById('bank');
+  const ans = document.getElementById('answer');
+  bank.innerHTML = '';
+  ans.innerHTML = '';
+  document.getElementById('feedback').textContent = '';
+  ans.className = 'answer-slot';
+
+  // 1. Render Answer Slot
+  state.built.forEach((word, idx) => {
+    const el = makeWord(word, () => {
+      state.built.splice(idx, 1);
+      renderGame();
+    });
+    ans.appendChild(el);
+  });
+
+  // 2. Render Bank (Available words)
+  let pool = [...state.target];
+  state.built.forEach(w => {
+    let w_lower = w.toLowerCase();
+    const i = pool.findIndex((pw, idx) => {
+        if (idx === 0) return pw === w; 
+        return pw.toLowerCase() === w_lower;
+    });
+    if(i > -1) pool.splice(i, 1);
+  });
+  
+  // If no words have been placed (state.built.length === 0)
+  if (state.built.length === 0 && pool.length > 0) {
+      const tenseWord = state.target[0];
+      const tenseIndex = pool.indexOf(tenseWord);
+      
+      // Separate the Tense word from the rest of the pool
+      if (tenseIndex !== -1) {
+          pool.splice(tenseIndex, 1);
+          // Shuffle the remaining words
+          pool.sort(() => Math.random() - 0.5);
+          // Re-insert the Tense word at the front
+          pool.unshift(tenseWord);
+      }
+  } else {
+      // If the sentence is started, shuffle everything remaining randomly
+      pool.sort(() => Math.random() - 0.5);
+  }
+
+  // Render the final pool
+  pool.forEach(word => {
+    // Ensure only the Tense word (if it's the first word) is capitalized in the bank display
+    const displayWord = (pool.indexOf(word) === 0 && (word === 'Kei' || word === 'I')) ? word : word.toLowerCase();
+
+    const el = makeWord(displayWord, () => {
+      // Logic to find the correct case/word from state.target when clicked
+      let indexInTarget = state.target.findIndex(tw => 
+          !state.built.includes(tw) && tw.toLowerCase() === word.toLowerCase()
+      );
+
+      if (indexInTarget !== -1) {
+          state.built.push(state.target[indexInTarget]);
+      } else {
+          state.built.push(word); 
+      }
+      
+      renderGame();
+      checkWin();
+    });
+    bank.appendChild(el);
+  });
+}
+
+function makeWord(txt, action) {
+  const d = document.createElement('div');
+  d.className = 'word';
+  d.textContent = txt;
+  d.onclick = action;
+  return d;
+}
+
+function checkWin() {
+  if (state.built.join(' ') === state.target.join(' ')) {
+    document.getElementById('answer').classList.add('correct');
+    document.getElementById('feedback').textContent = "Ka rawe! (Excellent!)";
+  }
+}
+
+// --- IMAGE DRAWING FUNCTION (SIMPLE AND CORRECTED) ---
+function drawImageScene(imageFilename) {
+  const sceneBox = document.getElementById('scene');
+  const d = locations[state.loc];
+  
+  // Use the filename directly, as confirmed to be in the same folder.
+  const imageUrl = 'https://kumikupu.web.app/KumiKupu_code/images/' + imageFilename; 
+  
+  // Use the clear English description for the alt text.
+  sceneBox.innerHTML = `<img src="${imageUrl}" alt="Bear ${d.eng}">`;
+}
+
+// Start running the game logic when the page loads
+init();
+</script>
+</body>
+</html>

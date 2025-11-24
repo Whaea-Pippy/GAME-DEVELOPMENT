@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="utf-8">
+<title>Kei hea te Pea? | Te Reo Māori Locatives</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0d9488;
+    --primary-dark: #0f766e;
+    --accent: #f59e0b;
+    --bg: #f0fdfa;
+    --surface: #ffffff;
+    --text: #334155;
+    --border: #cbd5e1;
+    --wrong: #ef4444;
+    --correct: #22c55e;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: 'Fredoka', system-ui, sans-serif;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Layout */
+  .header {
+    background: var(--surface);
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  
+  h1 { margin: 0; color: var(--primary-dark); font-size: 1.8rem; }
+  .subtitle { color: #64748b; font-size: 0.9rem; margin-top: 5px; }
+
+  .main-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Scene Card */
+  .scene-card {
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+    height: 300px;
+    border: 4px solid var(--surface);
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: white;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+
+  select {
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+  }
+  select:focus { border-color: var(--primary); }
+
+  .mode-btn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: none;
+    background: #e2e8f0;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-btn.active {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  /* Sentence Builder Area */
+  .game-area {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  .hint-text {
+    color: #94a3b8;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+
+  .answer-slot {
+    min-height: 70px;
+    background: #f1f5f9;
+    border-radius: 16px;
+    border: 2px dashed var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
+    transition: 0.3s;
+  }
+  
+  .answer-slot.correct { border-color: var(--correct); background: #dcfce7; }
+  .answer-slot.wrong { border-color: var(--wrong); background: #fee2e2; animation: shake 0.4s; }
+
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    min-height: 60px;
+  }
+
+  .word-chip {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-bottom-width: 4px;
+    padding: 10px 18px;
+    border-radius: 14px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s, background 0.2s;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .word-chip:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .word-chip:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+  .check-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 0 #d97706;
+    transition: 0.2s;
+  }
+  .check-btn:active { transform: translateY(4px); box-shadow: none; }
+  .check-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* SVG Styles */
+  svg { width: 100%; height: 100%; }
+  .bear-group { transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+
+  /* Feedback Overlay */
+  .feedback-msg {
+    height: 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  .feedback-msg.success { color: var(--correct); }
+
+  /* Mobile tweaks */
+  @media (max-width: 600px) {
+    .scene-card { height: 220px; }
+    .word-chip { padding: 8px 12px; font-size: 1rem; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Kei hea te pea?</h1>
+  <div class="subtitle">Where is the bear? Learn locatives in Te Reo Māori.</div>
+</header>
+
+<div class="main-container">
+  
+  <div class="controls">
+    <select id="locationSelect">
+      <option value="whare">Roto (Inside)</option>
+      <option value="table">Raro (Under)</option>
+      <option value="chair">Runga (On top)</option>
+      <option value="outside">Waho (Outside)</option>
+      <option value="front">Mua (In front)</option>
+    </select>
+    
+    <div style="display:flex; gap:5px;">
+      <button class="mode-btn active" onclick="setMode('full', this)">Full</button>
+      <button class="mode-btn" onclick="setMode('short', this)">Short</button>
+      <button class="mode-btn" onclick="setMode('past', this)">Past</button>
+    </div>
+  </div>
+
+  <div id="scene" class="scene-card">
+    </div>
+
+  <div class="game-area">
+    <div id="englishHint" class="hint-text">The bear is inside the house.</div>
+    
+    <div id="answerSlot" class="answer-slot"></div>
+    
+    <div id="wordBank" class="word-bank"></div>
+
+    <div id="feedback" class="feedback-msg"></div>
+
+    <button id="checkBtn" class="check-btn" onclick="checkAnswer()">Karawhiua! (Check)</button>
+    <button id="resetBtn" class="check-btn" onclick="initRound()" style="background:#64748b; box-shadow: 0 4px 0 #475569; display:none;">Anō (Again)</button>
+  </div>
+
+</div>
+
+<script>
+/* --- DATA --- */
+const locations = {
+  whare:   { p: "te whare", l: "roto", eng: "inside the house", x: 100, y: 135 },
+  table:   { p: "te tēpu",  l: "raro", eng: "under the table",  x: 100, y: 180 },
+  chair:   { p: "te tūru",  l: "runga", eng: "on the chair",    x: 100, y: 80 },
+  outside: { p: "te whare", l: "waho", eng: "outside the house",x: 160, y: 135 },
+  front:   { p: "te whare", l: "mua",  eng: "in front of the house", x: 100, y: 180 }
+};
+
+/* --- STATE --- */
+let currentLocKey = 'whare';
+let currentMode = 'full';
+let targetWords = [];
+let currentAnswer = [];
+
+/* --- TEMPLATES --- */
+const templates = {
+  full:  (l, p) => ["Kei", l, "i", p, "te", "pea"],
+  short: (l, p) => ["Kei", l, "i", p],
+  past:  (l, p) => ["I", l, "i", p, "te", "pea"]
+};
+
+/* --- INIT --- */
+const locSelect = document.getElementById('locationSelect');
+locSelect.addEventListener('change', (e) => {
+  currentLocKey = e.target.value;
+  initRound();
+});
+
+function setMode(mode, btn) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  initRound();
+}
+
+function initRound() {
+  // Reset UI
+  document.getElementById('answerSlot').innerHTML = '';
+  document.getElementById('answerSlot').classList.remove('correct', 'wrong');
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('checkBtn').style.display = 'inline-block';
+  document.getElementById('resetBtn').style.display = 'none';
+  currentAnswer = [];
+
+  // Get Data
+  const data = locations[currentLocKey];
+  
+  // Set English Hint
+  let engText = "";
+  if(currentMode === 'past') engText = `The bear was ${data.eng}.`;
+  else engText = `The bear is ${data.eng}.`;
+  document.getElementById('englishHint').textContent = engText;
+
+  // Generate Target Sentence
+  targetWords = templates[currentMode](data.l, data.p);
+
+  // Setup Word Bank (Shuffle)
+  const bankWords = [...targetWords].sort(() => Math.random() - 0.5);
+  const bankEl = document.getElementById('wordBank');
+  bankEl.innerHTML = '';
+  
+  bankWords.forEach((word, index) => {
+    const chip = createChip(word, index);
+    bankEl.appendChild(chip);
+  });
+
+  drawScene();
+}
+
+function createChip(text, id) {
+  const div = document.createElement('div');
+  div.className = 'word-chip';
+  div.textContent = text;
+  div.dataset.id = id; // unique ID for handling duplicates if any
+  
+  div.onclick = function() {
+    const slot = document.getElementById('answerSlot');
+    const bank = document.getElementById('wordBank');
+    
+    // If in bank, move to slot
+    if (this.parentNode === bank) {
+      slot.appendChild(this);
+      currentAnswer.push(text);
+    } 
+    // If in slot, move back to bank
+    else {
+      bank.appendChild(this);
+      // Remove first instance of this word from currentAnswer array
+      const idx = currentAnswer.indexOf(text);
+      if (idx > -1) currentAnswer.splice(idx, 1);
+    }
+  };
+  return div;
+}
+
+function checkAnswer() {
+  const slot = document.getElementById('answerSlot');
+  const feedback = document.getElementById('feedback');
+  
+  // Simple array comparison
+  const isCorrect = JSON.stringify(currentAnswer) === JSON.stringify(targetWords);
+
+  if (isCorrect) {
+    slot.classList.add('correct');
+    feedback.textContent = "Ka rawe! (Excellent!)";
+    feedback.classList.add('success');
+    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display = 'inline-block';
+    confettiEffect();
+  } else {
+    slot.classList.add('wrong');
+    feedback.textContent = "Whakamātau anō (Try again)";
+    setTimeout(() => slot.classList.remove('wrong'), 500);
+  }
+}
+
+/* --- GRAPHICS --- */
+function drawScene() {
+  const d = locations[currentLocKey];
+  const container = document.getElementById('scene');
+  
+  // Define Base House SVG parts
+  const houseBase = `
+    <rect x="0" y="0" width="100%" height="100%" fill="#dbeafe"/>
+    <rect x="0" y="200" width="100%" height="100" fill="#86efac"/>
+    <rect x="40" y="80" width="120" height="100" fill="#fcd34d" stroke="#b45309" stroke-width="4"/>
+    <polygon points="35,80 100,20 165,80" fill="#f87171" stroke="#b91c1c" stroke-width="4"/>
+    <rect x="85" y="130" width="30" height="50" fill="#78350f"/> <rect x="55" y="100" width="20" height="20" fill="#bae6fd" stroke="#0ea5e9" stroke-width="2"/>
+    <rect x="125" y="100" width="20" height="20" fill="#bae6fd" stroke="#0ea5e9" stroke-width="2"/>
+  `;
+
+  const tableScene = `
+    <rect x="0" y="0" width="100%" height="100%" fill="#fff7ed"/>
+    <rect x="0" y="180" width="100%" height="120" fill="#fb923c"/>
+    <rect x="30" y="100" width="140" height="15" rx="5" fill="#7c2d12"/>
+    <rect x="45" y="115" width="15" height="80" fill="#9a3412"/>
+    <rect x="140" y="115" width="15" height="80" fill="#9a3412"/>
+  `;
+
+  const chairScene = `
+    <rect x="0" y="0" width="100%" height="100%" fill="#f0fdfa"/>
+    <rect x="0" y="180" width="100%" height="120" fill="#cbd5e1"/>
+    <rect x="70" y="110" width="60" height="15" fill="#1e293b"/>
+    <rect x="75" y="60" width="50" height="50" fill="#334155"/> <rect x="75" y="125" width="10" height="60" fill="#475569"/>
+    <rect x="115" y="125" width="10" height="60" fill="#475569"/>
+  `;
+
+  let bg = houseBase; // default
+  if (currentLocKey === 'table') bg = tableScene;
+  if (currentLocKey === 'chair') bg = chairScene;
+
+  // The Bear Emoji inside a text group that transforms
+  const bear = `
+    <g class="bear-group" style="transform: translate(${d.x}px, ${d.y}px)">
+      <text x="0" y="0" font-size="60" text-anchor="middle" dominant-baseline="middle">🧸</text>
+    </g>
+  `;
+
+  // Extra props for specific scenes
+  let foreground = '';
+  if (currentLocKey === 'front') {
+     // Just moving bear to front coordinates in standard house scene
+  } 
+
+  container.innerHTML = `<svg viewBox="0 0 200 250">${bg}${bear}${foreground}</svg>`;
+  
+  // Trigger reflow for animation if needed, but SVG transform handles it smoothly
+  setTimeout(() => {
+    const g = container.querySelector('.bear-group');
+    // The transform is set inline, but we can ensure valid render here
+  }, 10);
+}
+
+/* --- UTILS --- */
+function confettiEffect() {
+  // A very simple CSS/JS particle burst
+  const colors = ['#f43f5e', '#3b82f6', '#eab308', '#22c55e'];
+  for(let i=0; i<30; i++) {
+    const p = document.createElement('div');
+    p.style.position = 'fixed';
+    p.style.left = '50%';
+    p.style.top = '50%';
+    p.style.width = '10px';
+    p.style.height = '10px';
+    p.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+    p.style.transition = 'transform 1s ease-out, opacity 1s';
+    p.style.zIndex = '9999';
+    p.style.borderRadius = '50%';
+    document.body.appendChild(p);
+
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = 100 + Math.random() * 200;
+    const tx = Math.cos(angle) * velocity;
+    const ty = Math.sin(angle) * velocity;
+
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(${tx}px, ${ty}px)`;
+      p.style.opacity = '0';
+    });
+    
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+
+// Start
+initRound();
+
+</script>
+</body>
+</html>
