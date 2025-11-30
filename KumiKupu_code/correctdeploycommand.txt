@@ -1,1 +1,4 @@
-cd KumiKupu_code && firebase deploy --only hosting
+I have a file called correctdeploycommand.txt and this is the correct deploy command:
+KumiKupu_code && firebase deploy --only hosting
+Please note you do not need to keep authenticating firebase
+Please remember for next time #1

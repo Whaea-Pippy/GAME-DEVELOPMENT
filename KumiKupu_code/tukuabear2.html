@@ -308,7 +308,7 @@ function drawImageScene(imageFilename) {
   const d = locations[state.loc];
   
   // Use the filename directly, as confirmed to be in the same folder.
-  const imageUrl = 'https://kumikupu.web.app/KumiKupu_code/images/' + imageFilename; 
+  const imageUrl = 'images/' + imageFilename; 
   
   // Use the clear English description for the alt text.
   sceneBox.innerHTML = `<img src="${imageUrl}" alt="Bear ${d.eng}">`;
