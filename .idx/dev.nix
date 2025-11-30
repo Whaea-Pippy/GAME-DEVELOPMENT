@@ -19,21 +19,6 @@
       onCreate = {
         npm-install = "npm install";
       };
-      # Runs every time the workspace is (re)started.
-      onStart = {
-        start-server = "npm run dev";
-      };
-    };
-
-    # Configure a web preview for your application.
-    previews = {
-      enable = true;
-      previews = {
-        web = {
-          command = ["npm" "run" "dev" "--" "--port" "$PORT"];
-          manager = "web";
-        };
-      };
     };
   };
 }
