@@ -90,8 +90,8 @@ const data = {
     select: [
         ["Negating Rerehāngū", "Negating Passive Sentences"],
         ["Tūmahihāngū", "Passive verb"],
-        ["Pūtōmu", "Passive suffixes"],
-        ["Tonga", "The thing the action is done to (object)"],
+        ["pīmuri whakahāngū", "Passive suffixes"],
+        ["Taonga", "The thing the action is done to (object)"],
         ["Kīanga", "The 'by whom' phrase (agent)"],
         ["Tūwāhi", "Negation word (e.g., Kāhore)"],
         ["Tense Marker 'e'", "Tense marker for present/future"],
@@ -101,7 +101,7 @@ const data = {
         ["Negating Rerehāngū", "Negating Passive Sentences"],
         ["Tūmahihāngū", "Passive verb"],
         ["Pūtōmu", "Passive suffixes"],
-        ["Tonga", "The thing the action is done to (object)"],
+        ["Taonga", "The thing the action is done to (object)"],
         ["Kīanga", "The 'by whom' phrase (agent)"],
         ["Tūwāhi", "Negation word (e.g., Kāhore)"],
         ["Affirmative structure", "Passive sentence structure"],
@@ -121,14 +121,14 @@ const data = {
     ],
     // Corresponds to E Tense Sentence Practice (8 pairs required)
     section2: [
-        ["E pangaia ana te pōro e te tamaiti.", "The ball is being thrown by the boy."],
-        ["Kāhore te pōro e pangaia ana e te tamaiti.", "The ball is not being thrown by the boy."],
+        ["E whiua ana te pōro e te tamaiti.", "The ball is being thrown by the boy."],
+        ["Kāhore te pōro e whiua ana e te tamaiti.", "The ball is not being thrown by the boy."],
         ["E kitea ana au e te tāngata.", "I am being seen by the people."],
         ["Kāhore au e kitea ana e te tāngata.", "I am not being seen by the people."],
         ["E tunua ana te kai e Māria.", "The food is being cooked by Maria."],
         ["Kāhore te kai e tunua ana e Māria.", "The food is not being cooked by Maria."],
-        ["E", "Present/Continuous Tense marker"],
-        ["Ana", "Continuous aspect particle"]
+        ["E... ana)", "Present/Continuous Tense marker"],
+        ["whiu", "throw"]
     ],
     // Corresponds to Kia Tense Negation (8 pairs required)
     section3: [
@@ -156,7 +156,7 @@ const data = {
     // Corresponds to Kua Tense Negation (Perfect) (8 pairs required)
     section5: [
         ["Kua (Perfect Tense)", "Has been / Already happened"],
-        ["Kāhore he... i", "Negation structure for Kua tense (uses 'i' instead of 'kua')"],
+        ["Kua haere au ki te marae.", "Kāore ano au kia haere ki te marae."],
         ["Kua mauria te pēke e Hēmi.", "The bag has been carried by Hemi."],
         ["Kāhore he pēke i mauria e Hēmi.", "The bag has not been carried by Hemi."],
         ["Kua pania te pakitara e rāua.", "The wall has been painted by the two of them."],
@@ -164,17 +164,17 @@ const data = {
         ["Kua inumia te wai e te kōtiro.", "The water has been drunk by the girl."],
         ["Kāhore he wai i inumia e te kōtiro.", "The water has not been drunk by the girl."]
     ],
-    // Corresponds to Passive Suffixes (Pūtomu) (8 pairs required)
+    // Corresponds to Passive Suffixes (8 pairs required)
     section6: [
-        ["Pūtomu", "The passive suffixes"],
-        ["Pangaia", "Thrown (passive form of Panga)"],
-        ["Tia", "Common passive suffix"],
-        ["Hia", "Common passive suffix"],
-        ["Ngia", "Common passive suffix"],
-        ["A", "Common passive suffix"],
-        ["Kia", "Passive suffix"],
-        ["Ria", "Passive suffix"]
-    ],
+    ["pīmuri whakahāngū", "The passive suffixes"],
+    ["-tia", "Passive suffix for verbs ending in 't' (kite → kitetia)"],
+    ["-hia", "Passive suffix for verbs ending in 'h' (whakaaro → whakaaro-hia)"],
+    ["-ngia", "Passive suffix for verbs ending in 'ng' (panga → panga-ngia)"],
+    ["-a", "Passive suffix for verbs ending in vowels (hoko → hoko-a)"],
+    ["-ria", "Passive suffix for verbs ending in 'r' (whakaora → whakaora-ria)"],
+    ["-kia", "Passive suffix for some verbs (whakaae → whakaae-kia)"],
+    ["Kitetia", "To be seen (passive form of kite - to see)"]
+],
 
     // Corresponds to Negating Imperatives (Kaua) (8 pairs required)
     section7: [
