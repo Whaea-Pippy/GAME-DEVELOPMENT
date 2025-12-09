@@ -4,7 +4,7 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GENERIC_TOPIC_TITLE_HERE</title>
+<title>Basic Te Reo Māori Kupu (Words)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -56,19 +56,15 @@ body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff;
 <body>
 
 <div class="header-container">
-    <h2>GENERIC_TOPIC_TITLE_HERE</h2>
+    <h2>Basic Te Reo Māori Kupu (Words)</h2>
     <div class="selector-container">
       <select id="category-selector" onchange="updateContent()">
         <option value="select" selected>--- Select ---</option>
         <option value="overview">Overview / Key Examples</option>
-        <option value="section1">SECTION_1_NAME_HERE</option>
-        <option value="section2">SECTION_2_NAME_HERE</option>
-        <option value="section3">SECTION_3_NAME_HERE</option>
-        <option value="section4">SECTION_4_NAME_HERE</option>
-        <option value="section5">SECTION_5_NAME_HERE</option>
-        <option value="section6">SECTION_6_NAME_HERE</option>
-        <option value="section7">SECTION_7_NAME_HERE</option>
-        <option value="section8">SECTION_8_NAME_HERE</option>
+        <option value="section1">Tae - Colours</option>
+        <option value="section2">Ngā Tau - Numbers (1-8)</option>
+        <option value="section3">Atawhai - Simple Greetings</option>
+        <option value="section4">Ngā Wāhanga o te Tinana - Body Parts</option>
       </select>
     </div>
 </div>
@@ -86,37 +82,62 @@ body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff;
 <script>
 // ────────────────── EDIT ONLY THIS DATA BLOCK ──────────────────
 const data = {
-    // This shows when nothing is selected or as the default overview (8 pairs)
+    // Source: Te Aka Māori Dictionary, A Dictionary of the Māori Language (Williams)
+    // Basic objects and nature words for general overview
     overview: [
-        ["REPLACE_WITH_WORD_1", "REPLACE_WITH_TRANSLATION_1"],
-        ["REPLACE_WITH_WORD_2", "REPLACE_WITH_TRANSLATION_2"],
-        ["REPLACE_WITH_WORD_3", "REPLACE_WITH_TRANSLATION_3"],
-        ["REPLACE_WITH_WORD_4", "REPLACE_WITH_TRANSLATION_4"],
-        ["REPLACE_WITH_WORD_5", "REPLACE_WITH_TRANSLATION_5"],
-        ["REPLACE_WITH_WORD_6", "REPLACE_WITH_TRANSLATION_6"],
-        ["REPLACE_WITH_WORD_7", "REPLACE_WITH_TRANSLATION_7"],
-        ["REPLACE_WITH_WORD_8", "REPLACE_WITH_TRANSLATION_8"]
+        ["Rā", "Sun / Day"],
+        ["Moana", "Sea / Ocean"],
+        ["Whare", "House / Building"],
+        ["Awa", "River"],
+        ["Manu", "Bird"],
+        ["Maunga", "Mountain"],
+        ["Iwi", "Tribe / People"],
+        ["Wai", "Water"]
     ],
+    // Source: Te Aka Māori Dictionary - Basic Colours
     section1: [
-        ["WORD_1", "TRANSLATION_1"],
-        ["WORD_2", "TRANSLATION_2"],
-        ["WORD_3", "TRANSLATION_3"],
-        ["WORD_4", "TRANSLATION_4"],
-        ["WORD_5", "TRANSLATION_5"],
-        ["WORD_6", "TRANSLATION_6"],
-        ["WORD_7", "TRANSLATION_7"],
-        ["WORD_8", "TRANSLATION_8"]
+        ["Whero", "Red"],
+        ["Kōwhai", "Yellow"],
+        ["Kākāriki", "Green"],
+        ["Kikorangi", "Blue"],
+        ["Pango", "Black"],
+        ["Mā", "White"],
+        ["Parauri", "Brown"],
+        ["Māwhero", "Pink"]
     ],
+    // Source: Te Aka Māori Dictionary - Numbers
     section2: [
-        ["WORD_9",  "TRANSLATION_9"],
-        // ... add 8+ pairs
+        ["Tahi", "One (1)"],
+        ["Rua", "Two (2)"],
+        ["Toru", "Three (3)"],
+        ["Whā", "Four (4)"],
+        ["Rima", "Five (5)"],
+        ["Ono", "Six (6)"],
+        ["Whitu", "Seven (7)"],
+        ["Waru", "Eight (8)"]
     ],
-    section3: [ /* 8+ pairs */ ],
-    section4: [ /* 8+ pairs */ ],
-    section5: [ /* 8+ pairs */ ],
-    section6: [ /* 8+ pairs */ ],
-    section7: [ /* 8+ pairs */ ],
-    section8: [ /* 8+ pairs */ ]
+    // Source: Te Aka Māori Dictionary - Greetings
+    section3: [
+        ["Kia ora", "Hello / Good health"],
+        ["Mōrena", "Good morning"],
+        ["Haere mai", "Welcome / Come here"],
+        ["Haere rā", "Goodbye (said to someone leaving)"],
+        ["E noho rā", "Goodbye (said to someone staying)"],
+        ["Tēnā koe", "Greetings to you (one person)"],
+        ["Āe", "Yes"],
+        ["Kāo", "No"]
+    ],
+    // Source: Te Aka Māori Dictionary - Body Parts
+    section4: [
+        ["Māhunga", "Head"],
+        ["Ringa", "Hand / Arm"],
+        ["Waewae", "Foot / Leg"],
+        ["Karua", "Eye"],
+        ["Waha", "Mouth"],
+        ["Ihu", "Nose"],
+        ["Taringa", "Ear"],
+        ["Manawa", "Heart / Breath"]
+    ],
 };
 // ────────────────── STOP EDITING HERE ──────────────────
 
@@ -259,13 +280,8 @@ document.getElementById('category-selector').value = 'overview';
 updateContent();
 </script>
 
-<!-- Optional YouTube video (remove or replace as needed) -->
 <div style="text-align:center; margin:40px 0;">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/smJKufNPCvk?si=6reRE-2dTboET2kO" title="Silent How To Video" frameborder="0" allowfullscreen></iframe>
-</div>
-
-<div style="text-align:center; margin-top:20px;">
-  <a href="https://github.com/Whaea-Pippy/GAME-DEVELOPMENT/blob/main/KumiKupu_code/generic.html" target="_blank" style="display: inline-block; background-color: #0b7a75; color: white; padding: 15px 30px; text-decoration: none; font-size: 1.5rem; border-radius: 10px; font-family: 'Poppins', sans-serif;">Link to Code</a>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/n4q0n7F251g" title="Te Reo Māori Lesson 1 - Greetings" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
 
 </body>
