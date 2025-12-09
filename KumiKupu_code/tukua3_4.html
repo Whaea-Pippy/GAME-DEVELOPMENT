@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Te Reo Māori Negation (Rerehāngū)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f9ff; }
+.header-container { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 20px; }
+.header-container h2 { margin: 0; color: #0b7a75; font-size: 2.2rem; }
+
+.selector-container {
+    background-color: #ADD8E6; border: 3px solid #00008B; border-radius: 15px;
+    padding: 5px 15px; display: inline-block;
+}
+#category-selector {
+    min-width: 320px; background: transparent; border: none;
+    font-family: 'Poppins', sans-serif; font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700; color: #333; cursor: pointer; text-align: center; text-align-last: center;
+}
+
+/* Flashcards */
+#flashcards-section {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0;
+}
+#flashcards-section .card {
+  height: 110px; padding: 10px; border: 4px solid #333; border-radius: 12px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  text-align: center; font-weight: bold; font-size: 1.4rem; background: #fff9c4;
+  transition: all 0.6s;
+  /* Added a rule to help prevent single long word/phrase from stretching the grid */
+  word-break: break-word; 
+}
+#flashcards-section .card.flipped { background: #b3e5fc; }
+
+/* Quiz & Matching */
+.quiz-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+.quiz-options button { padding: 12px; font-size: 1.1rem; border-radius: 8px; border: none; cursor: pointer; }
+
+.matched-container { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+.pair { padding: 12px; border-radius: 10px; font-size: 1.4rem; font-weight: bold; text-align: center; }
+
+.matching-container { display: flex; justify-content: space-between; gap: 20px; margin-top: 20px; }
+.matching-box { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+                min-height: 200px; border: 2px dashed #999; padding: 10px; border-radius: 10px; background: #fafafa; }
+.drag-item { height: 60px; border: 2px solid #666; background: #eee; cursor: pointer;
+             display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; 
+             word-break: break-word; /* Ensure matching items also break long words */
+}
+
+@media (max-width: 768px) {
+  #flashcards-section, .quiz-options, .matching-box { grid-template-columns: repeat(2, 1fr); }
+  .matching-container { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="header-container">
+    <h2>Te Reo Māori Negation (Rerehāngū)</h2>
+    <div class="selector-container">
+      <select id="category-selector" onchange="updateContent()">
+        <option value="select" selected>--- Select ---</option>
+        <option value="overview">Passive Negation Overview</option>
+        <option value="section1">E Tense Negation Rules</option>
+        <option value="section2">E Tense Sentence Examples</option>
+        <option value="section3">Kia Tense Sentence Examples</option>
+        <option value="section4">I Tense Sentence Examples</option>
+        <option value="section5">Kua Tense Sentence Examples</option>
+        <option value="section6">Passive Suffixes (Pūtomu)</option>
+        <option value="section7">Negating Imperatives (Kaua)</option>
+        <option value="section8">Negation Partner Summary</option>
+      </select>
+    </div>
+</div>
+
+<h3>Flashcards</h3>
+<div id="flashcards-section"></div>
+
+<h3>Quiz</h3>
+<div id="quiz-section"></div>
+
+<h3>Matching – Click two to pair</h3>
+<div class="matched-container" id="matched-pairs"></div>
+<div id="matching-section"></div>
+
+<script>
+// --- START OF DATA BLOCK (This is the editable content area) ---
+const data = {
+    // Shorter content for flashcards/matching
+    select: [
+        ["Rerehāngū", "Passive Sentences"],
+        ["Tūmahihāngū", "Passive Verb"],
+        ["Pūtōmu", "Passive Suffixes"],
+        ["Tonga", "The object"],
+        ["Kīanga", "The agent ('e' phrase)"],
+        ["Tūwāhi", "Negation word"],
+        ["Kāhore", "Did not / Is not"],
+        ["Kia", "Let / Should Tense Marker"]
+    ],
+    overview: [
+        ["Rerehāngū", "Passive Sentences"],
+        ["Tūmahihāngū", "Passive Verb"],
+        ["Pūtōmu", "Passive Suffixes"],
+        ["Tonga", "The object"],
+        ["Kīanga", "The agent ('e' phrase)"],
+        ["Tūwāhi", "Negation word"],
+        ["Kāhore", "Did not / Is not"],
+        ["Kia", "Let / Should Tense Marker"]
+    ],
+
+    // Shorter content for flashcards/matching
+    section1: [
+        ["Affirmative to Negative", "Transformation"],
+        ["Negation word", "Kāhore"],
+        ["Move the tonga", "To the front"],
+        ["E tense partner", "Still 'e'"],
+        ["I tense partner", "Still 'i'"],
+        ["Emphasis is on", "The tonga (object)"],
+        ["Te Tamaiti", "The boy (agent)"],
+        ["Te Pōro", "The ball (object)"]
+    ],
+    // FULL SENTENCES FOR QUIZ PRACTICE
+    section2: [
+        ["E pangaia ana te pōro e te tamaiti.", "The ball is being thrown by the boy."],
+        ["Kāhore te pōro e pangaia ana e te tamaiti.", "The ball is not being thrown by the boy."],
+        ["E kitea ana au e te tāngata.", "I am being seen by the people."],
+        ["Kāhore au e kitea ana e te tāngata.", "I am not being seen by the people."],
+        ["E tunua ana te kai e Māria.", "The food is being cooked by Maria."],
+        ["Kāhore te kai e tunua ana e Māria.", "The food is not being cooked by Maria."],
+        ["E (Tense Marker)", "Present/Continuous Tense"],
+        ["Ana (Particle)", "Continuous aspect"]
+    ],
+    // FULL SENTENCES FOR QUIZ PRACTICE
+    section3: [
+        ["Kia hokona e rātou te motokā.", "Let them buy the car (Passive)."],
+        ["Kāhore he motokā kia hokona e rātou.", "Don't let the car be bought by them."],
+        ["Kia karangatia a Hēmi e koe.", "You should call Hemi (Passive)."],
+        ["Kāhore a Hēmi kia karangatia e koe.", "Hemi should not be called by you."],
+        ["Kia tukua e koe te ika.", "You should release the fish."],
+        ["Kāhore he ika kia tukua e koe.", "The fish should not be released by you."],
+        ["Kia Tense", "Let/Should Tense Marker"],
+        ["Kāhore he... kia", "Kia negation structure"]
+    ],
+
+    // FULL SENTENCES FOR QUIZ PRACTICE
+    section4: [
+        ["I tuhia e ia te reta.", "The letter was written by her/him."],
+        ["Kāhore he reta i tuhia e ia.", "The letter was not written by her/him."],
+        ["I kitea e au te whare.", "The house was seen by me."],
+        ["Kāhore he whare i kitea e au.", "The house was not seen by me."],
+        ["I hangaia te waka e rātou.", "The canoe was made by them."],
+        ["Kāhore he waka i hangaia e rātou.", "The canoe was not made by them."],
+        ["I (Past Tense)", "Past Tense Marker"],
+        ["Kāhore he... i", "I tense negation structure"]
+    ],
+    // FULL SENTENCES FOR QUIZ PRACTICE
+    section5: [
+        ["Kua mauria te pēke e Hēmi.", "The bag has been carried by Hemi."],
+        ["Kāhore he pēke i mauria e Hēmi.", "The bag has not been carried by Hēmi."],
+        ["Kua pania te pakitara e rāua.", "The wall has been painted by the two of them."],
+        ["Kāhore he pakitara i pania e rāua.", "The wall has not been painted by the two of them."],
+        ["Kua inumia te wai e te kōtiro.", "The water has been drunk by the girl."],
+        ["Kāhore he wai i inumia e te kōtiro.", "The water has not been drunk by the girl."],
+        ["Kua (Perfect Tense)", "Has happened / Completed"],
+        ["Use 'i' to negate Kua", "Must change 'kua' to 'i' in negation"]
+    ],
+    // Shorter content for flashcards/matching
+    section6: [
+        ["Pangaia", "Thrown (Panga)"],
+        ["-tia", "Passive suffix"],
+        ["-hia", "Passive suffix"],
+        ["-ngia", "Passive suffix"],
+        ["-a", "Passive suffix"],
+        ["-kia", "Passive suffix"],
+        ["-ria", "Passive suffix"],
+        ["Tuhia", "Written (Tuhi)"]
+    ],
+
+    // Shorter content for flashcards/matching
+    section7: [
+        ["Negating instructions", "Negative Imperative"],
+        ["Kaua e", "Don't (Structure)"],
+        ["Kaua", "Don't (word)"],
+        ["Whangainga", "Feed (Affirmative)"],
+        ["Kaua e whangaingia", "Don't feed (Negative)"],
+        ["Kia hokona te rīwai", "Buy the potato"],
+        ["Kaua e hokona te rīwai", "Don't buy the potato"],
+        ["Waea atu ki a Māria", "Call Maria"]
+    ],
+    // Shorter content for flashcards/matching
+    section8: [
+        ["E Tense", "Negated by Kāhore + E"],
+        ["I Tense", "Negated by Kāhore he + I"],
+        ["Kua Tense", "Negated by Kāhore he + I"],
+        ["Kia Tense", "Negated by Kāhore he + Kia"],
+        ["Imperative", "Negated by Kaua + E"],
+        ["Te Pōro", "The ball"],
+        ["He waka", "A canoe"],
+        ["Au", "I / Me"]
+    ]
+};
+// --- END OF DATA BLOCK ---
+
+let selectedWords = [];
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function showFlashcards() {
+  const container = document.getElementById('flashcards-section');
+  container.innerHTML = '';
+  if (selectedWords.length === 0) return;
+  selectedWords.forEach(row => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.textContent = row[0];
+    card.onclick = () => {
+      card.classList.toggle('flipped');
+      card.textContent = card.classList.contains('flipped') ? row[1] : row[0];
+    };
+    container.appendChild(card);
+  });
+}
+
+function showQuiz() {
+  const container = document.getElementById('quiz-section');
+  container.innerHTML = '';
+  if (selectedWords.length < 4) return;
+
+  selectedWords.forEach((row, i) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'quiz-question';
+    qDiv.innerHTML = `<b>${row[0]}</b>`;
+    const optsDiv = document.createElement('div');
+    optsDiv.className = 'quiz-options';
+
+    const allTranslations = Object.values(data).flat().map(p => p[1]);
+    const distractors = [];
+    while (distractors.length < 3) {
+      const rand = allTranslations[Math.floor(Math.random() * allTranslations.length)];
+      if (rand !== row[1] && !distractors.includes(rand)) distractors.push(rand);
+    }
+    const options = shuffleArray([row[1], ...distractors]);
+
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (opt === row[1]) btn.style.backgroundColor = 'lightgreen';
+        else btn.style.backgroundColor = 'lightcoral';
+        optsDiv.querySelectorAll('button').forEach(b => b.disabled = true);
+      };
+      optsDiv.appendChild(btn);
+    });
+    qDiv.appendChild(optsDiv);
+    container.appendChild(qDiv);
+  });
+}
+
+function showMatching() {
+  const section = document.getElementById('matching-section');
+  const matched = document.getElementById('matched-pairs');
+  section.innerHTML = ''; matched.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'matching-container';
+  const left = document.createElement('div'); left.className = 'matching-box';
+  const right = document.createElement('div'); right.className = 'matching-box';
+  wrapper.append(left, right);
+  section.appendChild(wrapper);
+
+  const māori = selectedWords.map(p => p[0]);
+  const english = shuffleArray(selectedWords.map(p => p[1]));
+
+  let first = null;
+  const colors = ['#ff9e9e','#ffd89e','#fff599','#b5ffbd','#99f2ff','#d0bbff','#ffb3ff','#ff99cc'];
+
+  [...māori, ...english].forEach((word, i) => {
+    const box = document.createElement('div');
+    box.className = 'drag-item';
+    box.textContent = word;
+    box.dataset.word = word;
+    (i < māori.length ? left : right).appendChild(box);
+
+    box.onclick = () => {
+      if (box.style.backgroundColor) return;
+      if (!first) {
+        first = box;
+        box.style.border = '4px solid #0066ff';
+      } else if (first !== box) {
+        const leftWord = first.parentElement === left ? first.dataset.word : box.dataset.word;
+        const rightWord = first.parentElement === right ? first.dataset.word : box.dataset.word;
+        const correct = selectedWords.some(p => p[0] === leftWord && p[1] === rightWord);
+
+        if (correct) {
+          const col = colors[matched.children.length % colors.length];
+          [first, box].forEach(el => {
+            el.style.backgroundColor = col;
+            el.style.border = 'none';
+            el.onclick = null;
+          });
+          const chip = document.createElement('div');
+          chip.className = 'pair';
+          chip.style.backgroundColor = col;
+          chip.innerHTML = `${leftWord} <span class="sep">↔</span> ${rightWord}`;
+          matched.appendChild(chip);
+        } else {
+          first.style.border = box.style.border = '4px solid red';
+          setTimeout(() => {
+            first.style.border = box.style.border = '2px solid #666';
+          }, 600);
+        }
+        first.style.border = '2px solid #666';
+        first = null;
+      } else {
+        first.style.border = '2px solid #666';
+        first = box;
+        box.style.border = '4px solid #0066ff';
+      }
+    };
+  });
+}
+
+function updateContent() {
+  const cat = document.getElementById('category-selector').value;
+  selectedWords = data[cat] ? shuffleArray([...data[cat]]) : [];
+  document.getElementById('matched-pairs').innerHTML = '';
+  showFlashcards();
+  showQuiz();
+  showMatching();
+}
+
+// Start with overview
+document.getElementById('category-selector').value = 'overview';
+updateContent();
+</script>
+
+<div style="text-align:center; margin:40px 0;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/Cw_v7_xX9tI" title="Ngā Whakakāhaore Part Ten - Negating Rerehāngū" frameborder="0" allowfullscreen></iframe>
+</div>
+
+</body>
+</html>

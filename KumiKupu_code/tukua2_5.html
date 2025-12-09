@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="mi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Te Reo Māori — Kei te … Sentence Activities</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --card:#ffffff;--muted:#6b7280;--accent1:#ff6b6b;--accent2:#ffb86b;--accent3:#ffd36b;
+    --accent4:#9be15d;--accent5:#6bd3ff;--accent6:#b28bff;--success:#1e8f4a;--danger:#c02929;
+    --shadow:0 6px 18px rgba(15,23,42,0.08);
+  }
+  html,body{height:100%;background:linear-gradient(180deg,#f0fbff 0%,#fbf7ff 100%);margin:0;color:#062a3b;font-family:'Nunito',sans-serif}
+  .wrap{max-width:980px;margin:20px auto;padding:20px}
+  header h1{font-family:'Poppins',sans-serif;font-size:1.9rem;margin:0 0 24px;text-align:center}
+  .nav{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+  .nav button{padding:14px 22px;border-radius:999px;border:0;color:white;font-weight:700;cursor:pointer;font-size:1rem}
+  .tag-1{background:linear-gradient(90deg,var(--accent1),var(--accent2))}
+  .tag-2{background:linear-gradient(90deg,var(--accent3),var(--accent4))}
+  .tag-3{background:linear-gradient(90deg,var(--accent5),var(--accent6))}
+  .card{background:var(--card);padding:24px;border-radius:16px;box-shadow:var(--shadow);margin-bottom:20px}
+  .section-title{font-size:1.5rem;font-weight:700;margin-bottom:16px}
+  .small{font-size:0.9rem;color:var(--muted)}
+  .hidden{display:none}
+  .flashcard{min-height:180px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;
+    border-radius:16px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;text-align:center;padding:20px}
+  .words-grid,.gap-pool{display:flex;flex-wrap:wrap;gap:14px;margin:20px 0}
+  .word-btn,.gap-btn{padding:14px 22px;border-radius:999px;background:#f0f5ff;border:2px solid transparent;
+    font-weight:700;cursor:pointer;transition:all .2s;min-width:60px;text-align:center}
+  .word-btn.selected,.gap-btn.used{opacity:0.5;transform:scale(0.95);pointer-events:none}
+  .answer-area{min-height:80px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:20px;border-radius:14px;
+    border:2px dashed #c0ccda;background:#f8fbff;transition:all .4s;font-size:1.5rem;font-weight:600}
+  .answer-area.correct{border-color:var(--success);background:linear-gradient(90deg,#e6f7ea,#f0fff4)}
+  .answer-chip{background:#e0f2ff;padding:12px 18px;border-radius:999px;font-weight:700;cursor:pointer}
+  .gap-blank{display:inline-block;min-width:130px;height:56px;line-height:56px;text-align:center;border-bottom:5px solid #444;
+    margin:0 8px;background:rgba(100,150,255,0.1);border-radius:8px;vertical-align:middle}
+  .feedback{margin-top:16px;font-weight:700;font-size:1.2rem;text-align:center}
+  .correct-badge{color:var(--success)}
+  .choice{padding:16px 20px;border-radius:12px;background:#f6fbff;cursor:pointer;border:2px solid transparent;
+    font-weight:700;margin-bottom:12px;font-size:1.1rem}
+  .choice.correct{background:linear-gradient(90deg,#dff7e6,#bff1cf);border-color:var(--success)}
+  .choice.wrong{background:linear-gradient(90deg,#ffdede,#ffcccc);border-color:var(--danger)}
+  .type-btn{padding:20px;border-radius:14px;border:0;font-weight:700;font-size:1.15rem;cursor:pointer;
+    background:#f0f5ff;transition:all .2s;margin-bottom:14px;width:100%;text-align:left;line-height:1.4}
+  .type-btn.correct{background:linear-gradient(90deg,#9be15d,#6bd3ff);color:white}
+  .type-btn.wrong{background:#ffd6d6;color:var(--danger)}
+  .group{margin-bottom:36px}
+  .group h3{font-size:1.5rem;margin:0 0 10px;color:#1e40af}
+  .group p{margin:0 0 20px;color:#444;font-size:1.05rem;line-height:1.5;background:#f0f8ff;padding:16px;border-radius:12px}
+  .mini-flash{cursor:pointer;padding:18px;border-radius:12px;background:#f8fbff;margin:10px 0;
+    box-shadow:var(--shadow);font-weight:600;transition:all .2s;font-size:1.2rem;text-align:center}
+  .mini-flash:hover{background:#e6f0ff}
+  @media (max-width:520px){
+    .flashcard{font-size:1.5rem}
+    .word-btn,.gap-btn,.type-btn,.choice{font-size:1rem;padding:12px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>Te Reo Māori — Kei te … Sentence Activities</h1></header>
+
+  <div class="nav" role="tablist">
+    <button class="tag-1" data-view="flash">Flashcards</button>
+    <button class="tag-2" data-view="mcq">MCQ</button>
+    <button class="tag-3" data-view="fill">Fill the Gaps</button>
+    <button class="tag-1" data-view="word">Word Order</button>
+    <button class="tag-2" data-view="type">Sentence Type</button>
+    <button class="tag-3" data-view="list">List All</button>
+  </div>
+
+    <section id="flash" class="card">
+    <div class="section-title">Flashcards <span class="small">— tap to flip</span></div>
+    <div id="flashcard" class="flashcard">Tap to start</div>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:20px">
+      <button class="tag-1" id="prevFlash">Previous</button>
+      <button class="tag-3" id="shuffleFlash">Shuffle</button>
+      <button class="tag-1" id="nextFlash">Next</button>
+    </div>
+  </section>
+
+    <section id="mcq" class="card hidden">
+    <div class="section-title">Multiple Choice</div>
+    <div id="mcq-english" style="font-weight:700;font-size:1.4rem;margin-bottom:20px"></div>
+    <div id="mcq-choices"></div>
+    <div id="mcq-feedback" class="feedback"></div>
+    <div style="margin-top:20px;text-align:center"><button class="tag-3" id="nextMcq">Next Question</button></div>
+  </section>
+
+    <section id="fill" class="card hidden">
+    <div class="section-title">Fill the Gaps <span class="small">— tap words to fill blanks</span></div>
+    <div id="fill-english" style="font-weight:700;font-size:1.4rem;margin-bottom:20px"></div>
+    <div id="fill-sentence" class="answer-area"></div>
+    <div id="fill-pool" class="gap-pool"></div>
+    <div style="margin-top:20px;display:flex;gap:14px;justify-content:center">
+      <button class="tag-1" id="resetFill">Reset</button>
+      <button class="tag-3" id="nextFill">Next</button>
+    </div>
+    <div id="fill-feedback" class="feedback"></div>
+  </section>
+
+    <section id="word" class="card hidden">
+    <div class="section-title">Word Order <span class="small">— tap words in correct order</span></div>
+    <div id="word-english" style="font-weight:700;font-size:1.4rem;margin-bottom:20px"></div>
+    <div id="word-words" class="words-grid"></div>
+    <div id="word-answer" class="answer-area"></div>
+    <div style="margin-top:20px;display:flex;gap:14px;justify-content:center">
+      <button class="tag-1" id="resetWord">Reset</button>
+      <button class="tag-3" id="nextWord">Next</button>
+    </div>
+    <div id="word-feedback" class="feedback"></div>
+  </section>
+
+    <section id="type" class="card hidden">
+    <div class="section-title">Sentence Type</div>
+    <div style="margin-bottom:24px">
+      <div class="small">Māori sentence:</div>
+      <div id="type-sentence" style="font-weight:700;font-size:1.6rem;padding:20px;background:#f0f8ff;border-radius:14px"></div>
+    </div>
+    <div id="type-options"></div>
+    <div style="margin-top:24px;display:flex;gap:14px;justify-content:center">
+      <button class="tag-1" id="resetType">Reset</button>
+      <button class="tag-3" id="nextType">Next</button>
+    </div>
+    <div id="type-feedback" class="feedback"></div>
+  </section>
+
+    <section id="list" class="card hidden">
+    <div class="section-title">All Sentences Grouped by Type</div>
+    <div id="list-groups"></div>
+  </section>
+</div>
+
+<script>
+const items = [
+ {mi:"Kei te pīrangi ahau i te kai", en:"I am wanting the food", type:"Reremahi Wheako"},
+ {mi:"Kei te whakaaro ia i tēnei mea", en:"She/He is thinking this thing", type:"Reremahi Wheako"},
+ {mi:"Kei te aroha mātou i tō mātou whānau", en:"We are loving our family", type:"Reremahi Wheako"},
+ {mi:"Kei te mōhio te kaiako i te whakautu", en:"The teacher is knowing the answer", type:"Reremahi Wheako"},
+ {mi:"Kei te maumahara ahau i te wāhi", en:"I am remembering the place", type:"Reremahi Wheako"},
+ {mi:"Kei te whakapono rātou i te kōrero", en:"They are believing the story", type:"Reremahi Wheako"},
+ {mi:"Kei te tūmanako ia i tētahi rā pai", en:"She/He is hoping for a good day", type:"Reremahi Wheako"},
+ {mi:"Kei te mārama te ākonga i te kaupapa", en:"The student is understanding the topic", type:"Reremahi Wheako"},
+ {mi:"Kei te whaiwhakaaro koutou i te tikanga", en:"You (pl) are considering the custom/rule", type:"Reremahi Wheako"},
+ {mi:"Kei te huatau ahau i te pono", en:"I am realising the truth", type:"Reremahi Wheako"},
+ {mi:"Kei te pīrangi ia i te tiakarete", en:"She/He is wanting the chocolate", type:"Reremahi Wheako"},
+ {mi:"Kei te aroha ahau i a koe", en:"I am loving you", type:"Reremahi Wheako"},
+ {mi:"Kei te maumahara ia i tōna ingoa", en:"She/He is remembering her/his name", type:"Reremahi Wheako"},
+ {mi:"Kei te mārama rātou i te reo", en:"They are understanding the language", type:"Reremahi Wheako"},
+ {mi:"Kei te whakapono ahau i a rātou", en:"I am believing them", type:"Reremahi Wheako"}
+];
+
+const typeInfo = {
+  "Reremahi Wheako": {name:"Reremahi Wheako — Experience verb",   desc:"Experience/thinking verbs"},
+  "Rereāhua":         {name:"Rereāhua — Stative sentence",         desc:"Describes a feeling or state"},
+  "Reremahi Poro":   {name:"Reremahi Poro — Intransitive action",     desc:"Action with no object"},
+  "Reremahi Whiti":  {name:"Reremahi Whiti — Transitive action",    desc:"Action done to something/someone"}
+};
+
+let order = shuffle([...Array(items.length).keys()]);
+let flashIndex = mcqIndex = fillIndex = wordIndex = typeIndex = 0;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function splitWords(s){return s.trim().split(/\s+/).filter(Boolean)}
+
+document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+function showView(v){
+  document.querySelectorAll('section[id]').forEach(s => s.classList.add('hidden'));
+  document.getElementById(v).classList.remove('hidden');
+  if(v==='list') renderList();
+}
+
+/* ==================== FLASHCARDS ==================== */
+const flashcardEl = document.getElementById('flashcard');
+function renderFlash(){
+  const it = items[order[flashIndex]];
+  flashcardEl.innerHTML = `<div>${it.en}</div>`;
+  flashcardEl.dataset.side = 'front';
+}
+flashcardEl.onclick = () => {
+  const it = items[order[flashIndex]];
+  if(flashcardEl.dataset.side === 'front'){
+    flashcardEl.innerHTML = `<div>${it.mi}</div>`;
+    flashcardEl.dataset.side = 'back';
+  } else renderFlash();
+};
+document.getElementById('prevFlash').onclick = () => {flashIndex = (flashIndex-1+items.length)%items.length; renderFlash();}
+document.getElementById('nextFlash').onclick = () => {flashIndex = (flashIndex+1)%items.length; renderFlash();}
+document.getElementById('shuffleFlash').onclick = () => {order = shuffle([...Array(items.length).keys()]); flashIndex=0; renderFlash();}
+
+/* ==================== MCQ ==================== */
+function renderMcq(){
+  const it = items[order[mcqIndex]];
+  document.getElementById('mcq-english').textContent = it.en;
+  const c = document.getElementById('mcq-choices'); c.innerHTML = '';
+  let opts = [it.mi];
+  while(opts.length < 4){
+    const r = items[Math.floor(Math.random()*items.length)].mi;
+    if(!opts.includes(r)) opts.push(r);
+  }
+  shuffle(opts).forEach(o => {
+    const b = document.createElement('div'); b.className = 'choice'; b.textContent = o;
+    b.onclick = () => {
+      if(b.classList.contains('correct') || b.classList.contains('wrong')) return;
+      document.querySelectorAll('#mcq-choices .choice').forEach(x => x.style.pointerEvents = 'none');
+      if(o === it.mi){
+        b.classList.add('correct');
+        document.getElementById('mcq-feedback').innerHTML = '<span class="correct-badge">Tika! Ka rawe!</span>';
+      } else {
+        b.classList.add('wrong');
+        document.getElementById('mcq-feedback').innerHTML = '<span class="correct-badge">Kāore – try again later</span>';
+      }
+    };
+    c.appendChild(b);
+  });
+  document.getElementById('mcq-feedback').textContent = '';
+}
+document.getElementById('nextMcq').onclick = () => {mcqIndex = (mcqIndex+1)%items.length; renderMcq();};
+
+/* ==================== FILL THE GAPS — EXACTLY LIKE WORD ORDER ==================== */
+let fillPicked = [];
+
+function renderFill(){
+  fillPicked = [];
+  const it = items[order[fillIndex]];
+  document.getElementById('fill-english').textContent = it.en;
+  const words = splitWords(it.mi);
+  const gapCount = Math.min(3, Math.max(1, Math.floor(words.length/3)));
+  const gaps = []; while(gaps.length < gapCount){const i=Math.floor(Math.random()*words.length); if(!gaps.includes(i)) gaps.push(i);}
+  gaps.sort((a,b)=>a-b);
+
+  const sentence = document.getElementById('fill-sentence');
+  const pool = document.getElementById('fill-pool');
+  sentence.innerHTML = ''; pool.innerHTML = '';
+  document.getElementById('fill-feedback').textContent = '';
+  sentence.classList.remove('correct');
+
+  const correctGapWords = gaps.map(i => words[i]);
+  let wordPool = [...correctGapWords];
+  const distractors = items.flatMap(x=>splitWords(x.mi)).filter(w=>!correctGapWords.includes(w));
+  wordPool.push(...shuffle(distractors).slice(0,8));
+  shuffle(wordPool);
+
+  wordPool.forEach(w => {
+    const btn = document.createElement('button');
+    btn.className = 'gap-btn';
+    btn.textContent = w;
+    btn.onclick = () => {
+      if(btn.classList.contains('used')) return;
+      const blank = sentence.querySelector('.gap-blank:not(.filled)');
+      if(blank){
+        blank.textContent = w + ' ';
+        blank.classList.add('filled');
+        btn.classList.add('used');
+        fillPicked.push(w);
+        if(sentence.textContent.trim() === it.mi){
+          sentence.classList.add('correct');
+          document.getElementById('fill-feedback').innerHTML = '<span class="correct-badge">Tika! Ka rawe!</span>';
+          pool.querySelectorAll('button').forEach(b => b.disabled = true);
+        }
+      }
+    };
+    pool.appendChild(btn);
+  });
+
+  words.forEach((w,i) => {
+    if(gaps.includes(i)){
+      const b = document.createElement('span');
+      b.className = 'gap-blank';
+      sentence.appendChild(b);
+    } else sentence.appendChild(document.createTextNode(w + ' '));
+  });
+}
+
+document.getElementById('resetFill').onclick = renderFill;
+document.getElementById('nextFill').onclick = () => {fillIndex = (fillIndex + 1) % items.length; renderFill();};
+
+/* ==================== WORD ORDER ==================== */
+let wordPicked = [];
+function renderWord(){
+  wordPicked = [];
+  const it = items[order[wordIndex]];
+  document.getElementById('word-english').textContent = it.en;
+  const words = splitWords(it.mi);
+  const g = document.getElementById('word-words'), a = document.getElementById('word-answer');
+  g.innerHTML=''; a.innerHTML=''; a.classList.remove('correct');
+  document.getElementById('word-feedback').textContent='';
+
+  shuffle(words.map((w,i)=>({w,i}))).forEach(o => {
+    const b = document.createElement('button'); b.className='word-btn'; b.textContent=o.w;
+    b.onclick = () => {
+      if(b.disabled) return; b.disabled=true; b.classList.add('selected'); wordPicked.push(o.w);
+      const chip = document.createElement('div'); chip.className='answer-chip'; chip.textContent=o.w;
+      chip.onclick = () => {b.disabled=false; b.classList.remove('selected'); a.removeChild(chip); wordPicked=wordPicked.filter(x=>x!==o.w); a.classList.remove('correct');};
+      a.appendChild(chip);
+      if(wordPicked.join(' ') === it.mi){
+        a.classList.add('correct');
+        document.getElementById('word-feedback').innerHTML = '<span class="correct-badge">Tika! Ka mau te wehi!</span>';
+        g.querySelectorAll('button').forEach(x => x.disabled = true);
+      }
+    };
+    g.appendChild(b);
+  });
+}
+document.getElementById('resetWord').onclick = renderWord;
+document.getElementById('nextWord').onclick = () => {wordIndex = (wordIndex + 1) % items.length; renderWord();};
+
+/* ==================== SENTENCE TYPE ==================== */
+function renderType(){
+  const it = items[order[typeIndex]];
+  document.getElementById('type-sentence').textContent = it.mi;
+  const o = document.getElementById('type-options'); o.innerHTML = '';
+  document.getElementById('type-feedback').textContent = '';
+  shuffle(Object.keys(typeInfo)).forEach(k => {
+    const i = typeInfo[k];
+    const b = document.createElement('button');
+    b.className = 'type-btn';
+    b.innerHTML = `<strong>${i.name}</strong><br><span style="font-weight:normal;font-size:1rem">${i.desc}</span>`;
+    b.onclick = () => {
+      o.querySelectorAll('button').forEach(x => x.disabled = true);
+      if(k === it.type){
+        b.classList.add('correct');
+        document.getElementById('type-feedback').innerHTML = '<span class="correct-badge">Tika! Exactly right!</span>';
+      } else {
+        b.classList.add('wrong');
+        const correctBtn = [...o.querySelectorAll('button')].find(x => x.textContent.includes(it.type));
+        if(correctBtn) correctBtn.classList.add('correct');
+        document.getElementById('type-feedback').innerHTML = `<span class="correct-badge">Kāore – correct is ${it.type}</span>`;
+      }
+    };
+    o.appendChild(b);
+  });
+}
+document.getElementById('nextType').onclick = () => {typeIndex = (typeIndex + 1) % items.length; renderType();}
+document.getElementById('resetType').onclick = renderType;
+
+/* ==================== LIST ALL ==================== */
+function renderList(){
+  const c = document.getElementById('list-groups'); c.innerHTML = '';
+  const groups = {};
+  items.forEach(it => {groups[it.type] = groups[it.type] || []; groups[it.type].push(it);});
+  Object.keys(typeInfo).forEach(k => {
+    if(!groups[k]) return;
+    const d = document.createElement('div'); d.className = 'group';
+    d.innerHTML = `<h3>${typeInfo[k].name}</h3><p>${typeInfo[k].desc}</p>`;
+    groups[k].forEach(it => {
+      const card = document.createElement('div'); card.className = 'mini-flash';
+      card.innerHTML = it.mi;
+      card.onclick = () => {
+        card.innerHTML = card.innerHTML === it.mi ?
+          `${it.mi}<br><br><em style="color:#555;font-size:1rem">${it.en}</em>` : it.mi;
+      };
+      d.appendChild(card);
+    });
+    c.appendChild(d);
+  });
+}
+
+/* ==================== INITIALISE ==================== */
+renderFlash(); renderMcq(); renderFill(); renderWord(); renderType(); renderList();
+showView('fill');
+</script>
+</body>
+</html>
