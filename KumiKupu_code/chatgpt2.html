@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Te Haerenga ki te Taiao – Going to the Beach</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* Purple / Orange / Blue happy vibe */
+  :root{
+    --purple:#6a46c1;
+    --orange:#ff9f43;
+    --blue:#2aa3df;
+    --accent:#6a46c1;
+    --text:#2e2e2e;
+    --light:#fbfbff;
+  }
+  body { font-family: 'Poppins', Arial, sans-serif; padding: 20px; background: linear-gradient(180deg,#f6f7ff 0%, #fffaf0 100%); color:var(--text); }
+  .header-container { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 18px; }
+  .header-container h2 { margin: 0; color: var(--purple); font-size: 2.1rem; }
+  .selector-container {
+    background: linear-gradient(90deg,var(--blue),#bfe9ff); border: 3px solid var(--purple); border-radius: 14px;
+    padding: 6px 16px; display: inline-block;
+  }
+  #category-selector {
+    min-width: 320px; background: transparent; border: none;
+    font-family: 'Poppins', sans-serif; font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+    font-weight: 700; color: var(--text); cursor: pointer; text-align: center; text-align-last: center;
+  }
+
+  /* Flashcards */
+  #flashcards-section { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+  .card { height: 110px; padding: 10px; border: 4px solid var(--purple); border-radius: 12px; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; text-align: center;
+          font-weight: 800; font-size: 1.25rem; background: linear-gradient(180deg,var(--light), #fff3e6); transition: all 0.45s; color:var(--text); }
+  .card.flipped { background: linear-gradient(180deg,#e8f6ff,#e9e6ff); color:var(--purple); }
+
+  /* Quiz & Matching */
+  .quiz-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+  .quiz-options button { padding: 12px; font-size: 1.05rem; border-radius: 8px; border: 2px solid var(--orange); cursor: pointer; background: white; font-weight:700; }
+  .matched-container { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+  .pair { padding: 12px; border-radius: 10px; font-size: 1.15rem; font-weight: bold; text-align: center; }
+  .matching-container { display: flex; justify-content: space-between; gap: 20px; margin-top: 20px; }
+  .matching-box { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+                  min-height: 200px; border: 2px dashed #cfcfe1; padding: 10px; border-radius: 10px; background: #fff; }
+
+  .drag-item { height: 60px; border: 2px solid var(--blue); background: #f7fbff; cursor: pointer;
+               display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; border-radius:8px; }
+
+  /* Sentence Builder */
+  #sentence-builder { margin: 34px 0; padding: 18px; background: linear-gradient(180deg,#fff8f0,#f8fbff); border-radius: 14px; border: 3px solid #e6e0ff; }
+  .builder-sentence { background: white; padding: 14px; border-radius: 12px; margin-bottom: 18px; box-shadow: 0 6px 18px rgba(106,70,193,0.06); }
+  .english-prompt { font-weight: 800; font-size: 1.25rem; margin-bottom: 10px; color:var(--purple); }
+  .answer-area, .word-bank {
+    display: flex; flex-wrap: wrap; gap: 10px; min-height: 56px; padding: 12px;
+    border: 2px dashed #ddd; border-radius: 10px; margin-top: 10px; background: #fff;
+  }
+  .answer-area { background: #fcffff; min-height: 72px; }
+  .word {
+    padding: 10px 16px; background: #f3f3ff; border-radius: 10px; cursor: grab;
+    user-select: none; transition: all 0.15s; font-weight: 700; border: 2px solid #e3e0ff;
+  }
+  .word.in-answer { background: var(--orange); color: white; border-color: #ffb86b; }
+  .builder-sentence.correct { background: #e9fff3; border-left: 6px solid #56c06a; }
+
+  @media (max-width: 900px) {
+    #flashcards-section, .quiz-options { grid-template-columns: repeat(2, 1fr); }
+    .matching-container { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header-container">
+  <h2>Te Haerenga ki te Tāone – Going to the Beach</h2>
+  <div class="selector-container">
+    <select id="category-selector" onchange="updateContent()">
+      <option value="select" selected>--- Select ---</option>
+      <option value="overview">Overview / Key Examples</option>
+      <option value="section1">1. Getting ready (Planning)</option>
+      <option value="section2">2. Packing items</option>
+      <option value="section3">3. Travelling to the beach</option>
+      <option value="section4">4. Arriving at the beach</option>
+      <option value="section5">5. Swimming & safety</option>
+      <option value="section6">6. Playing / Activities</option>
+      <option value="section7">7. Eating / Picnic</option>
+      <option value="section8">8. Going home / Finishing up</option>
+    </select>
+  </div>
+</div>
+
+<h3>Flashcards</h3>
+<div id="flashcards-section"></div>
+
+<h3>Quiz</h3>
+<div id="quiz-section"></div>
+
+<h3>Matching – Click two to pair</h3>
+<div class="matched-container" id="matched-pairs"></div>
+<div id="matching-section"></div>
+
+<h3 style="margin-top:40px; color:var(--purple);">Sentence Builder</h3>
+<div id="sentence-builder">
+  <div id="sentences-container"></div>
+</div>
+
+<!-- Optional YouTube video -->
+<div style="text-align:center; margin:40px 0;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/dMfZH7_t1qg?si=GTtW_1CDkXJangBV" title="EXAMPLE How To Video" frameborder="0" allowfullscreen></iframe>
+</div>
+
+<div style="text-align:center; margin-top:20px;">
+  <a href="https://github.com/Whaea-Pippy/GAME-DEVELOPMENT/blob/main/KumiKupu_code/generic_extended.html" target="_blank" 
+     style="display: inline-block; background: linear-gradient(90deg,var(--purple),var(--blue)); color: white; padding: 15px 30px; text-decoration: none; 
+            font-size: 1.1rem; border-radius: 10px; font-family: 'Poppins', sans-serif;">
+    Link to Code
+  </a>
+</div>
+
+<script>
+// ────────────────── EDIT ONLY THESE TWO BLOCKS ──────────────────
+// ────────────────── REPLACE data BLOCK WITH THIS ──────────────────
+const data = {
+  overview: [
+    ["tātahi", "the seaside / the beach"],
+    ["one", "sand / the beach"],
+    ["moana", "sea / ocean"],
+    ["kauhoe / kaukau", "to swim / bathe"],
+    ["ngaru", "wave (surf)"],
+    ["kākahu kaukau", "swimming togs / swimsuit"],
+    ["whānau", "family"],
+    ["kai moana", "seafood / kai from the sea"]
+  ],
+  section1: [ // 1. Getting ready (Planning)
+    ["whakarite", "to prepare / get ready"],
+    ["haere", "to go"],
+    ["whānau", "family"],
+    ["kei te haere?", "Are we going? (phrase)"],
+    ["whakatā", "rest / holiday"],
+    ["tiaki", "to look after / take care"],
+    ["rawe", "great / awesome (colloquial)"],
+    ["pānui", "to check / read (eg weather)"]
+  ],
+  section2: [ // 2. Packing items (corrected)
+    ["kākahu kaukau", "swimming togs / swimsuit"],
+    ["kākahu", "clothes"],
+    ["pēke", "bag"],
+    ["tauera", "towel"],
+    ["pōtae", "hat / sunhat"],
+    ["pani pare tīkākā", "sunscreen / sunblock"],
+    ["kai", "food"],
+    ["ipu wai", "water bottle"]
+  ],
+  section3: [ // 3. Travelling to the beach (small wording cleanups)
+    ["rere / tere", "to travel / go quickly"],
+    ["motokā", "car"],
+    ["pahi", "bus"],
+    ["te ara", "the way / route"],
+    ["tae atu", "arrive / get there"],
+    ["konae", "ticket (if needed)"],
+    ["heke", "get down / alight"],
+    ["katahi ka", "and then / next"]
+  ],
+  section4: [ // 4. Arriving at the beach
+    ["tātahi", "the seaside / the beach"],
+    ["one", "sand"],
+    ["uta", "ashore / on land"],
+    ["tai", "toward the sea / tide"],
+    ["tū", "to stand / to stop"],
+    ["whakarite wāhi", "set up a spot / settle in"],
+    ["kāinga wā", "picnic spot / base (colloquial)"],
+    ["kia tupato", "be careful / take care"]
+  ],
+  section5: [ // 5. Swimming & safety (clarified wording)
+    ["kauhoe", "to swim"],
+    ["kaukau", "to bathe / swim (children)"],
+    ["ngaru", "waves / surf"],
+    ["rāhui", "warning / closure (context dependent)"],
+    ["kākahu kaukau", "swimming togs"],
+    ["tiaki", "look after / watch (someone)"],
+    ["tawhiti", "distance / keep distance (safety)"],
+    ["kia haumaru", "be safe / keep safe"]
+  ],
+  section6: [ // 6. Playing / activities
+    ["tākaro", "to play"],
+    ["ruku", "to dive / plunge"],
+    ["kohikohi pipi", "gather pipi (shellfish)"],
+    ["poi", "ball / toy (context)"],
+    ["hoe", "to paddle / use a paddle / small boat oar"],
+    ["hī ika", "to fish with a line"],
+    ["hanga pāreti", "build a sandcastle"],
+    ["waiata", "song / sing"]
+  ],
+  section7: [ // 7. Eating / picnic
+    ["kai", "food"],
+    ["hākari", "feast / big meal"],
+    ["pīki / pikitia", "picnic (colloquial)"],
+    ["kai moana", "seafood"],
+    ["pātaka", "container / lunchbox"],
+    ["hanga kai", "make food / prepare a picnic"],
+    ["tūpato ki te otaota", "watch for rubbish / keep area tidy"],
+    ["whakawhanaunga", "share / social time"]
+  ],
+  section8: [ // 8. Going home / finishing up
+    ["kohikohi", "collect / pack up"],
+    ["horoi", "wash / clean (eg feet, hands)"],
+    ["hoki ki te kāinga", "return home"],
+    ["whakaweti", "tidy up / put away (colloquial)"],
+    ["kua mutu", "time to go / it's finished"],
+    ["māharahara", "remember / keep in mind"],
+    ["ka kite anō", "see you again"],
+    ["whakawātea", "clear / pack the place"]
+  ]
+};
+
+// ────────────────── REPLACE sentenceBuilderData BLOCK WITH THIS ──────────────────
+const sentenceBuilderData = {
+  overview: [
+    { en: "We are going to the beach.",   te: "Kei te haere mātou ki tātahi." },
+    { en: "Remember to bring your togs.",   te: "Mahara ki te haria ō kākahu kaukau." }
+  ],
+  section1: [
+    { en: "Are you ready to go?",    te: "Kua whakarite koe kia haere?" },
+    { en: "Let's check the weather first.",   te: "Me titiro tātou ki te huarere tuatahi." }
+  ],
+  section2: [
+    { en: "Put your towel and togs in the bag.",    te: "Whakanohohia ō tauera me ō kākahu kaukau ki te pēke." },
+    { en: "Don't forget water and kai.",   te: "Kaua e wareware i te ipu wai me te kai." }
+  ],
+  section3: [
+    { en: "We will drive to the beach.",   te: "Ka haere mātou ki te tātahi mā te motokā." },
+    { en: "Stay in your seat until we stop.",   te: "Noho tonu i tō tūranga kia mutu te haere o te motokā." }
+  ],
+  section4: [
+    { en: "Let's find a spot to set up.",   te: "Me kimi tātou i tētahi wāhi hei whakaturanga." },
+    { en: "Watch your step on the sand.",   te: "Arohia ō waewae i te one." }
+  ],
+  section5: [
+    { en: "Swim between the flags and stay near the lifeguard.",   te: "Kauhoe i waenganui i ngā kara, ā, noho tata ki te kaitiaki." },
+    { en: "Don't go too deep — watch the waves.",   te: "Kaua e hohonu rawa — āta tirohia ngā ngaru." }
+  ],
+  section6: [
+    { en: "Let's build a sandcastle together.",   te: "Me hanga tātou i te pāreti one." },
+    { en: "Who wants to paddle the waka?",   te: "Ko wai e pīrangi ki te hoe i te waka?" }
+  ],
+  section7: [
+    { en: "Time for kai — come eat!",   te: "Wā kai — haere mai ki te kai!" },
+    { en: "Please tidy your rubbish.",   te: "Tēnā, kohia āu paru kia ma te rā." }
+  ],
+  section8: [
+    { en: "Let's pack up and go home.",   te: "Kei te kohikohi tātou, haere ki te kāinga." },
+    { en: "Ka kite anō — what a lovely day!",   te: "Ka kite anō — nē rā he rā pai!" }
+  ]
+};
+// ────────────────── STOP EDITING ──────────────────
+
+let selectedWords = [];
+let currentCategory = 'overview';
+
+function shuffleArray(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function showFlashcards() {
+  const c = document.getElementById('flashcards-section'); c.innerHTML = '';
+  selectedWords.forEach(row => {
+    const card = document.createElement('div'); card.className = 'card'; card.textContent = row[0];
+    card.onclick = () => { card.classList.toggle('flipped'); card.textContent = card.classList.contains('flipped') ? row[1] : row[0]; };
+    c.appendChild(card);
+  });
+}
+
+function showQuiz() {
+  const c = document.getElementById('quiz-section'); c.innerHTML = '';
+  if (selectedWords.length < 4) return;
+  selectedWords.forEach(row => {
+    const q = document.createElement('div'); q.innerHTML = `<b>${row[0]}</b>`;
+    const opts = document.createElement('div'); opts.className = 'quiz-options';
+    const all = Object.values(data).flat().map(p => p[1]);
+    const distractors = []; while (distractors.length < 3) { const r = all[Math.floor(Math.random()*all.length)]; if (r !== row[1] && !distractors.includes(r)) distractors.push(r); }
+    shuffleArray([row[1], ...distractors]).forEach(opt => {
+      const b = document.createElement('button'); b.textContent = opt;
+      b.onclick = () => { b.style.backgroundColor = opt === row[1] ? 'lightgreen' : 'lightcoral'; opts.querySelectorAll('button').forEach(x => x.disabled = true); };
+      opts.appendChild(b);
+    });
+    q.appendChild(opts); c.appendChild(q);
+  });
+}
+
+function showMatching() {
+  const section = document.getElementById('matching-section');
+  const matched = document.getElementById('matched-pairs');
+  section.innerHTML = ''; matched.innerHTML = '';
+  const wrapper = document.createElement('div'); wrapper.className = 'matching-container';
+  const left = document.createElement('div'); left.className = 'matching-box';
+  const right = document.createElement('div'); right.className = 'matching-box';
+  wrapper.append(left, right); section.appendChild(wrapper);
+  const lWords = selectedWords.map(p => p[0]);
+  const rWords = shuffleArray(selectedWords.map(p => p[1]));
+  let first = null;
+  const colors = ['#ffd1dc','#ffe9c9','#fff7a8','#d9ffd1','#ccefff','#e6dbff','#ffd9f0','#ffd7b2'];
+  [...lWords, ...rWords].forEach((word, i) => {
+    const box = document.createElement('div'); box.className = 'drag-item'; box.textContent = word; box.dataset.word = word;
+    (i < lWords.length ? left : right).appendChild(box);
+    box.onclick = function() {
+      if (box.style.backgroundColor) return;
+      if (!first) { first = box; box.style.border = '4px solid #222'; }
+      else if (first !== box) {
+        const l = first.parentElement === left ? first.dataset.word : box.dataset.word;
+        const r = first.parentElement === right ? first.dataset.word : box.dataset.word;
+        const correct = selectedWords.some(p => p[0] === l && p[1] === r);
+        if (correct) {
+          const col = colors[matched.children.length % colors.length];
+          [first, box].forEach(el => { el.style.backgroundColor = col; el.style.border = 'none'; el.onclick = null; });
+          const chip = document.createElement('div'); chip.className = 'pair'; chip.style.backgroundColor = col;
+          chip.innerHTML = `${l} ↔ ${r}`; matched.appendChild(chip);
+        } else {
+          first.style.border = box.style.border = '4px solid red';
+          setTimeout(() => { first.style.border = box.style.border = '2px solid #666'; }, 600);
+        }
+        first.style.border = '2px solid #666'; first = null;
+      }
+    };
+  });
+}
+
+function showSentenceBuilder() {
+  const container = document.getElementById('sentences-container');
+  container.innerHTML = '';
+  const sentences = sentenceBuilderData[currentCategory] || sentenceBuilderData.overview;
+  sentences.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'builder-sentence';
+    div.innerHTML = `
+      <div class="english-prompt">${item.en}</div>
+      <div class="answer-area" data-index="${idx}"></div>
+      <div class="word-bank" data-index="${idx}"></div>
+    `;
+    container.appendChild(div);
+    const correctWords = item.te.trim().split(/\s+/);
+    const shuffled = shuffleArray([...correctWords]);
+    const bank = div.querySelector('.word-bank');
+    shuffled.forEach(word => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = word;
+      span.onclick = () => moveWord(span, div, correctWords);
+      bank.appendChild(span);
+    });
+  });
+}
+
+function moveWord(el, sentenceDiv, correctOrder) {
+  const answerArea = sentenceDiv.querySelector('.answer-area');
+  const bank = sentenceDiv.querySelector('.word-bank');
+  if (el.parentElement === answerArea) {
+    bank.appendChild(el);
+    el.classList.remove('in-answer');
+  } else {
+    answerArea.appendChild(el);
+    el.classList.add('in-answer');
+  }
+  checkIfCorrect(sentenceDiv, correctOrder);
+}
+
+function checkIfCorrect(sentenceDiv, correctOrder) {
+  const answerArea = sentenceDiv.querySelector('.answer-area');
+  const current = Array.from(answerArea.children).map(el => el.textContent);
+  if (current.length === correctOrder.length && current.every((w, i) => w === correctOrder[i])) {
+    sentenceDiv.classList.add('correct');
+  } else {
+    sentenceDiv.classList.remove('correct');
+  }
+}
+
+function updateContent() {
+  const cat = document.getElementById('category-selector').value;
+  currentCategory = cat === 'select' ? 'overview' : cat;
+  selectedWords = data[currentCategory] ? shuffleArray([...data[currentCategory]]) : [];
+  document.getElementById('matched-pairs').innerHTML = '';
+  showFlashcards();
+  showQuiz();
+  showMatching();
+  showSentenceBuilder();
+}
+
+document.getElementById('category-selector').value = 'overview';
+updateContent();
+</script>
+
+</body>
+</html>
