@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="mi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Māori at Home – Page 41</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--o:#E65100;--lo:#F57C00;--r:#BF360C;--e:#8D4004;--c:#FFF3E0;--p:#FFEDD5;--k:#FFCCBC;--t:#3E2723}
+  body{font-family:'Poppins',sans-serif;background:var(--c);color:var(--t);margin:0;padding:20px 10px;line-height:1.6}
+  .header{text-align:center;background:linear-gradient(135deg,var(--o),var(--r));color:white;padding:30px 15px;border-radius:18px;margin-bottom:30px;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+  .header h1{margin:0;font-size:2.7rem}.authors{font-size:1.5rem;margin:8px 0}
+  .page-number{font-size:1.9rem;background:rgba(255,255,255,.3);padding:10px 35px;border-radius:50px;display:inline-block;margin-top:8px}
+  .section-buttons{display:flex;justify-content:center;gap:18px;margin:35px auto;flex-wrap:nowrap;overflow-x:auto;padding:10px 0}
+  .section-btn{flex:1;max-width:280px;padding:18px 8px;font-size:1.45rem;font-weight:600;color:white;background:var(--o);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,.3);transition:all .3s;opacity:.7}
+  .section-btn:hover{opacity:.9;transform:translateY(-5px)}.section-btn.active{opacity:1;background:#FF6D00 !important;transform:scale(1.12);box-shadow:0 0 25px #FF6D00,0 10px 20px rgba(0,0,0,.4) !important;font-weight:900}
+  h3{color:var(--r);border-bottom:5px solid var(--o);padding-bottom:8px;margin:50px 0 25px;font-size:1.8rem}
+  #flashcards-section{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:30px 0}
+  .card{background:var(--k);height:135px;border:5px solid var(--e);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600;font-size:1.5rem;cursor:pointer;transition:.5s;box-shadow:0 5px 12px rgba(0,0,0,.15)}
+  .card.flipped{background:#FF8A65;color:white}
+  .quiz-options{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+  .quiz-options button{padding:15px;font-size:1.2rem;background:white;border:4px solid var(--e);border-radius:12px;cursor:pointer;font-weight:600}
+  .matching-container{display:flex;gap:25px;margin-top:25px;flex-wrap:wrap}
+  .matching-box{flex:1;min-width:300px;background:white;border:4px dashed var(--e);border-radius:14px;padding:20px;min-height:340px}
+  .drag-item{background:var(--p);border:3px solid var(--e);margin:10px 0;padding:15px;border-radius:12px;text-align:center;font-weight:600;cursor:pointer}
+  .pair{background:var(--k);padding:12px;margin:8px;border-radius:10px;text-align:center;font-weight:bold;border-left:8px solid var(--o)}
+  #sentence-builder{background:white;padding:30px;border-radius:18px;border:6px solid var(--o);margin:50px 0;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .builder-sentence{background:#FFF3E0;padding:22px;border-radius:14px;margin-bottom:28px;border:2px solid #FFCCBC}
+  .english-prompt{font-size:1.5rem;font-weight:bold;color:var(--r);margin-bottom:16px}
+  .answer-area,.word-bank{min-height:80px;padding:16px;border:3px dashed var(--e);border-radius:12px;background:#FAFAFA;display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+  .word{background:#FFAB91;color:var(--t);padding:11px 22px;border-radius:11px;cursor:grab;font-weight:600;user-select:none}
+  .word:hover{background:#FF8A65}.word.in-answer{background:var(--r);color:white}
+  .builder-sentence.correct{background:#E8F5E9;border-left:12px solid #4CAF50}
+  .footer{text-align:center;margin:70px 0 40px;font-size:1.2rem;color:#555}
+  @media(max-width:899px){#flashcards-section,.quiz-options{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.section-buttons{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Māori at Home</h1>
+  <div class="authors">Scotty Morrison & Stacey Morrison</div>
+  <div class="page-number">Page 41 – Hei Mua i te Kura</div>
+</div>
+
+<div class="section-buttons">
+  <button class="section-btn active" id="btn1" onclick="loadSection('s1')">1. Getting Ready</button>
+  <button class="section-btn" id="btn2" onclick="loadSection('s2')">2. In the Car</button>
+  <button class="section-btn" id="btn3" onclick="loadSection('s3')">3. Safety & Behaviour</button>
+  <button class="section-btn" id="btn4" onclick="loadSection('s4')">4. Road Signs & Fun</button>
+</div>
+
+<h3>Ngā Kaari Kupu | Flashcards</h3><div id="flashcards-section"></div>
+<h3>Ngā Pātai | Quiz (choose correct te reo)</h3><div id="quiz-section"></div>
+<h3>Tōpū Kupu | Matching Pairs</h3><div id="matched-pairs"></div><div id="matching-section"></div>
+<h3>Hanga Rerenga Kōrero | Sentence Builder</h3><div id="sentence-builder"><div id="sentences-container"></div></div>
+
+<div class="footer">Coded by Whaea Pippy with Grok.</div>
+
+<script>
+const vocab = {
+  s1: [
+    ["Inumia he wai māori","Drink some water"],
+    ["Tuhaina","Spit it out"],
+    ["Kua ea!","All done!"],
+    ["Te haere mā runga waka ki te kura","Travelling by car to school"],
+    ["Kuhu/Tomokia te waka","Get in the car"],
+    ["Katia te kūaha","Close the door"],
+    ["Māku koe e whakanoho ki tō tūru","I will put you in your seat"],
+    ["Whakamaua tō tātua","Put your seatbelt on"]
+  ],
+  s2: [
+    ["Kei te pai tō noho?","Are you comfortable?"],
+    ["Āta noho","Sit still"],
+    ["Kaua e raweke i te matapihi","Don't fidget with the window"],
+    ["Kaua e raweke i te taumanu whakatū","Don't fidget with the brake pedal"],
+    ["Kaua e raweke i te taumanu whakatererangi","Don't fidget with the accelerator pedal"],
+    ["Waiho te hiwiwhiti","Leave the gearstick alone"],
+    ["Waiho te tururinga","Leave the handbrake alone"],
+    ["Me tukatuka i te waka?","Shall I start the car?"]
+  ],
+  s3: [
+    ["He aha tērā tohu ara?","What's that road sign?"],
+    ["He tohu tū","A stop sign"],
+    ["He tohu tautuku","A give-way sign"],
+    ["He tohu maioro","A roadworks sign"],
+    ["He aha te tikanga o te rama whero?","What does the red light mean?"],
+    ["He aha te tikanga o te rama kākāriki?","What does the green light mean?"],
+    ["E tū!","Stop!"],
+    ["Haere!","Go!"]
+  ],
+  s4: [
+    ["He pai tēnei waiata, nē?","This is a good song, isn't it?"],
+    ["Me whakarewa ake i te reo o te reo irirangi!","Let's turn the radio up!"],
+    ["Me waiata tahi!","Let's all sing together!"],
+    ["Kuhu mai ki te waka","Get in the car"],
+    ["Kati te tatau","Close the door"],
+    ["Whakamau i te tātua","Put on the seatbelt"],
+    ["Āe, kua rite","Yes, we're ready"],
+    ["Ka haere tātou","Here we go"]
+  ]
+};
+
+const sentences = {
+  s1: [
+    {en:"Tell them to drink some water",te:"Inumia he wai māori"},
+    {en:"Say 'Spit it out!'",te:"Tuhaina"},
+    {en:"Say 'All done!'",te:"Kua ea!"},
+    {en:"Tell them to get in the car",te:"Kuhu mai ki te waka"}
+  ],
+  s2: [
+    {en:"Ask if they are comfortable",te:"Kei te pai tō noho?"},
+    {en:"Tell them to sit still",te:"Āta noho"},
+    {en:"Say 'Don't touch the window'",te:"Kaua e raweke i te matapihi"},
+    {en:"Say 'Shall I start the car?'",te:"Me tukatuka i te waka?"}
+  ],
+  s3: [
+    {en:"Ask what that road sign is",te:"He aha tērā tohu ara?"},
+    {en:"Say 'Stop!'",te:"E tū!"},
+    {en:"Say 'Go!'",te:"Haere!"},
+    {en:"Ask what the red light means",te:"He aha te tikanga o te rama whero?"}
+  ],
+  s4: [
+    {en:"Say 'This is a good song, isn't it?'",te:"He pai tēnei waiata, nē?"},
+    {en:"Say 'Let's turn the radio up!'",te:"Me whakarewa ake i te reo o te reo irirangi!"},
+    {en:"Say 'Let's all sing together!'",te:"Me waiata tahi!"},
+    {en:"Say 'Here we go!'",te:"Ka haere tātou"}
+  ]
+};
+
+let currentWords = [], currentSentences = [];
+const colors = ['#FF9E9E','#FFD89E','#FFF599','#B5FFBD','#99F2FF','#D0BBFF','#FFB3FF','#FF99CC'];
+
+function shuffle(a){return a.slice().sort(()=>Math.random()-0.5)}
+
+function loadSection(sec){
+  currentWords = shuffle([...vocab[sec]]);
+  currentSentences = sentences[sec];
+  document.querySelectorAll('.section-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn'+sec[1]).classList.add('active');
+  document.getElementById('matched-pairs').innerHTML='';
+  showFlashcards(); showQuiz(); showMatching(); showSentences();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showFlashcards(){
+  const c=document.getElementById('flashcards-section'); c.innerHTML='';
+  currentWords.forEach(p=>{
+    const d=document.createElement('div'); d.className='card'; d.textContent=p[0];
+    d.onclick=()=>{d.classList.toggle('flipped'); d.textContent=d.classList.contains('flipped')?p[1]:p[0]};
+    c.appendChild(d);
+  });
+}
+
+function showQuiz(){
+  const c=document.getElementById('quiz-section'); c.innerHTML='';
+  currentWords.forEach(p=>{
+    const q=document.createElement('div'); q.innerHTML=`<b>${p[1]}</b>`;
+    const o=document.createElement('div'); o.className='quiz-options';
+    const allTeReo=Object.values(vocab).flat().map(x=>x[0]);
+    const wrong=allTeReo.filter(x=>x!==p[0]);
+    shuffle([p[0],...wrong.slice(0,3)]).forEach(ans=>{
+      const b=document.createElement('button'); b.textContent=ans;
+      b.onclick=()=>{b.style.background=ans===p[0]?'#C8E6C9':'#FFCDD2'; o.querySelectorAll('button').forEach(x=>x.disabled=true)};
+      o.appendChild(b);
+    });
+    q.appendChild(o); c.appendChild(q);
+  });
+}
+
+function showMatching(){
+  const s=document.getElementById('matching-section'), m=document.getElementById('matched-pairs');
+  s.innerHTML=''; m.innerHTML='';
+  const w=document.createElement('div'); w.className='matching-container';
+  const l=document.createElement('div'); l.className='matching-box';
+  const r=document.createElement('div'); r.className='matching-box';
+  w.append(l,r); s.appendChild(w);
+  const left=currentWords.map(p=>p[0]), right=shuffle(currentWords.map(p=>p[1]));
+  let first=null;
+  [...left,...right].forEach((word,i)=>{
+    const b=document.createElement('div'); b.className='drag-item'; b.textContent=word; b.dataset.word=word;
+    (i<8?l:r).appendChild(b);
+    b.onclick=function(){
+      if(this.style.backgroundColor)return;
+      if(!first){first=this; this.style.border='6px solid var(--o)'}else{
+        const L=first.parentElement===l?first.dataset.word:this.dataset.word;
+        const R=first.parentElement===r?first.dataset.word:this.dataset.word;
+        const ok=currentWords.some(p=>p[0]===L && p[1]===R);
+        if(ok){
+          const col=colors[m.children.length%8];
+          [first,this].forEach(e=>{e.style.backgroundColor=col;e.style.border='none';e.onclick=null});
+          const p=document.createElement('div'); p.className='pair'; p.style.backgroundColor=col;
+          p.innerHTML=`${L} to ${R}`; m.appendChild(p);
+        }else{
+          [first,this].forEach(e=>e.style.border='6px solid red');
+          setTimeout(()=>{[first,this].forEach(e=>e.style.border='3px solid var(--e)');},800);
+        }
+        first=null;
+      }
+    };
+  });
+}
+
+function showSentences(){
+  const c=document.getElementById('sentences-container'); c.innerHTML='';
+  currentSentences.forEach(i=>{
+    const d=document.createElement('div'); d.className='builder-sentence';
+    d.innerHTML=`<div class="english-prompt">${i.en}</div><div class="answer-area"></div><div class="word-bank"></div>`;
+    c.appendChild(d);
+    const words=i.te.trim().split(/\s+/);
+    const bank=d.querySelector('.word-bank');
+    shuffle(words).forEach(w=>{
+      const s=document.createElement('span'); s.className='word'; s.textContent=w;
+      s.onclick=()=>{
+        if(s.parentElement===bank){
+          d.querySelector('.answer-area').appendChild(s); s.classList.add('in-answer');
+        }else{
+          bank.appendChild(s); s.classList.remove('in-answer');
+        }
+        const ans=Array.from(d.querySelectorAll('.answer-area .word')).map(x=>x.textContent);
+        d.classList.toggle('correct',ans.length===words.length && ans.every((v,j)=>v===words[j]));
+      };
+      bank.appendChild(s);
+    });
+  });
+}
+
+loadSection('s1');
+</script>
+</body>
+</html>

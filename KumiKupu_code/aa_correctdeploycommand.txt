@@ -1,4 +1,5 @@
 I have a file called aa_correctdeploycommand.txt and this is the correct deploy command:
 KumiKupu_code && firebase deploy --only hosting
 Please note you do not need to keep authenticating firebase
-Please remember for next time #3
+Please remember for next time
+This is the 4th time I have told you this! Yes I am counting.
